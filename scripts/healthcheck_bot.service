@@ -1,0 +1,11 @@
+[Unit]
+Description=Healthcheck bot
+Wants=network-online.target
+After=network-online.target
+[Service]
+Restart=always
+WorkingDirectory=/opt/healthcheck_bot
+ExecStart=/usr/local/bin/docker-compose -f /opt/healthcheck_bot/docker-compose.yml up
+ExecStop=/usr/local/bin/docker-compose -f /opt/healthcheck_bot/docker-compose.yml down
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,48 @@
+version: '3.9'
+
+networks:
+  healthcheck_bot_network:
+    name:
+      "healthcheck_bot_network"
+
+services:
+
+  bot:
+    container_name: "healthcheck_bot"
+    hostname: "healthcheck_bot"
+    image: "healthcheck_bot:latest"
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+      args:
+        USER: ${USER}
+    restart: unless-stopped
+    env_file:
+      - settings/.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - healthcheck_bot_network
+    expose:
+      - "8080"
+    command: bash start-bot.sh
+
+  caddy:
+    image: "caddy:2.6.4"
+    container_name: healthcheck_bot_caddy
+    hostname: healthcheck_bot_caddy
+    restart: unless-stopped
+    env_file:
+      - app/config/.env
+    ports:
+      - '8084:8084'
+    depends_on:
+      - bot
+      - selenoid
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - healthcheck_bot_caddy-data:/data
+      - healthcheck_bot_caddy-config:/config
+    networks:
+      healthcheck_bot_network:
+        ipv4_address: 200.20.0.12

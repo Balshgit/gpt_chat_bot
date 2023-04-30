@@ -1,0 +1,105 @@
+[tool.poetry]
+name = "mosgortrans"
+version = "0.7.1"
+description = "Bot to help with mosgortans"
+authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
+
+[tool.poetry.dependencies]
+
+fastapi = "^0.95"
+python-telegram-bot="^20.2"
+
+python = "^3.11"
+python-dotenv = "^1.0"
+httpx = "^0.23"
+loguru = "^0.7"
+pydantic = "^1.10.7"
+gunicorn = "^20.1"
+uvicorn = "^0.21"
+wheel = "^0.40"
+orjson = "^3.8"
+
+[tool.poetry.dev-dependencies]
+
+factory-boy = "^3.2"
+Faker = "^18.3.0"
+
+ipython = "^8.12.0"
+
+safety = "^2.3"
+pip-audit = "^2.5"
+yamllint = "^1.30"
+tomlkit = "^0.11.7"
+bandit = "^1.7"
+aresponses = "^2.1"
+
+pyupgrade = "^3.3"
+isort = "^5.12"
+black = "^23.3"
+
+mypy = "^1.2"
+types-PyMySQL = "^1.0"
+types-python-dateutil = "^2.8"
+
+pytest = "^7.2"
+pytest-asyncio = "^0.21"
+pytest-deadfixtures = "^2.2"
+pytest-testmon = "^2.0"
+pytest-mock = "^3.10"
+pytest-cov = "^4.0"
+pytest-timeout = "^2.1"
+pytest-sugar = "^0.9"
+pytest-clarity = "^1.0"
+pytest-env = "^0.8"
+nest-asyncio = "^1.5"
+
+autoflake = "^1.7"
+flake8 = "^5.0.4"
+flake8-logging-format = "^0.9"
+flake8-comprehensions = "^3.11"
+flake8-eradicate = "^1.4"
+flake8-pytest-style = "^1.7"
+flake8-aaa = "^0.14"
+flake8-bugbear = "^23.3"
+flake8-debugger = "^4.1"
+flake8-expression-complexity = "^0.0.11"
+flake8-fixme = "^1.1"
+flake8-simplify = "^0.20"
+flake8-variables-names = "^0.0.5"
+flake8-bandit = "^4.1"
+flake8-tidy-imports = "^4.8"
+
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+src_paths = ["app", "settings", "tests"]
+combine_as_imports = true
+
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+allow_untyped_calls = true
+pretty = true
+show_error_codes = true
+implicit_reexport = true
+allow_untyped_decorators = true
+warn_return_any = false
+
+
+[tool.coverage.run]
+relative_files = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+target-version = ['py311']

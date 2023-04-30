@@ -1,0 +1,71 @@
+name: lint
+
+on:
+  push:
+    branches-ignore:
+      - test
+    tags-ignore:
+      - "*"
+  pull_request:
+    branches:
+      - 'release/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      #----------------------------------------------
+      #       check-out repo and set-up python
+      #----------------------------------------------
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11.3'
+      #----------------------------------------------
+      #  -----  install & configure poetry  -----
+      #----------------------------------------------
+      - name: Install poetry
+        env:  # Keep in sync with `POETRY_VERSION` in `Dockerfile`
+          POETRY_VERSION: "1.4.2"
+        run: |
+          curl -sSL "https://install.python-poetry.org" | python -
+          # Adding `poetry` to `$PATH`:
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Set up cache
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+      #----------------------------------------------
+      #       load cached venv if cache exists
+      #----------------------------------------------
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install
+          poetry run pip install -U pip
+      #----------------------------------------------
+      #              run test suite
+      #----------------------------------------------
+      - name: Analysing the code with mypy
+        run: |
+          source .venv/bin/activate
+          poetry run mypy app
+      - name: Analysing the code with flake8
+        run: |
+          poetry run flake8 app
+      - name: Analysing code with isort
+        run: |
+          poetry run isort --check-only app

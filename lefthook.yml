@@ -1,0 +1,67 @@
+# Refer for explanation to following link:
+# https://github.com/evilmartians/lefthook/blob/master/docs/full_guide.md
+
+# NOTE: use `lefthook install` when you make change in stages (groups like pre-commit, format, etc.)
+
+pre-commit:
+  commands:
+    format:
+      run: lefthook run format
+    lint:
+      run: lefthook run lint
+    check-format:
+      run: lefthook run check-format
+
+pre-push:
+  parallel: true
+  commands:
+    isort:
+      glob: "*.py"
+      run: isort --check-only {all_files}
+    black:
+      glob: "*.py"
+      run: black --check -S {all_files}
+    mypy:
+      glob: "*.py"
+      run: mypy {all_files} --namespace-packages
+    flake8:
+      glob: "*.py"
+      run: flake8 {all_files}
+
+format:
+  piped: true
+  parallel: false
+  commands:
+    # number prefix used to save ordering
+    1_autoflake:
+      glob: "*.py"
+      run: autoflake --recursive --ignore-init-module-imports --remove-all-unused-imports --remove-unused-variables --in-place {staged_files}
+    2_isort:
+      glob: "*.py"
+      run: isort --color --quiet {staged_files}
+    3_black:
+      glob: "*.py"
+      run: black -S {staged_files}
+    4_black_check:
+      glob: "*.py"
+      run: black --check -S {staged_files}
+
+lint:
+  parallel: true
+  commands:
+    mypy:
+      glob: "*.py"
+      run: mypy {staged_files} --namespace-packages
+    flake8:
+      glob: "*.py"
+      run: flake8 {staged_files}
+
+check-format:
+  parallel: true
+  commands:
+    isort:
+      glob: "*.py"
+      run: isort --check-only {staged_files}
+    black:
+      glob: "*.py"
+      run: black --check -S {staged_files}
