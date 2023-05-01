@@ -11,8 +11,8 @@ class Application:
             title='Health check bot',
             description='Bot which check all services are working',
             version='0.0.1',
-            docs_url=None,
-            redoc_url=None,
+            docs_url=f'{settings.WEBHOOK_PATH}/docs',
+            redoc_url=f'{settings.WEBHOOK_PATH}/redocs',
             openapi_url=f'{settings.WEBHOOK_PATH}/api/openapi.json',
             default_response_class=UJSONResponse,
         )
