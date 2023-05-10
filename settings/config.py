@@ -1,3 +1,4 @@
+import os
 from os import environ
 from pathlib import Path
 
@@ -41,6 +42,10 @@ class Settings(BaseSettings):
     WORKERS_COUNT: int = 1
     # Enable uvicorn reloading
     RELOAD: bool = False
+
+    @property
+    def bot_webhook_url(self) -> str:
+        return os.path.join(self.WEBHOOK_PATH.strip('/'), self.TELEGRAM_API_TOKEN)
 
     class Config:
         case_sensitive = True

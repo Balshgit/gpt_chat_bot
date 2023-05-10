@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mosgortrans"
+name = "healthcheck_bot"
 version = "0.7.1"
 description = "Bot to help with mosgortans"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
@@ -7,15 +7,15 @@ authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 [tool.poetry.dependencies]
 
 fastapi = "^0.95"
-python-telegram-bot="^20.2"
+python-telegram-bot = {version = "^20.3", extras=["ext"]}
 
 python = "^3.11"
 python-dotenv = "^1.0"
-httpx = "^0.23"
+httpx = "^0.24"
 loguru = "^0.7"
 pydantic = "^1.10.7"
 gunicorn = "^20.1"
-uvicorn = "^0.21"
+uvicorn = "^0.22"
 wheel = "^0.40"
 orjson = "^3.8"
 
@@ -24,7 +24,7 @@ orjson = "^3.8"
 factory-boy = "^3.2"
 Faker = "^18.3.0"
 
-ipython = "^8.12.0"
+ipython = "^8.13"
 
 safety = "^2.3"
 pip-audit = "^2.5"
@@ -33,7 +33,7 @@ tomlkit = "^0.11.7"
 bandit = "^1.7"
 aresponses = "^2.1"
 
-pyupgrade = "^3.3"
+pyupgrade = "^3.4"
 isort = "^5.12"
 black = "^23.3"
 
