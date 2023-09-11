@@ -1,11 +1,11 @@
+import asyncio
 import sys
-from functools import cached_property
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from loguru import logger
 
-from app.core.bot import Bot, BotQueue
+from app.core.bot import BotApplication, BotQueue
 from app.routers import api_router
 from settings.config import Settings, get_settings
 
@@ -19,18 +19,21 @@ logger.add(
 
 
 class Application:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, bot_app: BotApplication) -> None:
         self.app = FastAPI(
             title='Health check bot',
             description='Bot which check all services are working',
-            version='0.0.1',
+            version='0.0.3',
             docs_url=f'{settings.WEBHOOK_PATH}/docs',
             redoc_url=f'{settings.WEBHOOK_PATH}/redocs',
             openapi_url=f'{settings.WEBHOOK_PATH}/api/openapi.json',
             default_response_class=UJSONResponse,
         )
         self.app.state.settings = settings
+        self.app.state.queue = BotQueue(bot_app=bot_app.application)
+        self.bot_app = bot_app
         self.settings = settings
+
         self.app.include_router(api_router)
         self.configure_hooks()
 
@@ -38,26 +41,28 @@ class Application:
     def fastapi_app(self) -> FastAPI:
         return self.app
 
-    @cached_property
-    def bot(self) -> Bot:
-        return Bot(self.settings)
-
-    def set_bot_queue(self) -> None:
-        self.app.state.queue = BotQueue(bot=self.bot)
-
     def configure_hooks(self) -> None:
-        self.app.add_event_handler("startup", self.bot.set_webhook)
-        # self.app.add_event_handler("startup", self.bot.polling)  # noqa: E800
-        self.app.add_event_handler("startup", self.set_bot_queue)
+        if self.bot_app.start_with_webhook:
+            self.app.add_event_handler("startup", self.bot_app.polling)
+        else:
+            self.app.add_event_handler("startup", self._on_start_up)
 
-        self.app.add_event_handler("shutdown", self.bot.delete_webhook)
-        self.app.add_event_handler("shutdown", self.bot.shutdown)
+        self.app.add_event_handler("shutdown", self._on_shutdown)
+
+    async def _on_start_up(self) -> None:
+        await self.bot_app.set_webhook()
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.app.state.queue.get_updates_from_queue())
+
+    async def _on_shutdown(self) -> None:
+        await asyncio.gather(self.bot_app.delete_webhook(), self.bot_app.shutdown())
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
+    bot_app = BotApplication(settings=settings, start_with_webhook=settings.START_WITH_WEBHOOK)
 
-    return Application(settings=settings).fastapi_app
+    return Application(settings=settings, bot_app=bot_app).fastapi_app
 
 
 def main() -> None:
