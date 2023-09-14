@@ -1,4 +1,4 @@
-FROM python:3.11.3
+FROM python:3.11.5
 
 ARG USER
 
@@ -15,7 +15,7 @@ ENV USER=${USER} \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   PATH="$PATH:/root/.poetry/bin" \
   DOCKER_CONTAINER=1 \
-  POETRY_VERSION=1.4.2
+  POETRY_VERSION=1.6.1
 
 
 RUN printf "================\n\nStart build app. USER is: "${USER}"\n\n===============\n" \

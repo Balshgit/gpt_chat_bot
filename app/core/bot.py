@@ -25,7 +25,6 @@ class BotApplication:
 
     async def set_webhook(self) -> None:
         await self.application.initialize()
-        # await self.application.start()
         await self.application.bot.set_webhook(url=self.webhook_url)
 
     async def delete_webhook(self) -> None:
@@ -64,7 +63,7 @@ class BotApplication:
         return os.path.join(
             self.settings.WEBHOOK_HOST.strip('/'),
             API_PREFIX.strip('/'),
-            self.settings.WEBHOOK_PATH.strip('/'),
+            self.settings.URL_PREFIX.strip('/'),
             self.settings.TELEGRAM_API_TOKEN.strip('/'),
         )
 
@@ -76,7 +75,7 @@ class BotQueue:
 
     async def put_updates_on_queue(self, request: Request) -> Response:
         """
-        Listen {WEBHOOK_PATH}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
+        Listen {URL_PREFIX}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
         """
         data = await request.json()
         tg_update = Update.de_json(data=data, bot=self.bot_app.bot)
