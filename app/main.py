@@ -55,10 +55,7 @@ class Application:
         loop.create_task(self.app.state.queue.get_updates_from_queue())
 
     async def _on_shutdown(self) -> None:
-        await asyncio.gather(
-            self.bot_app.delete_webhook(),
-            self.bot_app.shutdown()
-        )
+        await asyncio.gather(self.bot_app.delete_webhook(), self.bot_app.shutdown())
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -71,7 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 def main() -> None:
     import uvicorn
 
-    app = create_app()
+    app = create_app()  # noqa: NEW100
 
     """Entrypoint of the application."""
     uvicorn.run(
@@ -79,7 +76,7 @@ def main() -> None:
         workers=app.state.settings.WORKERS_COUNT,
         host=app.state.settings.APP_HOST,
         port=app.state.settings.APP_PORT,
-        reload=app.state.settings.RELOAD,  # noqa: E800 remove reload for debug
+        reload=app.state.settings.RELOAD,
         factory=True,
     )
 

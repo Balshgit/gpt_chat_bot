@@ -3,7 +3,7 @@ import time
 import factory
 from faker import Faker
 
-from tests.integration.factories.models import User, Chat
+from tests.integration.factories.models import Chat, User
 
 data = {
     "update_id": 957250703,
@@ -15,25 +15,13 @@ data = {
             "first_name": "William",
             "last_name": "Dalton",
             "username": "bolshakovfortunat",
-            "language_code": "ru"
+            "language_code": "ru",
         },
-        "chat": {
-            "id": 1,
-            "first_name": "Gabrielle",
-            "last_name": "Smith",
-            "username": "arefi_2019",
-            "type": "private"
-        },
+        "chat": {"id": 1, "first_name": "Gabrielle", "last_name": "Smith", "username": "arefi_2019", "type": "private"},
         "date": time.time(),
         "text": "/chatid",
-        "entities": [
-            {
-                "type": "bot_command",
-                "offset": 0,
-                "length": 7
-            }
-        ]
-    }
+        "entities": [{"type": "bot_command", "offset": 0, "length": 7}],
+    },
 }
 
 
