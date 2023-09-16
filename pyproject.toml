@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "healthcheck_bot"
-version = "0.7.1"
-description = "Bot to help with mosgortans"
+name = "chat_gpt_bot"
+version = "0.8.0"
+description = "Bot to integrated with chat-gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
 [tool.poetry.dependencies]
 
-fastapi = "^0.101"
+fastapi = "^0.103.1"
 python-telegram-bot = {version = "^20.5", extras=["ext"]}
 
 python = "^3.11"
@@ -14,6 +14,7 @@ python-dotenv = "^1.0"
 httpx = "^0.24"
 loguru = "^0.7"
 pydantic = "^2.3"
+pydantic-settings = "^2.0.3"
 gunicorn = "^21.2"
 uvicorn = "^0.23"
 wheel = "^0.41"
@@ -52,7 +53,7 @@ Faker = "^19"
 
 ipython = "^8.14"
 
-safety = "^2.3"
+safety = "^2.3.5"
 pip-audit = "^2.6"
 yamllint = "^1.32"
 tomlkit = "^0.12"
@@ -78,9 +79,9 @@ pytest-timeout = "^2.1"
 pytest-timeouts = "^1.2"
 pytest-sugar = "^0.9"
 pytest-clarity = "^1.0"
-pytest-env = "^0.8"
+pytest-env = "^1.0.1"
 nest-asyncio = "^1.5"
-pytest-html = "^3.2"
+pytest-html = "^4.0"
 pytest-randomly = "^3.15"
 pytest-split = "^0.8"
 pytest-freezegun = "^0.4"
@@ -109,9 +110,43 @@ flake8-tidy-imports = "^4.10"
 flake8-noqa = "^1.3"
 flake8-useless-assert = "^0.4"
 flake8-mock = "^0.4"
-flake8-jira-todo-checker = "^0.6"
 flake8-comments = "^0.1"
 flake8-newspaper-style = "^0.4"
+Flake8-pyproject = "^1.2.3"
+
+[tool.flake8]
+inline-quotes = "double"
+max-line-length = 120
+max-expression-complexity = 10
+max-complexity = 10
+ban-relative-imports = true
+nested-classes-whitelist = ["Config", "Meta"]
+pytest-parametrize-names-type = "csv"
+exclude = [
+    "app/chat-gpt/*",
+    ".cache/*",
+    ".pytest_cache/*",
+    "*/__pycache__/*",
+]
+ignore = [
+    # use isort instead
+    "I",
+    # use black style
+    "E203", "W", "G004", "VNE003"
+]
+per-file-ignores = [
+    # too complex queries
+    "./app/tests/*: TAE001, S101, S311",
+    "app/tests/*/factories/*: S5720",
+    "settings/config.py: S104"
+]
+
+[tool.autoflake]
+in-place = true
+ignore-init-module-imports = true
+remove-unused-variables = true
+remove-all-unused-imports = true
+remove-duplicate-keys = true
 
 
 [tool.isort]
@@ -122,16 +157,30 @@ combine_as_imports = true
 
 
 [tool.mypy]
-python_version = "3.11"
-strict = true
+allow_redefinition = false
+namespace_packages = true
+check_untyped_defs = true
+disallow_untyped_decorators = false
+disallow_any_explicit = false
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+ignore_errors = false
 ignore_missing_imports = true
-allow_subclassing_any = true
-allow_untyped_calls = true
-pretty = true
+implicit_reexport = false
+local_partial_types = true
+strict_optional = true
+strict_equality = true
 show_error_codes = true
-implicit_reexport = true
-allow_untyped_decorators = true
-warn_return_any = false
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unreachable = true
+warn_no_return = true
+exclude = [
+    "app/chat-gpt/*"
+]
 
 
 [tool.coverage.run]
@@ -145,5 +194,4 @@ filterwarnings = [
 
 [tool.black]
 line-length = 120
-skip-string-normalization = true
 target-version = ['py311']

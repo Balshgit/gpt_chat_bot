@@ -25,7 +25,6 @@ class BotApplication:
 
     async def set_webhook(self) -> None:
         await self.application.initialize()
-        # await self.application.start()
         await self.application.bot.set_webhook(url=self.webhook_url)
 
     async def delete_webhook(self) -> None:
@@ -38,7 +37,7 @@ class BotApplication:
         if update.message:
             await asyncio.sleep(10)
             await update.message.reply_text(
-                'Help!',
+                "Help!",
                 disable_notification=True,
                 api_kwargs={
                     "text": "Hello World",
@@ -49,7 +48,7 @@ class BotApplication:
         return None
 
     def add_handlers(self) -> None:
-        self.application.add_handler(CommandHandler('help', self.help_command))
+        self.application.add_handler(CommandHandler("help", self.help_command))
 
     async def polling(self) -> None:
         await self.application.initialize()
@@ -62,10 +61,10 @@ class BotApplication:
     @cached_property
     def webhook_url(self) -> str:
         return os.path.join(
-            self.settings.WEBHOOK_HOST.strip('/'),
-            API_PREFIX.strip('/'),
-            self.settings.WEBHOOK_PATH.strip('/'),
-            self.settings.TELEGRAM_API_TOKEN.strip('/'),
+            self.settings.WEBHOOK_HOST.strip("/"),
+            API_PREFIX.strip("/"),
+            self.settings.URL_PREFIX.strip("/"),
+            self.settings.TELEGRAM_API_TOKEN.strip("/"),
         )
 
 
@@ -76,7 +75,7 @@ class BotQueue:
 
     async def put_updates_on_queue(self, request: Request) -> Response:
         """
-        Listen {WEBHOOK_PATH}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
+        Listen {URL_PREFIX}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
         """
         data = await request.json()
         tg_update = Update.de_json(data=data, bot=self.bot_app.bot)

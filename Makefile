@@ -12,7 +12,7 @@ PORT=8000
 
 ## Запустить приложение
 app:
-	poetry run uvicorn --host 0.0.0.0 --factory app.main:create_app --port $(PORT) --reload
+	poetry run uvicorn --host 0.0.0.0 --factory app.main:create_app --port $(PORT) --reload --reload-dir=app --reload-dir=settings
 
 ## Отформатировать код
 format:

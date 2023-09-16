@@ -1,5 +1,6 @@
 import asyncio
 import sys
+from functools import cached_property
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
@@ -13,7 +14,7 @@ logger.remove()
 logger.add(
     sink=sys.stdout,
     colorize=True,
-    level='DEBUG',
+    level="DEBUG",
     format="<cyan>{time:DD.MM.YYYY HH:mm:ss}</cyan> | <level>{level}</level> | <magenta>{message}</magenta>",
 )
 
@@ -21,31 +22,30 @@ logger.add(
 class Application:
     def __init__(self, settings: Settings, bot_app: BotApplication) -> None:
         self.app = FastAPI(
-            title='Health check bot',
-            description='Bot which check all services are working',
-            version='0.0.3',
-            docs_url=f'{settings.WEBHOOK_PATH}/docs',
-            redoc_url=f'{settings.WEBHOOK_PATH}/redocs',
-            openapi_url=f'{settings.WEBHOOK_PATH}/api/openapi.json',
+            title="Health check bot",
+            description="Bot which check all services are working",
+            version="0.0.3",
+            docs_url=f"{settings.URL_PREFIX}/docs",
+            redoc_url=f"{settings.URL_PREFIX}/redocs",
+            openapi_url=f"{settings.URL_PREFIX}/api/openapi.json",
             default_response_class=UJSONResponse,
         )
         self.app.state.settings = settings
         self.app.state.queue = BotQueue(bot_app=bot_app.application)
         self.bot_app = bot_app
-        self.settings = settings
 
         self.app.include_router(api_router)
         self.configure_hooks()
 
-    @property
+    @cached_property
     def fastapi_app(self) -> FastAPI:
         return self.app
 
     def configure_hooks(self) -> None:
         if self.bot_app.start_with_webhook:
-            self.app.add_event_handler("startup", self.bot_app.polling)
-        else:
             self.app.add_event_handler("startup", self._on_start_up)
+        else:
+            self.app.add_event_handler("startup", self.bot_app.polling)
 
         self.app.add_event_handler("shutdown", self._on_shutdown)
 
@@ -68,7 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 def main() -> None:
     import uvicorn
 
-    app = create_app()
+    app = create_app()  # noqa: NEW100
 
     """Entrypoint of the application."""
     uvicorn.run(
@@ -76,10 +76,10 @@ def main() -> None:
         workers=app.state.settings.WORKERS_COUNT,
         host=app.state.settings.APP_HOST,
         port=app.state.settings.APP_PORT,
-        # reload=app.state.settings.RELOAD,  # noqa: E800 remove reload for debug
+        reload=app.state.settings.RELOAD,
         factory=True,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
