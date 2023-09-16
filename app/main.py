@@ -14,7 +14,7 @@ logger.remove()
 logger.add(
     sink=sys.stdout,
     colorize=True,
-    level='DEBUG',
+    level="DEBUG",
     format="<cyan>{time:DD.MM.YYYY HH:mm:ss}</cyan> | <level>{level}</level> | <magenta>{message}</magenta>",
 )
 
@@ -22,12 +22,12 @@ logger.add(
 class Application:
     def __init__(self, settings: Settings, bot_app: BotApplication) -> None:
         self.app = FastAPI(
-            title='Health check bot',
-            description='Bot which check all services are working',
-            version='0.0.3',
-            docs_url=f'{settings.URL_PREFIX}/docs',
-            redoc_url=f'{settings.URL_PREFIX}/redocs',
-            openapi_url=f'{settings.URL_PREFIX}/api/openapi.json',
+            title="Health check bot",
+            description="Bot which check all services are working",
+            version="0.0.3",
+            docs_url=f"{settings.URL_PREFIX}/docs",
+            redoc_url=f"{settings.URL_PREFIX}/redocs",
+            openapi_url=f"{settings.URL_PREFIX}/api/openapi.json",
             default_response_class=UJSONResponse,
         )
         self.app.state.settings = settings
@@ -81,5 +81,5 @@ def main() -> None:
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent
-SHARED_DIR = BASE_DIR.resolve().joinpath('shared')
+SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
 SHARED_DIR.mkdir(exist_ok=True)
 
-SHARED_DIR.joinpath('logs').mkdir(exist_ok=True)
-DIR_LOGS = SHARED_DIR.joinpath('logs')
+SHARED_DIR.joinpath("logs").mkdir(exist_ok=True)
+DIR_LOGS = SHARED_DIR.joinpath("logs")
 
 env_path = f"{BASE_DIR}/settings/.env"
 

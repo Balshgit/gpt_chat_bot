@@ -1,0 +1,11 @@
+:8080 {
+
+    # Serving dynamic requests:
+    reverse_proxy chat_gpt:1338
+
+    # Logs:
+    log {
+      output stdout
+    }
+
+}

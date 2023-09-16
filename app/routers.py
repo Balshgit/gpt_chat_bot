@@ -7,4 +7,4 @@ from app.constants import API_PREFIX
 api_router = APIRouter(prefix=API_PREFIX, default_response_class=ORJSONResponse)
 
 
-api_router.include_router(system_router, tags=['system'])
+api_router.include_router(system_router, tags=["system"])

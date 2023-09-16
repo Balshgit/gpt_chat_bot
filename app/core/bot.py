@@ -37,7 +37,7 @@ class BotApplication:
         if update.message:
             await asyncio.sleep(10)
             await update.message.reply_text(
-                'Help!',
+                "Help!",
                 disable_notification=True,
                 api_kwargs={
                     "text": "Hello World",
@@ -48,7 +48,7 @@ class BotApplication:
         return None
 
     def add_handlers(self) -> None:
-        self.application.add_handler(CommandHandler('help', self.help_command))
+        self.application.add_handler(CommandHandler("help", self.help_command))
 
     async def polling(self) -> None:
         await self.application.initialize()
@@ -61,10 +61,10 @@ class BotApplication:
     @cached_property
     def webhook_url(self) -> str:
         return os.path.join(
-            self.settings.WEBHOOK_HOST.strip('/'),
-            API_PREFIX.strip('/'),
-            self.settings.URL_PREFIX.strip('/'),
-            self.settings.TELEGRAM_API_TOKEN.strip('/'),
+            self.settings.WEBHOOK_HOST.strip("/"),
+            API_PREFIX.strip("/"),
+            self.settings.URL_PREFIX.strip("/"),
+            self.settings.TELEGRAM_API_TOKEN.strip("/"),
         )
 
 
