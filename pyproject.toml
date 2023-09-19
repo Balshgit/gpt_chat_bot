@@ -136,8 +136,7 @@ ignore = [
 ]
 per-file-ignores = [
     # too complex queries
-    "./app/tests/*: TAE001, S101, S311",
-    "app/tests/*/factories/*: S5720",
+    "tests/integration/bot/conftest.py: NEW100",
     "settings/config.py: S104"
 ]
 
