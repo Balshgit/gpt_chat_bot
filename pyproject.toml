@@ -136,6 +136,7 @@ ignore = [
 ]
 per-file-ignores = [
     # too complex queries
+    "tests/*: S101",
     "tests/integration/bot/conftest.py: NEW100",
     "settings/config.py: S104"
 ]

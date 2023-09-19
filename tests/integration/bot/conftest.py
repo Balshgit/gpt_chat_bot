@@ -8,10 +8,16 @@ from datetime import tzinfo
 from typing import Any, AsyncGenerator
 
 import pytest
+import pytest_asyncio
+from fastapi import FastAPI
+from httpx import AsyncClient
 from pytest_asyncio.plugin import SubRequest
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
+from app.core.bot import BotApplication
+from app.main import Application as AppApplication
+from settings.config import get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
 from tests.integration.factories.bot import BotInfoFactory
 
@@ -107,7 +113,7 @@ def bot_info() -> dict[str, Any]:
     return BotInfoFactory()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestExtBot, None]:
     """Makes an ExtBot instance with the given bot_info"""
     async with make_bot(bot_info) as _bot:
@@ -120,14 +126,14 @@ def one_time_bot(bot_info: dict[str, Any]) -> PytestExtBot:
     return make_bot(bot_info)
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def cdc_bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestExtBot, None]:
     """Makes an ExtBot instance with the given bot_info that uses arbitrary callback_data"""
     async with make_bot(bot_info, arbitrary_callback_data=True) as _bot:
         yield _bot
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def raw_bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestBot, None]:
     """Makes an regular Bot instance with the given bot_info"""
     async with PytestBot(
@@ -145,7 +151,7 @@ async def raw_bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestBot, None]:
 _default_bots: dict[Defaults, PytestExtBot] = {}
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def default_bot(request: SubRequest, bot_info: dict[str, Any]) -> PytestExtBot:
     param = request.param if hasattr(request, "param") else {}
     defaults = Defaults(**param)
@@ -159,7 +165,7 @@ async def default_bot(request: SubRequest, bot_info: dict[str, Any]) -> PytestEx
     return default_bot
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def tz_bot(timezone: tzinfo, bot_info: dict[str, Any]) -> PytestExtBot:
     defaults = Defaults(tzinfo=timezone)
     try:  # If the bot is already created, return it. Saves time since get_me is not called again.
@@ -196,11 +202,36 @@ def provider_token(bot_info: dict[str, Any]) -> str:
     return bot_info["payment_provider_token"]
 
 
-@pytest.fixture()
-async def app(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]:
+@pytest_asyncio.fixture(scope="session")
+async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]:
     # We build a new bot each time so that we use `app` in a context manager without problems
     application = ApplicationBuilder().bot(make_bot(bot_info)).application_class(PytestApplication).build()
     yield application
     if application.running:
         await application.stop()
         await application.shutdown()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def main_application(bot_application: PytestApplication) -> FastAPI:
+    settings = get_settings()
+    bot_app = BotApplication(settings=settings)
+    bot_app.application = bot_application
+    fast_api_app = AppApplication(settings=settings, bot_app=bot_app).fastapi_app
+    return fast_api_app
+
+
+@pytest_asyncio.fixture()
+async def rest_client(
+    main_application: FastAPI,
+) -> AsyncGenerator[AsyncClient, None]:
+    """
+    Default http client. Use to test unauthorized requests, public endpoints
+    or special authorization methods.
+    """
+    async with AsyncClient(
+        app=main_application,
+        base_url="http://test",
+        headers={"Content-Type": "application/json"},
+    ) as client:
+        yield client
