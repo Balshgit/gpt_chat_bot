@@ -22,8 +22,8 @@ pre-push:
       glob: "*.py"
       run: black --check -S {all_files}
     mypy:
-      glob: "*.py"
-      run: mypy {all_files} --config-file ./pyproject.toml
+#      glob: "*.py"
+      run: mypy {all_files} --config-file pyproject.toml
     flake8:
       glob: "*.py"
       run: flake8 {all_files}
