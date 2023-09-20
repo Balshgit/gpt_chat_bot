@@ -1,11 +1,11 @@
 [Unit]
-Description=Healthcheck bot
+Description=Chat-gpt bot
 Wants=network-online.target
 After=network-online.target
 [Service]
 Restart=always
-WorkingDirectory=/opt/healthcheck_bot
-ExecStart=/usr/local/bin/docker-compose -f /opt/healthcheck_bot/docker-compose.yml up
-ExecStop=/usr/local/bin/docker-compose -f /opt/healthcheck_bot/docker-compose.yml down
+WorkingDirectory=/opt/chat_gpt_bot
+ExecStart=bash -c "docker compose -f /opt/chat_gpt_bot/docker-compose.yml up"
+ExecStop=bash -c "docker compose -f /opt/chat_gpt_bot/docker-compose.yml down"
 [Install]
 WantedBy=multi-user.target

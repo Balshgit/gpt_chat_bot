@@ -1,13 +1,13 @@
-# MosGotTrans bot
-Бот для получения расписания конкретных автобусов для конкретных остановок
+# Chat gpt bot
+Бот для запросов в chatgpt
 
-Использует **Selenium** для парсинга сайта "яндекс карты" 
+Использует **Selenium** и API chatgpt для запросов 
 
 ## Install & Update
 
 install service
 
-    sudo cp scripts/mosgortrans.service /etc/systemd/system
+    sudo cp scripts/chat-gpt.service /etc/systemd/system
 
 ```bash
 cd ~/PycharmProjects/mosgortrans
