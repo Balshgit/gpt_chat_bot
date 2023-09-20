@@ -23,7 +23,7 @@ pre-push:
       run: black --check -S {all_files}
     mypy:
       glob: "*.py"
-      run: mypy {all_files} --namespace-packages
+      run: mypy {all_files} --namespace-packages --config-file pyproject.toml
     flake8:
       glob: "*.py"
       run: flake8 {all_files}
@@ -51,7 +51,7 @@ lint:
   commands:
     mypy:
       glob: "*.py"
-      run: mypy {staged_files} --namespace-packages
+      run: mypy {staged_files} --namespace-packages --config-file pyproject.toml
     flake8:
       glob: "*.py"
       run: flake8 {staged_files}
