@@ -21,6 +21,7 @@ wheel = "^0.41"
 orjson = "^3.9"
 
 websocket-client = "^1.6"
+greenlet = "^2.0.2"
 requests = "^2.31"
 selenium = "^4.11"
 tls-client = "^0.2"
@@ -90,7 +91,7 @@ assertpy = "^1.1"
 
 coverage = "^7.3"
 
-autoflake = "2.2"
+autoflake = "^2.2"
 flake8 = "^6.1"
 flake8-logging-format = "^0.9"
 flake8-comprehensions = "^3.14"
