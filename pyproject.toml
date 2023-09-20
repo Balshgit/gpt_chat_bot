@@ -21,6 +21,7 @@ wheel = "^0.41"
 orjson = "^3.9"
 
 websocket-client = "^1.6"
+greenlet = "^2.0.2"
 requests = "^2.31"
 selenium = "^4.11"
 tls-client = "^0.2"
@@ -90,7 +91,7 @@ assertpy = "^1.1"
 
 coverage = "^7.3"
 
-autoflake = "2.2"
+autoflake = "^2.2"
 flake8 = "^6.1"
 flake8-logging-format = "^0.9"
 flake8-comprehensions = "^3.14"
@@ -136,8 +137,8 @@ ignore = [
 ]
 per-file-ignores = [
     # too complex queries
-    "./app/tests/*: TAE001, S101, S311",
-    "app/tests/*/factories/*: S5720",
+    "tests/*: S101",
+    "tests/integration/bot/conftest.py: NEW100",
     "settings/config.py: S104"
 ]
 
@@ -179,19 +180,48 @@ warn_unused_configs = true
 warn_unreachable = true
 warn_no_return = true
 exclude = [
-    "app/chat-gpt/*"
-]
-
-
-[tool.coverage.run]
-relative_files = true
-
-[tool.pytest.ini_options]
-filterwarnings = [
-    "error",
-    "ignore::DeprecationWarning",
+    "app/chat-gpt/"
 ]
 
 [tool.black]
 line-length = 120
 target-version = ['py311']
+
+
+[tool.coverage.run]
+relative_files = true
+concurrency = ["greenlet", "thread"]
+
+[tool.coverage.report]
+sort = "cover"
+skip_covered = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = "tests"
+python_files = [
+    # tests declarations
+    "test_*.py",
+    # base test scenarios and helpers for tests
+    "support.py",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore:_SixMetaPathImporter.*not found:ImportWarning"
+]
+addopts = '''
+  --disable-socket
+  --allow-unix-socket
+  --allow-hosts=::1,127.0.0.1
+  --strict-markers
+  --tb=short
+  --cov=app
+  --cov=settings
+  --cov=tests
+  --cov-branch
+  --cov-fail-under=90
+  --cov-config=.coveragerc
+  --cov-context=test
+  --no-cov
+'''
