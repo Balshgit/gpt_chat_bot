@@ -23,13 +23,13 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.11.3'
+          python-version: '3.11.5'
       #----------------------------------------------
       #  -----  install & configure poetry  -----
       #----------------------------------------------
       - name: Install poetry
         env:  # Keep in sync with `POETRY_VERSION` in `Dockerfile`
-          POETRY_VERSION: "1.4.2"
+          POETRY_VERSION: "1.6.1"
         run: |
           curl -sSL "https://install.python-poetry.org" | python -
           # Adding `poetry` to `$PATH`:
@@ -63,7 +63,7 @@ jobs:
       - name: Run tests
         run: |
           source .venv/bin/activate
-          pytest -vv --exitfirst
+          poetry run pytest -vv --exitfirst
       - name: Coverage report
         run: |
           poetry run coverage run -m pytest

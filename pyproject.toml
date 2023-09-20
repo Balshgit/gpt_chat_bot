@@ -182,16 +182,45 @@ exclude = [
     "app/chat-gpt/"
 ]
 
-
-[tool.coverage.run]
-relative_files = true
-
-[tool.pytest.ini_options]
-filterwarnings = [
-    "error",
-    "ignore::DeprecationWarning",
-]
-
 [tool.black]
 line-length = 120
 target-version = ['py311']
+
+
+[tool.coverage.run]
+relative_files = true
+concurrency = ["greenlet", "thread"]
+
+[tool.coverage.report]
+sort = "cover"
+skip_covered = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = "tests"
+python_files = [
+    # tests declarations
+    "test_*.py",
+    # base test scenarios and helpers for tests
+    "support.py",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore:_SixMetaPathImporter.*not found:ImportWarning"
+]
+addopts = '''
+  --disable-socket
+  --allow-unix-socket
+  --allow-hosts=::1,127.0.0.1
+  --strict-markers
+  --tb=short
+  --cov=app
+  --cov=settings
+  --cov=tests
+  --cov-branch
+  --cov-fail-under=90
+  --cov-config=.coveragerc
+  --cov-context=test
+  --no-cov
+'''
