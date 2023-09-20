@@ -51,7 +51,7 @@ lint:
   commands:
     mypy:
       glob: "*.py"
-      run: mypy {staged_files} --namespace-packages
+      run: mypy {staged_files}
     flake8:
       glob: "*.py"
       run: flake8 {staged_files}
