@@ -43,6 +43,14 @@ methods:
 poetry run pytest
 ```
 
+## Docs
+Docs can be found at
+
+- {domain}/{url_prefix}/{api_prefix}/docs
+- {domain}/{url_prefix}/{api_prefix}/redoc
+
+on local start can be found at http://localhost/gpt/api/docs
+
 ## Help article
 
 [Пишем асинхронного Телеграм-бота](https://habr.com/ru/company/kts/blog/598575/)

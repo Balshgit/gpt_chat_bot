@@ -17,9 +17,14 @@ from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
 from app.core.bot import BotApplication
 from app.main import Application as AppApplication
-from settings.config import get_settings
+from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
 from tests.integration.factories.bot import BotInfoFactory
+
+
+@pytest.fixture(scope="session")
+def test_settings() -> AppSettings:
+    return get_settings()
 
 
 class PytestExtBot(ExtBot):  # type: ignore
@@ -213,12 +218,13 @@ async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]
 
 
 @pytest_asyncio.fixture(scope="session")
-async def main_application(bot_application: PytestApplication) -> FastAPI:
-    settings = get_settings()
-    bot_app = BotApplication(settings=settings)
+async def main_application(
+    bot_application: PytestApplication, test_settings: AppSettings
+) -> AsyncGenerator[FastAPI, None]:
+    bot_app = BotApplication(settings=test_settings)
     bot_app.application = bot_application
-    fast_api_app = AppApplication(settings=settings, bot_app=bot_app).fastapi_app
-    return fast_api_app
+    fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app).fastapi_app
+    yield fast_api_app
 
 
 @pytest_asyncio.fixture()

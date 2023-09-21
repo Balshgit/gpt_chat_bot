@@ -19,7 +19,7 @@ async def healthcheck() -> ORJSONResponse:
 
 
 @router.post(
-    f"/{settings.bot_webhook_url}",
+    f"/{settings.TELEGRAM_API_TOKEN}",
     name="system:process_bot_updates",
     status_code=status.HTTP_202_ACCEPTED,
     summary="process bot updates",

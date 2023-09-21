@@ -9,17 +9,17 @@ from fastapi import Request, Response
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from settings.config import Settings
+from settings.config import AppSettings
 
 
 class BotApplication:
-    def __init__(self, settings: Settings, start_with_webhook: bool = False) -> None:
+    def __init__(self, settings: AppSettings) -> None:
         self.application: Application = (  # type: ignore
             Application.builder().token(token=settings.TELEGRAM_API_TOKEN).build()
         )
         self.add_handlers()
         self.settings = settings
-        self.start_with_webhook = start_with_webhook
+        self.start_with_webhook = settings.START_WITH_WEBHOOK
 
     async def set_webhook(self) -> None:
         await self.application.initialize()
@@ -59,15 +59,15 @@ class BotApplication:
 
 @dataclass
 class BotQueue:
-    bot_app: Application  # type: ignore[type-arg]
+    bot_app: BotApplication
     queue: Queue = asyncio.Queue()  # type: ignore[type-arg]
 
     async def put_updates_on_queue(self, request: Request) -> Response:
         """
-        Listen {URL_PREFIX}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
+        Listen /{URL_PREFIX}/{API_PREFIX}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
         """
         data = await request.json()
-        tg_update = Update.de_json(data=data, bot=self.bot_app.bot)
+        tg_update = Update.de_json(data=data, bot=self.bot_app.application.bot)
         self.queue.put_nowait(tg_update)
 
         return Response(status_code=HTTPStatus.ACCEPTED)
@@ -75,5 +75,5 @@ class BotQueue:
     async def get_updates_from_queue(self) -> None:
         while True:
             update = await self.queue.get()
-            await self.bot_app.process_update(update)
+            await self.bot_app.application.process_update(update)
             await sleep(0)

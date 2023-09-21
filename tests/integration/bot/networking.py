@@ -99,3 +99,11 @@ async def send_webhook_message(
             data=payload,  # type: ignore
             headers=headers,
         )
+
+
+class MockedRequest:
+    def __init__(self, data: dict[str, Any]) -> None:
+        self.data = data
+
+    async def json(self) -> dict[str, Any]:
+        return self.data

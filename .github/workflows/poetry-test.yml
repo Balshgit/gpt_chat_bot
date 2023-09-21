@@ -10,6 +10,9 @@ on:
     branches:
       - 'release/**'
 
+env:
+  STAGE: runtests
+
 jobs:
   test:
     runs-on: ubuntu-latest
