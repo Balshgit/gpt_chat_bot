@@ -5,6 +5,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
+from app.constants import API_PREFIX
+
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
 SHARED_DIR.mkdir(exist_ok=True)
@@ -23,10 +25,10 @@ if environ.get("STAGE") == "runtests":
 load_dotenv(env_path, override=True)
 
 
-class Settings(BaseSettings):
+class AppSettings(BaseSettings):
     """Application settings."""
 
-    PROJECT_NAME: str = "healthcheck bot"
+    PROJECT_NAME: str = "chat gpt bot"
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     STAGE: str = "dev"
@@ -35,7 +37,7 @@ class Settings(BaseSettings):
     TELEGRAM_API_TOKEN: str = "123456789:AABBCCDDEEFFaabbccddeeff-1234567890"
     # webhook settings
     START_WITH_WEBHOOK: bool = False
-    WEBHOOK_HOST: str = "https://mydomain.com"
+    DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
     # quantity of workers for uvicorn
@@ -44,12 +46,18 @@ class Settings(BaseSettings):
     RELOAD: bool = False
 
     @cached_property
+    def api_prefix(self) -> str:
+        if self.URL_PREFIX:
+            return "/" + "/".join([self.URL_PREFIX.strip("/"), API_PREFIX.strip("/")])
+        return API_PREFIX
+
+    @cached_property
     def bot_webhook_url(self) -> str:
-        return "/" + self.TELEGRAM_API_TOKEN
+        return "/".join([self.api_prefix, self.TELEGRAM_API_TOKEN])
 
     class Config:
         case_sensitive = True
 
 
-def get_settings() -> Settings:
-    return Settings()
+def get_settings() -> AppSettings:
+    return AppSettings()

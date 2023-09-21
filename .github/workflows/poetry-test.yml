@@ -3,12 +3,15 @@ name: test
 on:
   push:
     branches-ignore:
-      - test
+      - develop
     tags-ignore:
       - "*"
   pull_request:
     branches:
       - 'release/**'
+
+env:
+  STAGE: runtests
 
 jobs:
   test:
