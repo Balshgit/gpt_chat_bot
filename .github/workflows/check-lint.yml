@@ -3,7 +3,7 @@ name: lint
 on:
   push:
     branches-ignore:
-      - test
+      - develop
     tags-ignore:
       - "*"
   pull_request:

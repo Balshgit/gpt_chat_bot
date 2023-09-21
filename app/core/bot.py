@@ -1,6 +1,5 @@
 import asyncio
 import os
-import time
 from asyncio import Queue, sleep
 from dataclasses import dataclass
 from functools import cached_property
@@ -10,7 +9,6 @@ from fastapi import Request, Response
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from app.constants import API_PREFIX
 from settings.config import Settings
 
 
@@ -39,11 +37,7 @@ class BotApplication:
             await update.message.reply_text(
                 "Help!",
                 disable_notification=True,
-                api_kwargs={
-                    "text": "Hello World",
-                    "date": int(time.time()) + 30,
-                    "schedule_date": int(time.time()) + 30,
-                },
+                api_kwargs={"text": "Hello World"},
             )
         return None
 
@@ -60,12 +54,7 @@ class BotApplication:
 
     @cached_property
     def webhook_url(self) -> str:
-        return os.path.join(
-            self.settings.WEBHOOK_HOST.strip("/"),
-            API_PREFIX.strip("/"),
-            self.settings.URL_PREFIX.strip("/"),
-            self.settings.TELEGRAM_API_TOKEN.strip("/"),
-        )
+        return os.path.join(self.settings.DOMAIN.strip("/"), self.settings.bot_webhook_url.strip("/"))
 
 
 @dataclass
@@ -86,6 +75,5 @@ class BotQueue:
     async def get_updates_from_queue(self) -> None:
         while True:
             update = await self.queue.get()
-            print(update)
             await self.bot_app.process_update(update)
             await sleep(0)

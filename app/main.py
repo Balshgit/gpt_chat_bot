@@ -25,9 +25,9 @@ class Application:
             title="Health check bot",
             description="Bot which check all services are working",
             version="0.0.3",
-            docs_url=f"{settings.URL_PREFIX}/docs",
-            redoc_url=f"{settings.URL_PREFIX}/redocs",
-            openapi_url=f"{settings.URL_PREFIX}/api/openapi.json",
+            docs_url="/" + "/".join([settings.api_prefix.strip("/"), "docs"]),
+            redoc_url="/" + "/".join([settings.api_prefix.strip("/"), "redocs"]),
+            openapi_url="/" + "/".join([settings.api_prefix.strip("/"), "openapi.json"]),
             default_response_class=UJSONResponse,
         )
         self.app.state.settings = settings
