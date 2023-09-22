@@ -1,22 +1,13 @@
 import asyncio
-import sys
 from functools import cached_property
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
-from loguru import logger
 
 from app.core.bot import BotApplication, BotQueue
+from app.core.handlers import command_handlers
 from app.routers import api_router
 from settings.config import AppSettings, get_settings
-
-logger.remove()
-logger.add(
-    sink=sys.stdout,
-    colorize=True,
-    level="DEBUG",
-    format="<cyan>{time:DD.MM.YYYY HH:mm:ss}</cyan> | <level>{level}</level> | <magenta>{message}</magenta>",
-)
 
 
 class Application:
@@ -60,7 +51,7 @@ class Application:
 
 def create_app(settings: AppSettings | None = None) -> FastAPI:
     settings = settings or get_settings()
-    bot_app = BotApplication(settings=settings)
+    bot_app = BotApplication(settings=settings, handlers=command_handlers.handlers)
 
     return Application(settings=settings, bot_app=bot_app).fastapi_app
 

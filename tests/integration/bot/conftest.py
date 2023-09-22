@@ -16,6 +16,7 @@ from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
 from app.core.bot import BotApplication
+from app.core.handlers import command_handlers
 from app.main import Application as AppApplication
 from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
@@ -226,8 +227,11 @@ def provider_token(bot_info: dict[str, Any]) -> str:
 async def main_application(
     bot_application: PytestApplication, test_settings: AppSettings
 ) -> AsyncGenerator[FastAPI, None]:
-    bot_app = BotApplication(settings=test_settings)
-    bot_app.application = bot_application
+    bot_app = BotApplication(
+        application=bot_application,
+        settings=test_settings,
+        handlers=command_handlers.handlers,
+    )
     fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app).fastapi_app
     yield fast_api_app
 

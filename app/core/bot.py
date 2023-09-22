@@ -4,50 +4,45 @@ from asyncio import Queue, sleep
 from dataclasses import dataclass
 from functools import cached_property
 from http import HTTPStatus
+from typing import Any
 
 from fastapi import Request, Response
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application
 
+from app.core.utils import logger
 from settings.config import AppSettings
 
 
 class BotApplication:
-    def __init__(self, settings: AppSettings) -> None:
-        self.application: Application = (  # type: ignore
+    def __init__(
+        self,
+        settings: AppSettings,
+        handlers: list[Any],
+        application: Application | None = None,  # type: ignore[type-arg]
+    ) -> None:
+        self.application: Application = application or (  # type: ignore
             Application.builder().token(token=settings.TELEGRAM_API_TOKEN).build()
         )
-        self.add_handlers()
+        self.handlers = handlers
         self.settings = settings
         self.start_with_webhook = settings.START_WITH_WEBHOOK
+        self._add_handlers()
 
     async def set_webhook(self) -> None:
         await self.application.initialize()
         await self.application.bot.set_webhook(url=self.webhook_url)
+        logger.info('webhook is set')
 
     async def delete_webhook(self) -> None:
         await self.application.bot.delete_webhook()
-
-    @staticmethod
-    async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        """Send a message when the command /help is issued."""
-
-        if update.message:
-            await asyncio.sleep(10)
-            await update.message.reply_text(
-                "Help!",
-                disable_notification=True,
-                api_kwargs={"text": "Hello World"},
-            )
-        return None
-
-    def add_handlers(self) -> None:
-        self.application.add_handler(CommandHandler("help", self.help_command))
+        logger.info('webhook has been deleted')
 
     async def polling(self) -> None:
         await self.application.initialize()
         await self.application.start()
         await self.application.updater.start_polling()  # type: ignore
+        logger.info("bot started in polling mode")
 
     async def shutdown(self) -> None:
         await self.application.updater.shutdown()  # type: ignore
@@ -55,6 +50,10 @@ class BotApplication:
     @cached_property
     def webhook_url(self) -> str:
         return os.path.join(self.settings.DOMAIN.strip("/"), self.settings.bot_webhook_url.strip("/"))
+
+    def _add_handlers(self) -> None:
+        for handler in self.handlers:
+            self.application.add_handler(handler)
 
 
 @dataclass
