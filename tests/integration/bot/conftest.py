@@ -119,27 +119,41 @@ def bot_info() -> dict[str, Any]:
 
 
 @pytest_asyncio.fixture(scope="session")
-async def bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestExtBot, None]:
+async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]:
+    # We build a new bot each time so that we use `app` in a context manager without problems
+    application = ApplicationBuilder().bot(make_bot(bot_info)).application_class(PytestApplication).build()
+    yield application
+    if application.running:
+        await application.stop()
+        await application.shutdown()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[PytestExtBot, None]:
     """Makes an ExtBot instance with the given bot_info"""
     async with make_bot(bot_info) as _bot:
+        _bot.application = bot_application
         yield _bot
 
 
 @pytest.fixture()
-def one_time_bot(bot_info: dict[str, Any]) -> PytestExtBot:
+def one_time_bot(bot_info: dict[str, Any], bot_application: Any) -> PytestExtBot:
     """A function scoped bot since the session bot would shutdown when `async with app` finishes"""
-    return make_bot(bot_info)
+    bot = make_bot(bot_info)
+    bot.application = bot_application
+    return bot
 
 
 @pytest_asyncio.fixture(scope="session")
-async def cdc_bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestExtBot, None]:
+async def cdc_bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[PytestExtBot, None]:
     """Makes an ExtBot instance with the given bot_info that uses arbitrary callback_data"""
     async with make_bot(bot_info, arbitrary_callback_data=True) as _bot:
+        _bot.application = bot_application
         yield _bot
 
 
 @pytest_asyncio.fixture(scope="session")
-async def raw_bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestBot, None]:
+async def raw_bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[PytestBot, None]:
     """Makes an regular Bot instance with the given bot_info"""
     async with PytestBot(
         bot_info["token"],
@@ -147,6 +161,7 @@ async def raw_bot(bot_info: dict[str, Any]) -> AsyncGenerator[PytestBot, None]:
         request=NonchalantHttpxRequest(8),
         get_updates_request=NonchalantHttpxRequest(1),
     ) as _bot:
+        _bot.application = bot_application
         yield _bot
 
 
@@ -205,16 +220,6 @@ def channel_id(bot_info: dict[str, Any]) -> int:
 @pytest.fixture(scope="session")
 def provider_token(bot_info: dict[str, Any]) -> str:
     return bot_info["payment_provider_token"]
-
-
-@pytest_asyncio.fixture(scope="session")
-async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]:
-    # We build a new bot each time so that we use `app` in a context manager without problems
-    application = ApplicationBuilder().bot(make_bot(bot_info)).application_class(PytestApplication).build()
-    yield application
-    if application.running:
-        await application.stop()
-        await application.shutdown()
 
 
 @pytest_asyncio.fixture(scope="session")
