@@ -7,7 +7,7 @@ RESET  := $(shell tput -Txterm sgr0)
 .DEFAULT_GOAL := help
 .PHONY: help app format lint check-style check-import-sorting lint-typing lint-imports lint-complexity lint-deps
 
-PY_TARGET_DIRS=bot_microservice settings tests
+PY_TARGET_DIRS=bot_microservice settings
 PORT=8000
 
 ## Запустить приложение

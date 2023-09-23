@@ -7,15 +7,14 @@ import pytest
 from assertpy import assert_that
 from bot_microservice.core.bot import BotApplication, BotQueue
 from bot_microservice.main import Application
-from faker import Faker
-from httpx import AsyncClient
-
-from tests.integration.bot.networking import MockedRequest
-from tests.integration.factories.bot import (
+from bot_microservice.tests.integration.bot.networking import MockedRequest
+from bot_microservice.tests.integration.factories.bot import (
     BotChatFactory,
     BotEntitleFactory,
     BotUserFactory,
 )
+from faker import Faker
+from httpx import AsyncClient
 
 pytestmark = [
     pytest.mark.asyncio,

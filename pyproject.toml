@@ -18,7 +18,33 @@ gunicorn = "^21.2"
 uvicorn = "^0.23"
 wheel = "^0.41"
 orjson = "^3.9"
+
+websocket-client = "^1.6"
 greenlet = "^2.0.2"
+requests = "^2.31"
+selenium = "^4.11"
+tls-client = "^0.2"
+pypasser = "^0.0.5"
+names = "^0.3"
+colorama = "^0.4"
+curl_cffi = "0.5.7"
+aiohttp = "^3.8.5"
+flask = "^2.3"
+flask_cors = "^4.0"
+flask-babel = "^3.1"
+streamlit = "^1.26"
+fake-useragent = "^1.2"
+twocaptcha = "^0.0.1"
+pymailtm = "^1.1"
+Levenshtein = "^0.21"
+retrying = "^1.3"
+mailgw_temporary_email = "^0.0.2"
+pycryptodome = "^3.18"
+random-password-generator = "^2.2"
+numpy = "^1.25"
+tornado = "^6.3"
+PyExecJS = "^1.5"
+browser_cookie3 = "^0.19"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.14"
@@ -85,7 +111,6 @@ flake8-mock = "^0.4"
 flake8-comments = "^0.1"
 flake8-newspaper-style = "^0.4"
 Flake8-pyproject = "^1.2.3"
-
 [tool.flake8]
 inline-quotes = "double"
 max-line-length = 120
@@ -108,8 +133,8 @@ ignore = [
 ]
 per-file-ignores = [
     # too complex queries
-    "tests/*: S101",
-    "tests/integration/bot/conftest.py: NEW100",
+    "bot_microservice/tests/*: S101",
+    "bot_microservice/tests/integration/bot/conftest.py: NEW100",
     "settings/config.py: S104"
 ]
 

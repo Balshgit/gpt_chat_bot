@@ -4,5 +4,5 @@
 		"port": 1338,
 		"debug": false
 	},
-	"url_prefix": ""
+	"url_prefix": "/gpt"
 }

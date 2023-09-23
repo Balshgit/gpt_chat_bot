@@ -66,10 +66,10 @@ jobs:
       - name: Run tests
         run: |
           source .venv/bin/activate
-          poetry run pytest -vv --exitfirst
+          poetry run pytest bot_microservice/ -vv --exitfirst
       - name: Coverage report
         run: |
-          poetry run coverage run -m pytest
+          poetry run coverage run -m pytest bot_microservice/
           poetry run coverage report
       - name: Extended checks
         run: |

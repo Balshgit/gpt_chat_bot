@@ -1,9 +1,8 @@
 import string
 
 import factory
+from bot_microservice.tests.integration.factories.models import Chat, User
 from faker import Faker
-
-from tests.integration.factories.models import Chat, User
 
 faker = Faker("ru_RU")
 

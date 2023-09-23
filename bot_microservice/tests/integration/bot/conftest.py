@@ -12,6 +12,8 @@ import pytest_asyncio
 from bot_microservice.core.bot import BotApplication
 from bot_microservice.core.handlers import command_handlers
 from bot_microservice.main import Application as AppApplication
+from bot_microservice.tests.integration.bot.networking import NonchalantHttpxRequest
+from bot_microservice.tests.integration.factories.bot import BotInfoFactory
 from fastapi import FastAPI
 from httpx import AsyncClient
 from pytest_asyncio.plugin import SubRequest
@@ -19,8 +21,6 @@ from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
 from settings.config import AppSettings, get_settings
-from tests.integration.bot.networking import NonchalantHttpxRequest
-from tests.integration.factories.bot import BotInfoFactory
 
 
 @pytest.fixture(scope="session")
