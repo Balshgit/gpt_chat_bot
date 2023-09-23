@@ -2,10 +2,9 @@ from functools import cached_property
 from os import environ
 from pathlib import Path
 
+from bot_microservice.constants import API_PREFIX
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-
-from app.constants import API_PREFIX
 
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")

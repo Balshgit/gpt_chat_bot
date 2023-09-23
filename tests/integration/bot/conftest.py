@@ -9,15 +9,15 @@ from typing import Any, AsyncGenerator
 
 import pytest
 import pytest_asyncio
+from bot_microservice.core.bot import BotApplication
+from bot_microservice.core.handlers import command_handlers
+from bot_microservice.main import Application as AppApplication
 from fastapi import FastAPI
 from httpx import AsyncClient
 from pytest_asyncio.plugin import SubRequest
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
-from app.core.bot import BotApplication
-from app.core.handlers import command_handlers
-from app.main import Application as AppApplication
 from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
 from tests.integration.factories.bot import BotInfoFactory

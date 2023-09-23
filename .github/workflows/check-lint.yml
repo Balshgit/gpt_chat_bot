@@ -62,10 +62,10 @@ jobs:
       - name: Analysing the code with mypy
         run: |
           source .venv/bin/activate
-          poetry run mypy app
+          poetry run mypy bot_microservice
       - name: Analysing the code with flake8
         run: |
-          poetry run flake8 app
+          poetry run flake8 bot_microservice
       - name: Analysing code with isort
         run: |
-          poetry run isort --check-only app
+          poetry run isort --check-only bot_microservice

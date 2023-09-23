@@ -7,12 +7,12 @@ RESET  := $(shell tput -Txterm sgr0)
 .DEFAULT_GOAL := help
 .PHONY: help app format lint check-style check-import-sorting lint-typing lint-imports lint-complexity lint-deps
 
-PY_TARGET_DIRS=app settings tests
+PY_TARGET_DIRS=bot_microservice settings tests
 PORT=8000
 
 ## Запустить приложение
 app:
-	poetry run uvicorn --host 0.0.0.0 --factory app.main:create_app --port $(PORT) --reload --reload-dir=app --reload-dir=settings
+	poetry run uvicorn --host 0.0.0.0 --factory bot_microservice.main:create_app --port $(PORT) --reload --reload-dir=bot_microservice --reload-dir=settings
 
 ## Отформатировать код
 format:

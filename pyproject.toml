@@ -151,7 +151,7 @@ warn_unused_configs = true
 warn_unreachable = true
 warn_no_return = true
 exclude = [
-    "./chat_gpt_microservice"
+    "chat_gpt_microservice"
 ]
 
 [tool.black]

@@ -6,11 +6,11 @@ from functools import cached_property
 from http import HTTPStatus
 from typing import Any
 
+from bot_microservice.core.utils import logger
 from fastapi import Request, Response
 from telegram import Update
 from telegram.ext import Application
 
-from app.core.utils import logger
 from settings.config import AppSettings
 
 

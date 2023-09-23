@@ -23,7 +23,7 @@ python main.py
 ```
 
 ```shell
-	poetry run uvicorn --host 0.0.0.0 --factory app.main:create_app --port 8000 --reload --reload-dir=app --reload-dir=settings
+	poetry run uvicorn --host 0.0.0.0 --factory bot_microservice.main:create_app --port 8000 --reload --reload-dir=bot_microservice --reload-dir=settings
 ```
 
 - set `START_WITH_WEBHOOK` to blank

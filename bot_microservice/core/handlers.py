@@ -1,9 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from bot_microservice.core.commands import help_command
 from telegram.ext import CommandHandler
-
-from app.core.commands import help_command
 
 
 @dataclass

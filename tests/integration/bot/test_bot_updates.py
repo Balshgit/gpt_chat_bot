@@ -5,11 +5,11 @@ from typing import Any
 
 import pytest
 from assertpy import assert_that
+from bot_microservice.core.bot import BotApplication, BotQueue
+from bot_microservice.main import Application
 from faker import Faker
 from httpx import AsyncClient
 
-from app.core.bot import BotApplication, BotQueue
-from app.main import Application
 from tests.integration.bot.networking import MockedRequest
 from tests.integration.factories.bot import (
     BotChatFactory,

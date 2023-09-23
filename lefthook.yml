@@ -23,7 +23,7 @@ pre-push:
       run: black --check -S {all_files}
     mypy:
       glob: "*.py"
-      run: mypy app settings tests --config-file pyproject.toml
+      run: mypy bot_microservice settings tests --config-file pyproject.toml
     flake8:
       glob: "*.py"
       run: flake8 {all_files}
