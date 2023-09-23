@@ -4,6 +4,7 @@ from pathlib import Path
 
 from bot_microservice.constants import API_PREFIX
 from dotenv import load_dotenv
+from pydantic import HttpUrl
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent
@@ -24,7 +25,13 @@ if environ.get("STAGE") == "runtests":
 load_dotenv(env_path, override=True)
 
 
-class AppSettings(BaseSettings):
+class SentrySettings(BaseSettings):
+    SENTRY_DSN: HttpUrl | None = None
+    DEPLOY_ENVIRONMENT: str | None = None
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.95
+
+
+class AppSettings(SentrySettings, BaseSettings):
     """Application settings."""
 
     PROJECT_NAME: str = "chat gpt bot"

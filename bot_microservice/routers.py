@@ -1,3 +1,4 @@
+from bot_microservice.api.bot.controllers import router as bot_router
 from bot_microservice.api.system.controllers import router as system_router
 from fastapi import APIRouter
 from fastapi.responses import ORJSONResponse
@@ -13,3 +14,4 @@ api_router = APIRouter(
 
 
 api_router.include_router(system_router, tags=["system"])
+api_router.include_router(bot_router, tags=["bot"])

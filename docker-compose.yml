@@ -19,7 +19,7 @@ services:
       dockerfile: deploy/Dockerfile
       target: bot-service
       args:
-        USER: ${USER}
+        USER: web
     restart: unless-stopped
     env_file:
       - settings/.env
@@ -43,6 +43,8 @@ services:
       context: .
       dockerfile: deploy/Dockerfile
       target: chat-service
+      args:
+        USER: web
     restart: unless-stopped
     networks:
       chat-gpt-network:

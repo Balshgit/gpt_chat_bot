@@ -1,24 +1,6 @@
-import sys
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
-from logging import Logger
 from typing import Any
-
-from loguru import logger as loguru_logger
-
-
-def configure_logger() -> Logger:
-    loguru_logger.remove()
-    loguru_logger.add(
-        sink=sys.stdout,
-        colorize=True,
-        level='DEBUG',
-        format='<cyan>{time:DD.MM.YYYY HH:mm:ss}</cyan> | <level>{level}</level> | <magenta>{message}</magenta>',
-    )
-    return loguru_logger  # type: ignore
-
-
-logger = configure_logger()
 
 
 def timed_cache(**timedelta_kwargs: Any) -> Any:

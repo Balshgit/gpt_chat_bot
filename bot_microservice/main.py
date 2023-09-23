@@ -1,6 +1,7 @@
 import asyncio
 from functools import cached_property
 
+import sentry_sdk
 from bot_microservice.core.bot import BotApplication, BotQueue
 from bot_microservice.core.handlers import command_handlers
 from bot_microservice.routers import api_router
@@ -27,6 +28,14 @@ class Application:
 
         self.app.include_router(api_router)
         self.configure_hooks()
+
+        if settings.SENTRY_DSN is not None:
+            sentry_sdk.init(
+                dsn=settings.SENTRY_DSN,  # type: ignore[arg-type]
+                environment=settings.DEPLOY_ENVIRONMENT,
+                traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
+                send_client_reports=False,
+            )
 
     @cached_property
     def fastapi_app(self) -> FastAPI:

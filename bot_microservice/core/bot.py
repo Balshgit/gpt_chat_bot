@@ -6,8 +6,8 @@ from functools import cached_property
 from http import HTTPStatus
 from typing import Any
 
-from bot_microservice.core.utils import logger
 from fastapi import Request, Response
+from loguru import logger
 from telegram import Update
 from telegram.ext import Application
 

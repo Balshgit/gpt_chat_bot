@@ -18,7 +18,7 @@ ENV USER=${USER} \
   POETRY_VERSION=1.6.1
 
 
-RUN printf "================\n\nStart build chat service. with USER: "${USER}"\n\n===============\n" \
+RUN printf "================\n\nStart build base service. with USER: ${USER}\n\n===============\n" \
   && apt-get update \
   && apt-get install --no-install-recommends -y \
     bash \

@@ -45,6 +45,7 @@ numpy = "^1.25"
 tornado = "^6.3"
 PyExecJS = "^1.5"
 browser_cookie3 = "^0.19"
+sentry-sdk = "^1.31.0"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.14"
