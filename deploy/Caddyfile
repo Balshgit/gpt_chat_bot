@@ -1,6 +1,6 @@
 # Telegram bot. Redirects to bot-service
 :8083 {
-    reverse_proxy bot_service:8080
+    reverse_proxy bot_service:8000
     header Strict-Transport-Security max-age=31536000;
 
     # Removing some headers for improved security:

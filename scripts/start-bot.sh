@@ -6,7 +6,7 @@ if [[ "${START_WITH_WEBHOOK}" == "true" ]]
 then
   echo "Starting bot in webhook mode..."
   gunicorn main:create_app \
-    -- workers ${WORKERS_COUNT} \
+    --workers ${WORKERS_COUNT} \
     --bind ${APP_HOST}:${APP_PORT} \
     --worker-class uvicorn.workers.UvicornWorker \
     --timeout 150 \
