@@ -5,11 +5,10 @@ description = "Bot to integrated with chat-gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
 [tool.poetry.dependencies]
+python = "^3.11"
 
 fastapi = "^0.103.1"
 python-telegram-bot = {version = "^20.5", extras=["ext"]}
-
-python = "^3.11"
 python-dotenv = "^1.0"
 httpx = "^0.24"
 loguru = "^0.7"
@@ -28,7 +27,7 @@ tls-client = "^0.2"
 pypasser = "^0.0.5"
 names = "^0.3"
 colorama = "^0.4"
-curl_cffi = "^0.5"
+curl_cffi = "0.5.7"
 aiohttp = "^3.8.5"
 flask = "^2.3"
 flask_cors = "^4.0"
@@ -46,20 +45,19 @@ numpy = "^1.25"
 tornado = "^6.3"
 PyExecJS = "^1.5"
 browser_cookie3 = "^0.19"
+sentry-sdk = "^1.31.0"
 
 [tool.poetry.dev-dependencies]
+ipython = "^8.14"
 
 factory-boy = "^3.3"
 Faker = "^19"
-
-ipython = "^8.14"
 
 safety = "^2.3.5"
 pip-audit = "^2.6"
 yamllint = "^1.32"
 tomlkit = "^0.12"
 bandit = "^1.7"
-aresponses = "^2.1"
 
 pyupgrade = "^3.10"
 isort = "^5.12"
@@ -114,7 +112,6 @@ flake8-mock = "^0.4"
 flake8-comments = "^0.1"
 flake8-newspaper-style = "^0.4"
 Flake8-pyproject = "^1.2.3"
-
 [tool.flake8]
 inline-quotes = "double"
 max-line-length = 120
@@ -124,7 +121,7 @@ ban-relative-imports = true
 nested-classes-whitelist = ["Config", "Meta"]
 pytest-parametrize-names-type = "csv"
 exclude = [
-    "app/chat-gpt/*",
+    "chat_gpt_microservice/*",
     ".cache/*",
     ".pytest_cache/*",
     "*/__pycache__/*",
@@ -137,9 +134,9 @@ ignore = [
 ]
 per-file-ignores = [
     # too complex queries
-    "tests/*: S101",
-    "tests/integration/bot/conftest.py: NEW100",
-    "settings/config.py: S104"
+    "bot_microservice/tests/*: S101",
+    "bot_microservice/tests/integration/bot/conftest.py: NEW100",
+    "bot_microservice/settings/config.py: S104"
 ]
 
 [tool.autoflake]
@@ -180,7 +177,7 @@ warn_unused_configs = true
 warn_unreachable = true
 warn_no_return = true
 exclude = [
-    "app/chat-gpt/"
+    "chat_gpt_microservice"
 ]
 
 [tool.black]

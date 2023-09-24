@@ -1,55 +1,75 @@
 version: '3.9'
 
 networks:
-  healthcheck_bot_network:
+  chat-gpt-network:
     name:
-      "healthcheck_bot_network"
-
-volumes:
-  healthcheck_bot_caddy-data:
-    name: healthcheck_bot_caddy-data
-  healthcheck_bot_caddy-config:
-    name: healthcheck_bot_caddy-config
-
+      "chat_gpt_network"
+    ipam:
+      config:
+        - subnet: 200.20.0.0/24
 
 services:
 
   bot:
-    container_name: "healthcheck_bot"
-    hostname: "healthcheck_bot"
-    image: "healthcheck_bot:latest"
+    image: "chat_gpt_bot_service:latest"
+    container_name: "chat_gpt_bot_service"
+    hostname: "bot_service"
     build:
       context: .
       dockerfile: deploy/Dockerfile
+      target: bot-service
       args:
-        USER: ${USER}
+        USER: web
     restart: unless-stopped
-    env_file:
-      - settings/.env
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "8000"
+      WORKERS_COUNT: "1"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      healthcheck_bot_network:
+      chat-gpt-network:
         ipv4_address: 200.20.0.10
+    depends_on:
+      - caddy
+      - chat-gpt
     expose:
-      - "8080"
+      - "8000"
     command: bash start-bot.sh
+
+  chat-gpt:
+    image: "chat_gpt_chat_service:latest"
+    container_name: "chat_gpt_chat_service"
+    hostname: "chat_service"
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+      target: chat-service
+      args:
+        USER: web
+    restart: unless-stopped
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "1338"
+      WORKERS_COUNT: "1"
+    networks:
+      chat-gpt-network:
+        ipv4_address: 200.20.0.11
+    depends_on:
+      - caddy
+    expose:
+      - "1338"
 
   caddy:
     image: "caddy:2.7.4"
-    container_name: healthcheck_bot_caddy
-    hostname: healthcheck_bot_caddy
+    container_name: "chat_gpt_caddy_service"
+    hostname: "caddy_service"
     restart: unless-stopped
-    env_file:
-      - settings/.env
     ports:
-      - '8085:8085'
-    depends_on:
-      - bot
+      - '8083:8083'
+      - '8084:8084'
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - healthcheck_bot_caddy-data:/data
-      - healthcheck_bot_caddy-config:/config
     networks:
-      healthcheck_bot_network:
-        ipv4_address: 200.20.0.11
+      chat-gpt-network:
+        ipv4_address: 200.20.0.12

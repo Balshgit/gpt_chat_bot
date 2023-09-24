@@ -6,8 +6,9 @@ if [[ "${START_WITH_WEBHOOK}" == "true" ]]
 then
   echo "Starting bot in webhook mode..."
   gunicorn main:create_app \
-    --bind ${WEBAPP_HOST}:${WEBAPP_PORT} \
-    --worker-class aiohttp.GunicornWebWorker \
+    -- workers ${WORKERS_COUNT} \
+    --bind ${APP_HOST}:${APP_PORT} \
+    --worker-class uvicorn.workers.UvicornWorker \
     --timeout 150 \
     --max-requests 2000 \
     --max-requests-jitter 400
