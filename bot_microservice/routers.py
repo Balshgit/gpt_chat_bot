@@ -1,8 +1,7 @@
-from bot_microservice.api.bot.controllers import router as bot_router
-from bot_microservice.api.system.controllers import router as system_router
+from api.bot.controllers import router as bot_router
+from api.system.controllers import router as system_router
 from fastapi import APIRouter
 from fastapi.responses import ORJSONResponse
-
 from settings.config import get_settings
 
 settings = get_settings()

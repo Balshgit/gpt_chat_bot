@@ -2,46 +2,30 @@ FROM python:3.11.5 AS compile-image
 
 ARG USER
 
-ENV USER=${USER} \
-  PYTHONFAULTHANDLER=1 \
-  PYTHONUNBUFFERED=1 \
-  PYTHONHASHSEED=random \
-  PYTHONDONTWRITEBYTECODE=1 \
-  # pip:
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VIRTUALENVS_CREATE=false \
-  POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  PATH="$PATH:/root/.poetry/bin" \
-  DOCKER_CONTAINER=1 \
-  POETRY_VERSION=1.6.1
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    DOCKER_CONTAINER=1 \
+    POETRY_VERSION=1.6.1
 
-
-RUN printf "================\n\nStart build base service. with USER: ${USER}\n\n===============\n" \
+RUN printf "================ Start build base service. with USER: ${USER} ===============" \
   && apt-get update \
   && apt-get install --no-install-recommends -y \
     bash \
     build-essential \
-    curl \
     iputils-ping \
-    gettext \
-    git \
     libpq-dev \
-    nano \
     libffi-dev \
     cmake \
     libcurl4-openssl-dev \
-  && pip install --upgrade pip \
-  # Installing `poetry` package manager:
-  && pip install poetry==$POETRY_VERSION wheel \
+    bash \
+    curl \
+    git \
+    nano \
   # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-USER "$USER"
+WORKDIR /app/
 
 RUN if [ "$USER" != "root" ]; then \
       mkdir /home/"$USER" \
@@ -49,35 +33,49 @@ RUN if [ "$USER" != "root" ]; then \
       && chown "$USER":"$USER" -R /home/"$USER"; \
     fi
 
-COPY --chown="$USER":"$USER" ../poetry.lock ../pyproject.toml /app/
+COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
 
-# Installing requirements
-RUN poetry --version \
-  && poetry run pip install -U pip \
-  && poetry install $(if [ "$USER" != 'root' ]; then echo '--only main'; fi) --no-interaction --no-ansi \
-  # Cleaning poetry installation's cache for production:
-  && if [ "$USER" != 'root' ]; then rm -rf "$POETRY_CACHE_DIR"; fi
+RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION
+RUN poetry config virtualenvs.in-project true && \
+    poetry config virtualenvs.create true && \
+    poetry install --only main --no-interaction --no-ansi && \
+    rm -rf $POETRY_CACHE_DIR
 
 
 #==================== bot-service =================================
 FROM compile-image as bot-service
 
-USER "$USER"
+RUN printf "================ Start build bot-service. with USER: ${USER} ==============="
+
+WORKDIR /app/
+
+# Copying bot service
+COPY --chown=${USER}:${USER} ../bot_microservice /app/
 
 COPY ./scripts/start-bot.sh /app/
 RUN chmod +x ./start-bot.sh
 
-# Copying bot service
-COPY --chown="$USER":"$USER" ../bot_microservice /app/
+COPY --from=compile-image /app/.venv /app/.venv
+
+USER ${USER}
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 
 #===================== chat-service ================================
 FROM compile-image as chat-service
 
-USER "$USER"
+RUN printf "================ Start build chat-service. with USER: ${USER} ==============="
+
+WORKDIR /app/
+
+USER ${USER}
 
 # Copying bot service
-COPY --chown="$USER":"$USER" ../chat_gpt_microservice /app/
+COPY --chown=${USER}:${USER} ../chat_gpt_microservice /app/
+
+COPY --from=compile-image /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
 RUN chmod -R 777 translations
 

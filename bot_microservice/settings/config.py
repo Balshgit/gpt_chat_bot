@@ -2,7 +2,7 @@ from functools import cached_property
 from os import environ
 from pathlib import Path
 
-from bot_microservice.constants import API_PREFIX
+from constants import API_PREFIX
 from dotenv import load_dotenv
 from pydantic import HttpUrl
 from pydantic_settings import BaseSettings

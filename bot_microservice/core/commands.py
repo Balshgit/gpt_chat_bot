@@ -1,8 +1,10 @@
 import random
+import tempfile
 from uuid import uuid4
 
 import httpx
-from bot_microservice.constants import CHAT_GPT_BASE_URL
+from constants import CHAT_GPT_BASE_URL
+from core.utils import convert_file_to_wav
 from httpx import AsyncClient, AsyncHTTPTransport
 from loguru import logger
 from telegram import Update
@@ -59,3 +61,14 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         except Exception as error:
             logger.error("error get data from chat api", error=error)
             await update.message.reply_text("Вообще всё сломалось :(")  # type: ignore[union-attr]
+
+
+async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(  # type: ignore[union-attr]
+        "Пожалуйста, ожидайте :)\nТрехминутная запись обрабатывается примерно 30 секунд"
+    )
+    sound_bytes = await update.message.voice.get_file()  # type: ignore[union-attr]
+    sound_bytes = await sound_bytes.download_as_bytearray()
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+        tmpfile.write(sound_bytes)
+        convert_file_to_wav(tmpfile.name)

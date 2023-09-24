@@ -21,8 +21,9 @@ services:
       args:
         USER: web
     restart: unless-stopped
-    env_file:
-      - settings/.env
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "8000"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -32,7 +33,7 @@ services:
       - caddy
       - chat-gpt
     expose:
-      - "8080"
+      - "8000"
     command: bash start-bot.sh
 
   chat-gpt:
@@ -59,8 +60,6 @@ services:
     container_name: "chat_gpt_caddy_service"
     hostname: "caddy_service"
     restart: unless-stopped
-    env_file:
-      - settings/.env
     ports:
       - '8083:8083'
       - '8084:8084'

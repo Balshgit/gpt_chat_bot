@@ -2,12 +2,11 @@ import asyncio
 from functools import cached_property
 
 import sentry_sdk
-from bot_microservice.core.bot import BotApplication, BotQueue
-from bot_microservice.core.handlers import command_handlers
-from bot_microservice.routers import api_router
+from core.bot import BotApplication, BotQueue
+from core.handlers import command_handlers
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
-
+from routers import api_router
 from settings.config import AppSettings, get_settings
 
 
@@ -72,7 +71,7 @@ def main() -> None:
 
     """Entrypoint of the application."""
     uvicorn.run(
-        "bot_microservice.main:create_app",
+        "main:create_app",
         workers=app.state.settings.WORKERS_COUNT,
         host=app.state.settings.APP_HOST,
         port=app.state.settings.APP_PORT,

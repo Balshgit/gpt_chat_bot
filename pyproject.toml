@@ -136,7 +136,7 @@ per-file-ignores = [
     # too complex queries
     "bot_microservice/tests/*: S101",
     "bot_microservice/tests/integration/bot/conftest.py: NEW100",
-    "settings/config.py: S104"
+    "bot_microservice/settings/config.py: S104"
 ]
 
 [tool.autoflake]

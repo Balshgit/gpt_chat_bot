@@ -3,7 +3,7 @@ import sys
 from types import FrameType
 from typing import TYPE_CHECKING, Any, cast
 
-from bot_microservice.constants import LogLevelEnum
+from constants import LogLevelEnum
 from loguru import logger
 from sentry_sdk.integrations.logging import EventHandler
 
