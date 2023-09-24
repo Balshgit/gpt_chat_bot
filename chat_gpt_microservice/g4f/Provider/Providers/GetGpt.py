@@ -1,11 +1,10 @@
 import json
 import os
 import uuid
+from typing import get_type_hints
 
 import requests
 from Crypto.Cipher import AES
-
-from ...typing import get_type_hints
 
 url = "https://chat.getgpt.world/"
 model = ["gpt-3.5-turbo"]

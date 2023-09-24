@@ -1,5 +1,7 @@
 import secrets
+from functools import lru_cache
 from json import load
+from typing import Any
 
 from flask import Flask
 from server.babel import create_babel
@@ -7,12 +9,18 @@ from server.backend import Backend_Api
 from server.bp import bp
 from server.website import Website
 
-if __name__ == "__main__":
-    # Load configuration from config.json
-    config = load(open("config.json", "r"))
-    site_config = config["site_config"]
-    url_prefix = config.pop("url_prefix")
 
+@lru_cache(maxsize=None)
+def get_config() -> dict[str, Any]:
+    # Load configuration from config.json
+    with open("config.json", "r") as config_file:
+        return load(config_file)
+
+
+def create_app() -> Flask:
+    config = get_config()
+
+    url_prefix = config["url_prefix"]
     # Create the app
     app = Flask(__name__)
     app.secret_key = secrets.token_hex(16)
@@ -41,6 +49,14 @@ if __name__ == "__main__":
     # Register the blueprint
     app.register_blueprint(bp, url_prefix=url_prefix)
 
+    return app
+
+
+if __name__ == "__main__":
+    config = get_config()
+    site_config = config["site_config"]
+    url_prefix = config["url_prefix"]
+    app = create_app()
     # Run the Flask server
     print(f"Running on {site_config['port']}{url_prefix}")
     app.run(**site_config)

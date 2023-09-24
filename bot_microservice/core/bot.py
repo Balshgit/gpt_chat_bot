@@ -8,10 +8,9 @@ from typing import Any
 
 from fastapi import Request, Response
 from loguru import logger
+from settings.config import AppSettings
 from telegram import Update
 from telegram.ext import Application
-
-from settings.config import AppSettings
 
 
 class BotApplication:

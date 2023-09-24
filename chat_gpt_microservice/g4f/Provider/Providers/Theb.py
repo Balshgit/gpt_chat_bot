@@ -1,8 +1,7 @@
 import json
 import os
 import subprocess
-
-from ...typing import get_type_hints
+from typing import get_type_hints
 
 url = "https://theb.ai"
 model = ["gpt-3.5-turbo"]

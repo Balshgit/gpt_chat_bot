@@ -3,10 +3,9 @@ import os
 import random
 import string
 import time
+from typing import get_type_hints
 
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://wewordle.org/gptapi/v1/android/turbo"
 model = ["gpt-3.5-turbo"]

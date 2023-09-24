@@ -4,10 +4,10 @@ import os
 import time
 import uuid
 from datetime import datetime
+from typing import Dict, get_type_hints
 
 import requests
-
-from ...typing import Dict, get_type_hints, sha256
+from g4f.typing import sha256
 
 url: str = "https://ai.ls"
 model: str = "gpt-3.5-turbo"

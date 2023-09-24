@@ -1,9 +1,8 @@
 import json
 import os
+from typing import get_type_hints
 
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://v.chatfree.cc"
 model = ["gpt-3.5-turbo", "gpt-3.5-turbo-16k"]

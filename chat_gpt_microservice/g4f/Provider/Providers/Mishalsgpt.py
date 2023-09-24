@@ -1,8 +1,7 @@
 import os
+from typing import get_type_hints
 
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://mishalsgpt.vercel.app"
 model = ["gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo"]

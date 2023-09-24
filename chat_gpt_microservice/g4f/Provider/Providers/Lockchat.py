@@ -1,9 +1,8 @@
 import json
 import os
+from typing import get_type_hints
 
 import requests
-
-from ...typing import get_type_hints
 
 url = "http://supertest.lockchat.app"
 model = ["gpt-4", "gpt-3.5-turbo"]

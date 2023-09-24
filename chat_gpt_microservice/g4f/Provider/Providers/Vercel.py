@@ -3,11 +3,10 @@ import json
 import os
 import queue
 import threading
+from typing import get_type_hints
 
 import execjs
 from curl_cffi import requests
-
-from ...typing import get_type_hints
 
 url = "https://play.vercel.ai"
 supports_stream = True

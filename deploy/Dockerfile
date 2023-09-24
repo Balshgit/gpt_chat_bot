@@ -69,14 +69,17 @@ RUN printf "================ Start build chat-service. with USER: ${USER} ======
 
 WORKDIR /app/
 
-USER ${USER}
-
 # Copying bot service
 COPY --chown=${USER}:${USER} ../chat_gpt_microservice /app/
+
+COPY ./scripts/start-chat.sh /app/
+RUN chmod +x ./start-chat.sh
 
 COPY --from=compile-image /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
+USER ${USER}
+
 RUN chmod -R 777 translations
 
-CMD ["python3", "./run.py"]
+CMD ["bash", "start-chat.sh"]

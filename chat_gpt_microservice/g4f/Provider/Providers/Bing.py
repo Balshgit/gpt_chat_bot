@@ -4,12 +4,11 @@ import os
 import random
 import ssl
 import uuid
+from typing import get_type_hints
 
 import aiohttp
 import certifi
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://bing.com/chat"
 model = ["gpt-4"]

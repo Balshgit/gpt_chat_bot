@@ -1,10 +1,9 @@
 import base64
 import os
 import re
+from typing import get_type_hints
 
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://chatgptlogin.ac"
 model = ["gpt-3.5-turbo"]

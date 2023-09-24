@@ -24,6 +24,7 @@ services:
     environment:
       APP_HOST: "0.0.0.0"
       APP_PORT: "8000"
+      WORKERS_COUNT: "1"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -47,6 +48,10 @@ services:
       args:
         USER: web
     restart: unless-stopped
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "1338"
+      WORKERS_COUNT: "1"
     networks:
       chat-gpt-network:
         ipv4_address: 200.20.0.11

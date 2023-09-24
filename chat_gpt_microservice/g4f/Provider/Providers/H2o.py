@@ -1,10 +1,9 @@
 import os
 from json import loads
+from typing import get_type_hints
 from uuid import uuid4
 
 from requests import Session
-
-from ...typing import get_type_hints
 
 url = "https://gpt-gm.h2o.ai"
 model = ["falcon-40b", "falcon-7b", "llama-13b"]

@@ -18,23 +18,43 @@ sudo systemctl start chat_gpt_bot.service
 ```
 
 ## Local start
+
+### Bot:
+
 ```bash
+cd bot_microservice
 python main.py
 ```
 
 ```shell
-	poetry run uvicorn --host 0.0.0.0 --factory bot_microservice.main:create_app --port 8000 --reload --reload-dir=bot_microservice --reload-dir=settings
+cd bot_microservice
+	poetry run uvicorn --host 0.0.0.0 --factory main:create_app --port 8000 --reload
 ```
 
-- set `START_WITH_WEBHOOK` to blank
+To start on polling mode set `START_WITH_WEBHOOK` to blank
 
-## Delete or set webhook manually
+
+### Delete or set webhook manually
 
 url: https://api.telegram.org/bot{TELEGRAM_TOKEN}/{method}Webhook?url={WEBHOOK_URL}
 
 methods:
 - delete
 - set
+
+
+## Chat:
+
+```shell
+cd chat_gpt_microservice
+python3 run.py
+```
+
+
+```bash
+cd chat_gpt_microservice
+poetry run uvicorn --host 0.0.0.0 --factory run:create_app --port 1338 --reload
+```
 
 
 ## Tests

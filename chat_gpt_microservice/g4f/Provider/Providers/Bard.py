@@ -2,11 +2,10 @@ import json
 import os
 import random
 import re
+from typing import get_type_hints
 
 import browser_cookie3
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://bard.google.com"
 model = ["Palm2"]

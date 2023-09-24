@@ -1,8 +1,7 @@
 import json
 import os
 import subprocess
-
-from ...typing import get_type_hints
+from typing import get_type_hints
 
 url = "https://phind.com"
 model = ["gpt-4"]

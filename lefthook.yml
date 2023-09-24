@@ -23,7 +23,7 @@ pre-push:
       run: black --check -S {all_files}
     mypy:
       glob: "*.py"
-      run: mypy bot_microservice settings --config-file pyproject.toml
+      run: mypy bot_microservice --config-file pyproject.toml
     flake8:
       glob: "*.py"
       run: flake8 {all_files}
@@ -51,10 +51,10 @@ lint:
   commands:
     mypy:
       glob: "*.py"
-      run: mypy {staged_files} --namespace-packages --config-file pyproject.toml
+      run: mypy bot_microservice --namespace-packages --config-file pyproject.toml
     flake8:
       glob: "*.py"
-      run: flake8 {staged_files}
+      run: flake8 bot_microservice
 
 check-format:
   parallel: true

@@ -1,9 +1,8 @@
 import os
 import re
+from typing import get_type_hints
 
 import requests
-
-from ...typing import get_type_hints
 
 url = "https://chatgpt.ai/gpt-4/"
 model = ["gpt-4"]
