@@ -10,7 +10,7 @@ from typing import Any, AsyncGenerator
 import pytest
 import pytest_asyncio
 from core.bot import BotApplication
-from core.handlers import command_handlers
+from core.handlers import bot_event_handlers
 from fastapi import FastAPI
 from httpx import AsyncClient
 from main import Application as AppApplication
@@ -229,7 +229,7 @@ async def main_application(
     bot_app = BotApplication(
         application=bot_application,
         settings=test_settings,
-        handlers=command_handlers.handlers,
+        handlers=bot_event_handlers.handlers,
     )
     fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app).fastapi_app
     yield fast_api_app

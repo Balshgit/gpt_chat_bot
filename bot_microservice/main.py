@@ -3,7 +3,7 @@ from functools import cached_property
 
 import sentry_sdk
 from core.bot import BotApplication, BotQueue
-from core.handlers import command_handlers
+from core.handlers import bot_event_handlers
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from routers import api_router
@@ -59,7 +59,7 @@ class Application:
 
 def create_app(settings: AppSettings | None = None) -> FastAPI:
     settings = settings or get_settings()
-    bot_app = BotApplication(settings=settings, handlers=command_handlers.handlers)
+    bot_app = BotApplication(settings=settings, handlers=bot_event_handlers.handlers)
 
     return Application(settings=settings, bot_app=bot_app).fastapi_app
 
