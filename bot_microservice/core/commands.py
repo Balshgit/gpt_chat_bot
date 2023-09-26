@@ -1,10 +1,11 @@
+import asyncio
 import random
 import tempfile
 from uuid import uuid4
 
 import httpx
 from constants import CHAT_GPT_BASE_URL
-from core.utils import convert_file_to_wav
+from core.utils import SpeechToTextService
 from httpx import AsyncClient, AsyncHTTPTransport
 from loguru import logger
 from telegram import Update
@@ -69,8 +70,22 @@ async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.message.reply_text("Пожалуйста, ожидайте :)\nТрехминутная запись обрабатывается примерно 30 секунд")
     if not update.message.voice:
         return None
+
     sound_file = await update.message.voice.get_file()
     sound_bytes = await sound_file.download_as_bytearray()
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
         tmpfile.write(sound_bytes)
-        convert_file_to_wav(tmpfile.name)
+
+    logger.info('file has been saved', filename=tmpfile.name)
+
+    speech_to_text_service = SpeechToTextService(filename=tmpfile.name)
+
+    speech_to_text_service.get_text_from_audio()
+
+    part = 0
+    while speech_to_text_service.text_parts or not speech_to_text_service.text_recognised:
+        if text := speech_to_text_service.text_parts.get(part):
+            speech_to_text_service.text_parts.pop(part)
+            await update.message.reply_text(text)
+            part += 1
+        await asyncio.sleep(5)

@@ -32,6 +32,7 @@ class BotApplication:
         _, webhook_info = await asyncio.gather(self.application.initialize(), self.application.bot.get_webhook_info())
         if not webhook_info.url:
             await self.application.bot.set_webhook(url=self.webhook_url)
+            webhook_info = await self.application.bot.get_webhook_info()
             logger.info("webhook is set", ip_address=webhook_info.ip_address)
 
     async def delete_webhook(self) -> None:

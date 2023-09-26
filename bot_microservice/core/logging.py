@@ -6,11 +6,15 @@ from typing import TYPE_CHECKING, Any, cast
 from constants import LogLevelEnum
 from loguru import logger
 from sentry_sdk.integrations.logging import EventHandler
+from settings.config import get_settings
 
 if TYPE_CHECKING:
     from loguru import Record
 else:
     Record = dict[str, Any]
+
+
+settings = get_settings()
 
 
 class InterceptHandler(logging.Handler):
@@ -29,7 +33,7 @@ class InterceptHandler(logging.Handler):
 
         logger.opt(depth=depth, exception=record.exc_info).log(
             level,
-            record.getMessage(),
+            record.getMessage().replace(settings.TELEGRAM_API_TOKEN, "TELEGRAM_API_TOKEN".center(24, '*')),
         )
 
 
@@ -97,6 +101,3 @@ def _text_formatter(record: Record) -> str:
         format_ += "{exception}\n"
 
     return format_
-
-
-configure_logging(level=LogLevelEnum.DEBUG, enable_json_logs=True, enable_sentry_logs=True)

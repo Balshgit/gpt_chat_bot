@@ -2,8 +2,10 @@ import asyncio
 from functools import cached_property
 
 import sentry_sdk
+from constants import LogLevelEnum
 from core.bot import BotApplication, BotQueue
 from core.handlers import bot_event_handlers
+from core.logging import configure_logging
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from routers import api_router
@@ -12,6 +14,7 @@ from settings.config import AppSettings, get_settings
 
 class Application:
     def __init__(self, settings: AppSettings, bot_app: BotApplication) -> None:
+        print('Hello World')
         self.app = FastAPI(
             title="Chat gpt bot",
             description="Bot for proxy to chat gpt in telegram",
@@ -27,6 +30,7 @@ class Application:
 
         self.app.include_router(api_router)
         self.configure_hooks()
+        configure_logging(level=LogLevelEnum.INFO, enable_json_logs=True, enable_sentry_logs=True)
 
         if settings.SENTRY_DSN is not None:
             sentry_sdk.init(
