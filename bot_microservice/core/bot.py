@@ -40,6 +40,8 @@ class BotApplication:
             logger.info("webhook has been deleted")
 
     async def polling(self) -> None:
+        if self.settings.STAGE == "runtests":
+            return None
         await self.application.initialize()
         await self.application.start()
         await self.application.updater.start_polling()  # type: ignore

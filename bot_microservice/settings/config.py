@@ -1,10 +1,11 @@
 from functools import cached_property
 from os import environ
 from pathlib import Path
+from typing import Any
 
 from constants import API_PREFIX
 from dotenv import load_dotenv
-from pydantic import HttpUrl
+from pydantic import HttpUrl, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent
@@ -50,6 +51,12 @@ class AppSettings(SentrySettings, BaseSettings):
     WORKERS_COUNT: int = 1
     # Enable uvicorn reloading
     RELOAD: bool = False
+
+    @field_validator("START_WITH_WEBHOOK")
+    def star_with_webhook_validator(cls, field_value: Any, info: ValidationInfo) -> Any:
+        if field_value == "false":
+            return False
+        return field_value
 
     @cached_property
     def api_prefix(self) -> str:

@@ -19,20 +19,15 @@ services:
       dockerfile: deploy/Dockerfile
       target: bot-service
       args:
-        USER: web
+        STAGE: ${STAGE}
     restart: unless-stopped
-    environment:
-      APP_HOST: "0.0.0.0"
-      APP_PORT: "8000"
-      WORKERS_COUNT: "1"
+    env_file:
+      - bot_microservice/settings/.env
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
       chat-gpt-network:
         ipv4_address: 200.20.0.10
-    depends_on:
-      - caddy
-      - chat-gpt
     expose:
       - "8000"
     command: bash start-bot.sh
@@ -46,7 +41,7 @@ services:
       dockerfile: deploy/Dockerfile
       target: chat-service
       args:
-        USER: web
+        STAGE: ${STAGE}
     restart: unless-stopped
     environment:
       APP_HOST: "0.0.0.0"
@@ -55,8 +50,6 @@ services:
     networks:
       chat-gpt-network:
         ipv4_address: 200.20.0.11
-    depends_on:
-      - caddy
     expose:
       - "1338"
 

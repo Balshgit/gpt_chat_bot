@@ -71,7 +71,7 @@ poetry run pytest
 
 ### Run tests in docker compose:
 ```bash
-docker compose run bot poetry run pytest bot_microservice/
+STAGE=runtests docker compose run bot bash -c "coverage run -m pytest -vv --exitfirst && poetry run coverage report"
 ```
 
 ## Docs
