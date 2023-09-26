@@ -37,6 +37,7 @@ jobs:
           curl -sSL "https://install.python-poetry.org" | python -
           # Adding `poetry` to `$PATH`:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          apt-get update && apt-get install --no-install-recommends -y ffmpeg
 
       - name: Set up cache
         uses: actions/cache@v3
@@ -59,7 +60,7 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
           poetry install
-          poetry run pip install -U pip ffmpeg
+          poetry run pip install -U pip
       #----------------------------------------------
       #              run test suite
       #----------------------------------------------

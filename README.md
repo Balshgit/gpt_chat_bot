@@ -64,8 +64,14 @@ gunicorn main:create_app --workers 10 --bind 0.0.0.0:8083 --worker-class uvicorn
 
 ## Tests
 
+### Run local tests:
 ```bash
 poetry run pytest
+```
+
+### Run tests in docker compose:
+```bash
+docker compose run bot poetry run pytest bot_microservice/
 ```
 
 ## Docs
