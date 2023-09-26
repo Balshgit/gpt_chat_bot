@@ -37,7 +37,6 @@ jobs:
           curl -sSL "https://install.python-poetry.org" | python -
           # Adding `poetry` to `$PATH`:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          apt-get update && apt-get install --no-install-recommends -y ffmpeg
 
       - name: Set up cache
         uses: actions/cache@v3
@@ -64,14 +63,10 @@ jobs:
       #----------------------------------------------
       #              run test suite
       #----------------------------------------------
-      - name: Run tests
-        run: |
-          source .venv/bin/activate
-          poetry run pytest bot_microservice/ -vv --exitfirst
       - name: Coverage report
         run: |
-          poetry run coverage run -m pytest bot_microservice/
-          poetry run coverage report
+          cp bot_microservice/serrings/.env.ci.runtests bot_microservice/serrings/.env
+          docker compose run bot poetry run bash -c "coverage run -m pytest -vv --exitfirst && poetry run coverage report"
       - name: Extended checks
         run: |
           poetry run poetry check

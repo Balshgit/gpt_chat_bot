@@ -1,13 +1,16 @@
 FROM python:3.11.5 AS compile-image
 
-ARG USER
+ARG USER=web
+ARG STAGE
+
+
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     DOCKER_CONTAINER=1 \
     POETRY_VERSION=1.6.1
 
-RUN printf "================ Start build base service. with USER: ${USER} ===============" \
+RUN printf "================ Start build base service. with USER: ${USER}, STAGE: ${STAGE} ===============" \
   && apt-get update \
   && apt-get install --no-install-recommends -y \
     bash \
@@ -31,7 +34,7 @@ WORKDIR /app/
 RUN if [ "$USER" != "root" ]; then \
       mkdir /home/${USER} \
       && groupadd -r ${USER} && useradd -d /home/${USER} -r -g ${USER} ${USER} \
-      && chown ${USER}:${USER} -R /home/${USER}; \
+      && chown ${USER}:${USER} -R /home/${USER} /app; \
     fi
 
 COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
@@ -39,7 +42,7 @@ COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
 RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION
 RUN poetry config virtualenvs.in-project true && \
     poetry config virtualenvs.create true && \
-    poetry install $(if [ "$USER" != "root" ]; then echo "--only main"; fi) --no-interaction --no-ansi && \
+    poetry install $(if [ "$STAGE" = "production" ]; then echo "--only main"; fi) --no-interaction --no-ansi && \
     rm -rf $POETRY_CACHE_DIR
 
 
