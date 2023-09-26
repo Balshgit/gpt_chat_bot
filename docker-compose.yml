@@ -33,25 +33,19 @@ services:
     command: bash start-bot.sh
 
   chat-gpt:
-    image: "chat_gpt_chat_service:latest"
+    image: "fantasypeak/freegpt:latest"
     container_name: "chat_gpt_chat_service"
     hostname: "chat_service"
-    build:
-      context: .
-      dockerfile: deploy/Dockerfile
-      target: chat-service
-      args:
-        STAGE: ${STAGE}
     restart: unless-stopped
     environment:
-      APP_HOST: "0.0.0.0"
-      APP_PORT: "1338"
-      WORKERS_COUNT: "1"
+      CHAT_PATH: "/gpt/chat"
+    volumes:
+      - ./chat_gpt_microservice/client:/app/client
     networks:
       chat-gpt-network:
         ipv4_address: 200.20.0.11
     expose:
-      - "1338"
+      - "8858"
 
   caddy:
     image: "caddy:2.7.4"

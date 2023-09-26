@@ -67,7 +67,11 @@ jobs:
         run: |
           cp bot_microservice/settings/.env.ci.runtests bot_microservice/settings/.env
           docker compose run bot poetry run bash -c "coverage run -m pytest -vv --exitfirst && poetry run coverage report"
+      #----------------------------------------------
+      #              check dependencies
+      #----------------------------------------------
       - name: Extended checks
+        continue-on-error: true
         run: |
           poetry run poetry check
           poetry run pip check

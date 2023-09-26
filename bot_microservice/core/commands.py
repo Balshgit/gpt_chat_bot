@@ -8,6 +8,7 @@ from constants import CHAT_GPT_BASE_URL
 from core.utils import SpeechToTextService
 from httpx import AsyncClient, AsyncHTTPTransport
 from loguru import logger
+from settings.config import settings
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -33,7 +34,7 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     chat_gpt_request = {
         "conversation_id": str(uuid4()),
         "action": "_ask",
-        "model": "gpt-3.5-turbo",
+        "model": settings.GPT_MODEL,
         "jailbreak": "default",
         "meta": {
             "id": random.randint(10**18, 10**19 - 1),  # noqa: S311

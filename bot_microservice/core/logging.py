@@ -6,15 +6,12 @@ from typing import TYPE_CHECKING, Any, cast
 from constants import LogLevelEnum
 from loguru import logger
 from sentry_sdk.integrations.logging import EventHandler
-from settings.config import get_settings
+from settings.config import settings
 
 if TYPE_CHECKING:
     from loguru import Record
 else:
     Record = dict[str, Any]
-
-
-settings = get_settings()
 
 
 class InterceptHandler(logging.Handler):

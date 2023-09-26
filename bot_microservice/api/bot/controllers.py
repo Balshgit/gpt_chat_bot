@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Request
-from settings.config import get_settings
+from settings.config import settings
 from starlette import status
 from starlette.responses import Response
 
 router = APIRouter()
-settings = get_settings()
 
 
 @router.post(
