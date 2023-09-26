@@ -37,9 +37,9 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return None
     await update.effective_message.reply_text(
         "Бот использует бесплатную модель Chat-GPT3.5 для ответов на вопросы. "
-        "Принимает запросы на разных языках. \n\n Бот так же умеет переводить голосовые сообщения в текст"
+        "Принимает запросы на разных языках. \n\nБот так же умеет переводить голосовые сообщения в текст"
         "просто пришлите голосовуху и получите поток сознания без запятых в виде текста",
-        parse_mode='MarkdownV2',
+        parse_mode='Markdown',
     )
 
 
