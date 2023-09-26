@@ -7,7 +7,7 @@
 
 install service
 
-    sudo cp scripts/chat-gpt.service /etc/systemd/system
+    sudo cp scripts/gpt_chat_bot.service /etc/systemd/system
 
 ```bash
 cd ~/PycharmProjects/chat_gpt_bot
