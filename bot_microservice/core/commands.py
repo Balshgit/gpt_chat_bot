@@ -1,27 +1,66 @@
 import asyncio
 import random
 import tempfile
+from urllib.parse import urljoin
 from uuid import uuid4
 
 import httpx
-from constants import CHAT_GPT_BASE_URL
+from constants import CHAT_GPT_BASE_URL, BotEntryPoints
+from core.keyboards import main_keyboard
 from core.utils import SpeechToTextService
 from httpx import AsyncClient, AsyncHTTPTransport
 from loguru import logger
 from settings.config import settings
-from telegram import Update
+from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
+
+
+async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Send message on `/start`."""
+    if not update.message:
+        return BotEntryPoints.end
+    reply_markup = InlineKeyboardMarkup(main_keyboard)
+    await update.message.reply_text("Выберете команду:", reply_markup=reply_markup)
+    return BotEntryPoints.start_routes
+
+
+async def about_me(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.effective_message:
+        return None
+    await update.effective_message.reply_text(
+        'Автор бота: *Дмитрий Афанасьев*\n\nTg nickname: *Balshtg*', parse_mode='MarkdownV2'
+    )
+
+
+async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.effective_message:
+        return None
+    await update.effective_message.reply_text(
+        "Бот использует бесплатную модель Chat-GPT3.5 для ответов на вопросы. "
+        "Принимает запросы на разных языках. \n\n Бот так же умеет переводить голосовые сообщения в текст"
+        "просто пришлите голосовуху и получите поток сознания без запятых в виде текста",
+        parse_mode='MarkdownV2',
+    )
+
+
+async def website(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.effective_message:
+        return None
+    website = urljoin(settings.DOMAIN, f"{settings.URL_PREFIX}/chat")
+    await update.effective_message.reply_text(f"Веб версия: {website}")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
 
-    if not update.message:
+    if not update.effective_message:
         return None
-    await update.message.reply_text(
+    reply_markup = InlineKeyboardMarkup(main_keyboard)
+    await update.effective_message.reply_text(
         "Help!",
         disable_notification=True,
-        api_kwargs={"text": "Hello World"},
+        api_kwargs={"text": "Список основных команд:"},
+        reply_markup=reply_markup,
     )
 
 
