@@ -8,6 +8,6 @@ main_keyboard = [
     ],
     [
         InlineKeyboardButton("Помощь", callback_data=str(BotStagesEnum.help)),
-        InlineKeyboardButton("О боте", callback_data=str(BotStagesEnum.help)),
+        InlineKeyboardButton("О боте", callback_data=str(BotStagesEnum.about_bot)),
     ],
 ]

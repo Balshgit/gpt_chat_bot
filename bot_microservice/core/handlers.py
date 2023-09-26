@@ -3,6 +3,7 @@ from typing import Any
 
 from constants import BotEntryPoints, BotStagesEnum
 from core.commands import (
+    about_bot,
     about_me,
     ask_question,
     help_command,
@@ -40,6 +41,7 @@ bot_event_handlers.add_handler(
                 CallbackQueryHandler(about_me, pattern="^" + str(BotStagesEnum.about_me) + "$"),
                 CallbackQueryHandler(website, pattern="^" + str(BotStagesEnum.website) + "$"),
                 CallbackQueryHandler(help_command, pattern="^" + str(BotStagesEnum.help) + "$"),
+                CallbackQueryHandler(about_bot, pattern="^" + str(BotStagesEnum.about_bot) + "$"),
             ],
         },
         fallbacks=[CommandHandler("start", main_command)],
@@ -48,3 +50,4 @@ bot_event_handlers.add_handler(
 bot_event_handlers.add_handler(CallbackQueryHandler(about_me, pattern="^" + str(BotStagesEnum.about_me) + "$"))
 bot_event_handlers.add_handler(CallbackQueryHandler(website, pattern="^" + str(BotStagesEnum.website) + "$"))
 bot_event_handlers.add_handler(CallbackQueryHandler(help_command, pattern="^" + str(BotStagesEnum.help) + "$"))
+bot_event_handlers.add_handler(CallbackQueryHandler(about_bot, pattern="^" + str(BotStagesEnum.about_bot) + "$"))
