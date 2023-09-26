@@ -59,7 +59,7 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
           poetry install
-          poetry run pip install -U pip, ffmpeg
+          poetry run pip install -U pip ffmpeg
       #----------------------------------------------
       #              run test suite
       #----------------------------------------------
