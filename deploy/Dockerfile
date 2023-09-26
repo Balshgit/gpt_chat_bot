@@ -21,6 +21,7 @@ RUN printf "================ Start build base service. with USER: ${USER} ======
     curl \
     git \
     nano \
+    ffmpeg \
   # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
@@ -35,10 +36,10 @@ RUN if [ "$USER" != "root" ]; then \
 
 COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
 
-RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION && pip install ffmpeg
+RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION
 RUN poetry config virtualenvs.in-project true && \
     poetry config virtualenvs.create true && \
-    poetry install --only main --no-interaction --no-ansi && \
+    poetry install $(if [ "$USER" != "root" ]; then echo "--only main"; fi) --no-interaction --no-ansi && \
     rm -rf $POETRY_CACHE_DIR
 
 
