@@ -14,7 +14,6 @@ from settings.config import AppSettings, get_settings
 
 class Application:
     def __init__(self, settings: AppSettings, bot_app: BotApplication) -> None:
-        print('Hello World')
         self.app = FastAPI(
             title="Chat gpt bot",
             description="Bot for proxy to chat gpt in telegram",
