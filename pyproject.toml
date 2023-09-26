@@ -208,7 +208,8 @@ python_files = [
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
-    "ignore:_SixMetaPathImporter.*not found:ImportWarning"
+    "ignore:_SixMetaPathImporter.*not found:ImportWarning",
+    "ignore::telegram.warnings.PTBUserWarning"
 ]
 addopts = '''
   --disable-socket
