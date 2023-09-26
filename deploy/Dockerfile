@@ -35,7 +35,7 @@ RUN if [ "$USER" != "root" ]; then \
 
 COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
 
-RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION
+RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION && pip install ffmpeg
 RUN poetry config virtualenvs.in-project true && \
     poetry config virtualenvs.create true && \
     poetry install --only main --no-interaction --no-ansi && \
