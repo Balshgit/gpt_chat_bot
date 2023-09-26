@@ -29,13 +29,15 @@ class BotApplication:
         self._add_handlers()
 
     async def set_webhook(self) -> None:
-        await self.application.initialize()
-        await self.application.bot.set_webhook(url=self.webhook_url)
-        logger.info('webhook is set')
+        _, webhook_info = await asyncio.gather(self.application.initialize(), self.application.bot.get_webhook_info())
+        if not webhook_info.url:
+            await self.application.bot.set_webhook(url=self.webhook_url)
+            webhook_info = await self.application.bot.get_webhook_info()
+            logger.info("webhook is set", ip_address=webhook_info.ip_address)
 
     async def delete_webhook(self) -> None:
-        await self.application.bot.delete_webhook()
-        logger.info('webhook has been deleted')
+        if await self.application.bot.delete_webhook():
+            logger.info("webhook has been deleted")
 
     async def polling(self) -> None:
         await self.application.initialize()
@@ -73,5 +75,5 @@ class BotQueue:
     async def get_updates_from_queue(self) -> None:
         while True:
             update = await self.queue.get()
-            await self.bot_app.application.process_update(update)
+            asyncio.create_task(self.bot_app.application.process_update(update))
             await sleep(0)

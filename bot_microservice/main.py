@@ -2,8 +2,10 @@ import asyncio
 from functools import cached_property
 
 import sentry_sdk
+from constants import LogLevelEnum
 from core.bot import BotApplication, BotQueue
 from core.handlers import bot_event_handlers
+from core.logging import configure_logging
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from routers import api_router
@@ -27,6 +29,7 @@ class Application:
 
         self.app.include_router(api_router)
         self.configure_hooks()
+        configure_logging(level=LogLevelEnum.INFO, enable_json_logs=True, enable_sentry_logs=True)
 
         if settings.SENTRY_DSN is not None:
             sentry_sdk.init(

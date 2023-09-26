@@ -46,14 +46,19 @@ methods:
 ## Chat:
 
 ```shell
-cd chat_gpt_microservice
+cd bot_microservice
 python3 run.py
 ```
 
 
 ```bash
-cd chat_gpt_microservice
+cd bot_microservice
 poetry run uvicorn --host 0.0.0.0 --factory run:create_app --port 1338 --reload
+```
+
+```bash
+cd bot_microservice
+gunicorn main:create_app --workers 10 --bind 0.0.0.0:8083 --worker-class uvicorn.workers.UvicornWorker --timeout 150 --max-requests 2000 --max-requests-jitter 400
 ```
 
 

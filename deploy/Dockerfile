@@ -28,9 +28,9 @@ RUN printf "================ Start build base service. with USER: ${USER} ======
 WORKDIR /app/
 
 RUN if [ "$USER" != "root" ]; then \
-      mkdir /home/"$USER" \
-      && groupadd -r "$USER" && useradd -d /home/"$USER" -r -g "$USER" "$USER" \
-      && chown "$USER":"$USER" -R /home/"$USER"; \
+      mkdir /home/${USER} \
+      && groupadd -r ${USER} && useradd -d /home/${USER} -r -g ${USER} ${USER} \
+      && chown ${USER}:${USER} -R /home/${USER}; \
     fi
 
 COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
@@ -51,6 +51,7 @@ WORKDIR /app/
 
 # Copying bot service
 COPY --chown=${USER}:${USER} ../bot_microservice /app/
+RUN mkdir "/app/shared" -p && chown ${USER}:${USER} -R /app/shared
 
 COPY ./scripts/start-bot.sh /app/
 RUN chmod +x ./start-bot.sh
@@ -72,9 +73,6 @@ WORKDIR /app/
 # Copying bot service
 COPY --chown=${USER}:${USER} ../chat_gpt_microservice /app/
 
-COPY ./scripts/start-chat.sh /app/
-RUN chmod +x ./start-chat.sh
-
 COPY --from=compile-image /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
@@ -82,4 +80,4 @@ USER ${USER}
 
 RUN chmod -R 777 translations
 
-CMD ["bash", "start-chat.sh"]
+CMD ["python3", "./run.py"]
