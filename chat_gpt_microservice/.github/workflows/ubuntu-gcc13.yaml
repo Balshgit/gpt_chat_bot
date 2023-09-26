@@ -1,0 +1,69 @@
+name: ubuntu-gcc13
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+
+    steps:
+      - name: Installation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev p7zip gobjc g++-13 wget sudo libcurl4-openssl-dev libnss3 nss-plugin-pem ca-certificates
+          wget https://github.com/lwthiker/curl-impersonate/releases/download/v0.5.4/libcurl-impersonate-v0.5.4.x86_64-linux-gnu.tar.gz
+          sudo mv libcurl-impersonate-v0.5.4.x86_64-linux-gnu.tar.gz /usr/lib64
+          cd /usr/lib64
+          sudo tar -xvf libcurl-impersonate-v0.5.4.x86_64-linux-gnu.tar.gz
+          cd -
+          wget https://github.com/xmake-io/xmake/releases/download/v2.8.2/xmake-v2.8.2.xz.run
+          chmod 777 xmake-v2.8.2.xz.run
+          ./xmake-v2.8.2.xz.run > a.txt
+
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: build
+        run: |
+          export XMAKE_ROOT="y"
+          source ~/.xmake/profile
+          g++-13 -v
+          export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+          export LIBRARY_PATH=/usr/lib64:$LIBRARY_PATH
+          export CXX=g++-13
+          export CC=gcc-13
+          xmake build -y
+          xmake install -o .
+          ldd ./bin/cpp-freegpt-webui
+
+      - name: Docker login
+        if: github.ref_name == 'dev' || github.ref_name == 'main'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build the Docker image to dev
+        if: github.ref_name == 'dev'
+        run: |
+          docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/freegpt:dev
+
+      - name: Build the Docker image to main
+        if: github.ref_name == 'main'
+        run: |
+          docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/freegpt:latest
+
+      - name: Docker image push to dev
+        if: github.ref_name == 'dev'
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/freegpt:dev
+
+      - name: Docker image push main
+        if: github.ref_name == 'main'
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/freegpt:latest

@@ -9,7 +9,7 @@
 
 # Telegram bot. Redirects to test-server ip
 :8084 {
-    reverse_proxy chat_service:1338
+    reverse_proxy chat_service:8858
     header Strict-Transport-Security max-age=31536000;
 
     # Removing some headers for improved security:

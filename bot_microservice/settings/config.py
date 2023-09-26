@@ -47,6 +47,7 @@ class AppSettings(SentrySettings, BaseSettings):
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
+    GPT_MODEL: str = "gpt-3.5-turbo-stream-AItianhuSpace"
     # quantity of workers for uvicorn
     WORKERS_COUNT: int = 1
     # Enable uvicorn reloading
@@ -74,3 +75,6 @@ class AppSettings(SentrySettings, BaseSettings):
 
 def get_settings() -> AppSettings:
     return AppSettings()
+
+
+settings = get_settings()

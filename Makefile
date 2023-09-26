@@ -37,12 +37,15 @@ lint-typing:
 lint-complexity:
 	flake8 $(PY_TARGET_DIRS)
 
-## Запустить все линтеры
-lint: lint-typing lint-complexity check-import-sorting
-
 ## Проверить зависимостей
 lint-deps:
-	safety check --full-report && pip-audit
+	poetry run poetry check
+	poetry run pip check
+	poetry run safety check --full-report
+	poetry run pip-audit
+
+## Запустить все линтеры
+lint: lint-typing lint-complexity check-import-sorting lint-deps
 
 ## Show help
 help:
