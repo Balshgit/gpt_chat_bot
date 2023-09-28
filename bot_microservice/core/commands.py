@@ -16,7 +16,7 @@ from core.utils import SpeechToTextService
 from settings.config import settings
 
 
-async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Send message on `/start`."""
     if not update.message:
         return BotEntryPoints.end
@@ -29,7 +29,7 @@ async def about_me(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
         return None
     await update.effective_message.reply_text(
-        'Автор бота: *Дмитрий Афанасьев*\n\nTg nickname: *Balshtg*', parse_mode='MarkdownV2'
+        "Автор бота: *Дмитрий Афанасьев*\n\nTg nickname: *Balshtg*", parse_mode="MarkdownV2"
     )
 
 
@@ -40,7 +40,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Бот использует бесплатную модель Chat-GPT3.5 для ответов на вопросы. "
         "Принимает запросы на разных языках. \n\nБот так же умеет переводить голосовые сообщения в текст. "
         "Просто пришлите голосовуху и получите поток сознания без запятых в виде текста",
-        parse_mode='Markdown',
+        parse_mode="Markdown",
     )
 
 
@@ -93,7 +93,7 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             response = await client.post(CHAT_GPT_BASE_URL, json=chat_gpt_request, timeout=50)
             status = response.status_code
             if status != httpx.codes.OK:
-                logger.info(f'got response status: {status} from chat api', data=chat_gpt_request)
+                logger.info(f"got response status: {status} from chat api", data=chat_gpt_request)
                 await update.message.reply_text(
                     "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору"
                 )
@@ -117,7 +117,7 @@ async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
         tmpfile.write(sound_bytes)
 
-    logger.info('file has been saved', filename=tmpfile.name)
+    logger.info("file has been saved", filename=tmpfile.name)
 
     speech_to_text_service = SpeechToTextService(filename=tmpfile.name)
 

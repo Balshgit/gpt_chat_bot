@@ -39,16 +39,16 @@ bot_event_handlers.add_handler(
         entry_points=[CommandHandler("start", main_command)],
         states={
             BotEntryPoints.start_routes: [
-                CallbackQueryHandler(about_me, pattern="^" + str(BotStagesEnum.about_me) + "$"),
-                CallbackQueryHandler(website, pattern="^" + str(BotStagesEnum.website) + "$"),
-                CallbackQueryHandler(help_command, pattern="^" + str(BotStagesEnum.help) + "$"),
-                CallbackQueryHandler(about_bot, pattern="^" + str(BotStagesEnum.about_bot) + "$"),
+                CallbackQueryHandler(about_me, pattern="^" + BotStagesEnum.about_me + "$"),
+                CallbackQueryHandler(website, pattern="^" + BotStagesEnum.website + "$"),
+                CallbackQueryHandler(help_command, pattern="^" + BotStagesEnum.help + "$"),
+                CallbackQueryHandler(about_bot, pattern="^" + BotStagesEnum.about_bot + "$"),
             ],
         },
         fallbacks=[CommandHandler("start", main_command)],
     )
 )
-bot_event_handlers.add_handler(CallbackQueryHandler(about_me, pattern="^" + str(BotStagesEnum.about_me) + "$"))
-bot_event_handlers.add_handler(CallbackQueryHandler(website, pattern="^" + str(BotStagesEnum.website) + "$"))
-bot_event_handlers.add_handler(CallbackQueryHandler(help_command, pattern="^" + str(BotStagesEnum.help) + "$"))
-bot_event_handlers.add_handler(CallbackQueryHandler(about_bot, pattern="^" + str(BotStagesEnum.about_bot) + "$"))
+bot_event_handlers.add_handler(CallbackQueryHandler(about_me, pattern="^" + BotStagesEnum.about_me + "$"))
+bot_event_handlers.add_handler(CallbackQueryHandler(website, pattern="^" + BotStagesEnum.website + "$"))
+bot_event_handlers.add_handler(CallbackQueryHandler(help_command, pattern="^" + BotStagesEnum.help + "$"))
+bot_event_handlers.add_handler(CallbackQueryHandler(about_bot, pattern="^" + BotStagesEnum.about_bot + "$"))
