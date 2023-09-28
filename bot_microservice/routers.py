@@ -1,7 +1,8 @@
-from api.bot.controllers import router as bot_router
-from api.system.controllers import router as system_router
 from fastapi import APIRouter
 from fastapi.responses import ORJSONResponse
+
+from api.bot.controllers import router as bot_router
+from api.system.controllers import router as system_router
 from settings.config import settings
 
 api_router = APIRouter(

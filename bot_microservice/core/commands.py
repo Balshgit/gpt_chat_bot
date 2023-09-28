@@ -5,14 +5,15 @@ from urllib.parse import urljoin
 from uuid import uuid4
 
 import httpx
+from httpx import AsyncClient, AsyncHTTPTransport
+from loguru import logger
+from telegram import InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
+
 from constants import CHAT_GPT_BASE_URL, BotEntryPoints
 from core.keyboards import main_keyboard
 from core.utils import SpeechToTextService
-from httpx import AsyncClient, AsyncHTTPTransport
-from loguru import logger
 from settings.config import settings
-from telegram import InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
 
 
 async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -37,7 +38,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return None
     await update.effective_message.reply_text(
         "Бот использует бесплатную модель Chat-GPT3.5 для ответов на вопросы. "
-        "Принимает запросы на разных языках. \n\nБот так же умеет переводить голосовые сообщения в текст."
+        "Принимает запросы на разных языках. \n\nБот так же умеет переводить голосовые сообщения в текст. "
         "Просто пришлите голосовуху и получите поток сознания без запятых в виде текста",
         parse_mode='Markdown',
     )

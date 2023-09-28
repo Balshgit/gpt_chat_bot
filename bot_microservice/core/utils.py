@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from functools import lru_cache, wraps
 from typing import Any
 
-from constants import AUDIO_SEGMENT_DURATION
 from loguru import logger
 from pydub import AudioSegment
 from speech_recognition import (
@@ -13,6 +12,8 @@ from speech_recognition import (
     Recognizer,
     UnknownValueError as SpeechRecognizerError,
 )
+
+from constants import AUDIO_SEGMENT_DURATION
 
 
 def timed_cache(**timedelta_kwargs: Any) -> Any:

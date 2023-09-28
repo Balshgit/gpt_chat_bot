@@ -39,8 +39,6 @@ services:
     restart: unless-stopped
     environment:
       CHAT_PATH: "/gpt/chat"
-    volumes:
-      - ./chat_gpt_microservice/client:/app/client
     networks:
       chat-gpt-network:
         ipv4_address: 200.20.0.11

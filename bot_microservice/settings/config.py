@@ -3,10 +3,11 @@ from os import environ
 from pathlib import Path
 from typing import Any
 
-from constants import API_PREFIX
 from dotenv import load_dotenv
 from pydantic import HttpUrl, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings
+
+from constants import API_PREFIX
 
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")

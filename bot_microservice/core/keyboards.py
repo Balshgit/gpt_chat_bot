@@ -1,5 +1,6 @@
-from constants import BotStagesEnum
 from telegram import InlineKeyboardButton
+
+from constants import BotStagesEnum
 
 main_keyboard = [
     [
