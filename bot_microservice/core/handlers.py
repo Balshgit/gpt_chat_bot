@@ -1,6 +1,14 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from telegram.ext import (
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
+
 from constants import BotEntryPoints, BotStagesEnum
 from core.commands import (
     about_bot,
@@ -10,13 +18,6 @@ from core.commands import (
     main_command,
     voice_recognize,
     website,
-)
-from telegram.ext import (
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
 )
 
 

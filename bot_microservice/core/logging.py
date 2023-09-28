@@ -3,9 +3,10 @@ import sys
 from types import FrameType
 from typing import TYPE_CHECKING, Any, cast
 
-from constants import LogLevelEnum
 from loguru import logger
 from sentry_sdk.integrations.logging import EventHandler
+
+from constants import LogLevelEnum
 from settings.config import settings
 
 if TYPE_CHECKING:

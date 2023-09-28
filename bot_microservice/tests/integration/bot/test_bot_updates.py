@@ -5,9 +5,10 @@ from typing import Any
 
 import pytest
 from assertpy import assert_that
-from core.bot import BotApplication, BotQueue
 from faker import Faker
 from httpx import AsyncClient
+
+from core.bot import BotApplication, BotQueue
 from main import Application
 from tests.integration.bot.networking import MockedRequest
 from tests.integration.factories.bot import (

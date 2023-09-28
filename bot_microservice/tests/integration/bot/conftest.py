@@ -9,15 +9,16 @@ from typing import Any, AsyncGenerator
 
 import pytest
 import pytest_asyncio
-from core.bot import BotApplication
-from core.handlers import bot_event_handlers
 from fastapi import FastAPI
 from httpx import AsyncClient
-from main import Application as AppApplication
 from pytest_asyncio.plugin import SubRequest
-from settings.config import AppSettings, get_settings
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
+
+from core.bot import BotApplication
+from core.handlers import bot_event_handlers
+from main import Application as AppApplication
+from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
 from tests.integration.factories.bot import BotInfoFactory
 

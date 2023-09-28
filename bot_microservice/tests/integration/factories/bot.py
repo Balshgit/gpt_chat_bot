@@ -2,6 +2,7 @@ import string
 
 import factory
 from faker import Faker
+
 from tests.integration.factories.models import Chat, User
 
 faker = Faker("ru_RU")

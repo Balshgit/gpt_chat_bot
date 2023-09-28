@@ -4,8 +4,8 @@ Wants=network-online.target
 After=network-online.target
 [Service]
 Restart=always
-WorkingDirectory=/opt/chat_gpt_bot
-ExecStart=bash -c "STAGE=production docker compose -f /opt/gpt_chat_bot/docker-compose.yml up"
+WorkingDirectory=/opt/gpt_chat_bot
+ExecStart=bash -c "docker compose -f /opt/gpt_chat_bot/docker-compose.yml up"
 ExecStop=bash -c "docker compose -f /opt/gpt_chat_bot/docker-compose.yml down"
 [Install]
 WantedBy=multi-user.target
