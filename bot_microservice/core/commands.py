@@ -1,18 +1,14 @@
 import asyncio
-import random
 import tempfile
 from urllib.parse import urljoin
-from uuid import uuid4
 
-import httpx
-from httpx import AsyncClient, AsyncHTTPTransport
 from loguru import logger
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from constants import CHAT_GPT_BASE_URI, BotEntryPoints
+from constants import BotEntryPoints
 from core.keyboards import main_keyboard
-from core.utils import SpeechToTextService
+from core.utils import ChatGptService, SpeechToTextService
 from settings.config import settings
 
 
@@ -38,7 +34,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return None
     await update.effective_message.reply_text(
         f"Бот использует бесплатную модель {settings.GPT_MODEL} для ответов на вопросы. "
-        f"Принимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
+        f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
         f"Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
         parse_mode="Markdown",
     )
@@ -71,38 +67,9 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     await update.message.reply_text("Пожалуйста подождите, ответ в среднем занимает 10-15 секунд")
 
-    chat_gpt_request = {
-        "conversation_id": str(uuid4()),
-        "action": "_ask",
-        "model": settings.GPT_MODEL,
-        "jailbreak": "default",
-        "meta": {
-            "id": random.randint(10**18, 10**19 - 1),  # noqa: S311
-            "content": {
-                "conversation": [],
-                "internet_access": False,
-                "content_type": "text",
-                "parts": [{"content": update.message.text, "role": "user"}],
-            },
-        },
-    }
-
-    transport = AsyncHTTPTransport(retries=3)
-    async with AsyncClient(base_url=settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
-        try:
-            response = await client.post(CHAT_GPT_BASE_URI, json=chat_gpt_request, timeout=50)
-            status = response.status_code
-            if status != httpx.codes.OK:
-                logger.info(f"got response status: {status} from chat api", data=chat_gpt_request)
-                await update.message.reply_text(
-                    "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору"
-                )
-                return
-
-            await update.message.reply_text(response.text)
-        except Exception as error:
-            logger.error("error get data from chat api", error=error)
-            await update.message.reply_text("Вообще всё сломалось :(")
+    chat_gpt_service = ChatGptService(chat_gpt_model=settings.GPT_MODEL)
+    answer = await chat_gpt_service.request_to_chatgpt(question=update.message.text)
+    await update.message.reply_text(answer)
 
 
 async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

@@ -113,7 +113,7 @@ ignore = [
 per-file-ignores = [
     # too complex queries
     "bot_microservice/tests/*: S101",
-    "bot_microservice/tests/integration/bot/conftest.py: NEW100",
+    "bot_microservice/tests/integration/conftest.py: NEW100",
     "bot_microservice/settings/config.py: S104"
 ]
 

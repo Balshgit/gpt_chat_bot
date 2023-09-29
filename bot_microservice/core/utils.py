@@ -1,10 +1,14 @@
 import os
+import random
 import subprocess  # noqa
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
 from typing import Any
+from uuid import uuid4
 
+import httpx
+from httpx import AsyncClient, AsyncHTTPTransport, Response
 from loguru import logger
 from pydub import AudioSegment
 from speech_recognition import (
@@ -13,7 +17,12 @@ from speech_recognition import (
     UnknownValueError as SpeechRecognizerError,
 )
 
-from constants import AUDIO_SEGMENT_DURATION
+from constants import (
+    AUDIO_SEGMENT_DURATION,
+    CHAT_GPT_BASE_URI,
+    INVALID_GPT_MODEL_MESSAGE,
+)
+from settings.config import settings
 
 
 def timed_cache(**timedelta_kwargs: Any) -> Any:
@@ -103,3 +112,49 @@ class SpeechToTextService:
                 os.remove(tmp_filename)
                 logger.error("error recognizing text with google", error=error)
                 raise error
+
+
+class ChatGptService:
+    def __init__(self, chat_gpt_model: str) -> None:
+        self.chat_gpt_model = chat_gpt_model
+
+    async def request_to_chatgpt(self, question: str | None) -> str:
+        question = question or "Привет!"
+        chat_gpt_request = self.build_request_data(question)
+        try:
+            response = await self.do_request(chat_gpt_request)
+            status = response.status_code
+            if response.text == INVALID_GPT_MODEL_MESSAGE:
+                message = f"{INVALID_GPT_MODEL_MESSAGE}: {settings.GPT_MODEL}"
+                logger.info(message, data=chat_gpt_request)
+                return message
+            if status != httpx.codes.OK:
+                logger.info(f"got response status: {status} from chat api", data=chat_gpt_request)
+                return "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору"
+            return response.text
+        except Exception as error:
+            logger.error("error get data from chat api", error=error)
+        return "Вообще всё сломалось :("
+
+    @staticmethod
+    async def do_request(data: dict[str, Any]) -> Response:
+        transport = AsyncHTTPTransport(retries=3)
+        async with AsyncClient(base_url=settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
+            return await client.post(CHAT_GPT_BASE_URI, json=data, timeout=50)
+
+    def build_request_data(self, question: str) -> dict[str, Any]:
+        return {
+            "conversation_id": str(uuid4()),
+            "action": "_ask",
+            "model": self.chat_gpt_model,
+            "jailbreak": "default",
+            "meta": {
+                "id": random.randint(10**18, 10**19 - 1),  # noqa: S311
+                "content": {
+                    "conversation": [],
+                    "internet_access": False,
+                    "content_type": "text",
+                    "parts": [{"content": question, "role": "user"}],
+                },
+            },
+        }
