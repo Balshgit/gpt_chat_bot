@@ -2,18 +2,18 @@ import asyncio
 from asyncio import AbstractEventLoop
 from unittest import mock
 
+import httpx
 import pytest
 import telegram
 from assertpy import assert_that
 from faker import Faker
-from httpx import AsyncClient
+from httpx import AsyncClient, Response
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 
 from constants import BotStagesEnum
 from core.bot import BotApplication, BotQueue
 from main import Application
 from settings.config import AppSettings, settings
-from tests.integration.bot.conftest import mocked_ask_question_api
 from tests.integration.bot.networking import MockedRequest
 from tests.integration.factories.bot import (
     BotCallBackQueryFactory,
@@ -21,6 +21,7 @@ from tests.integration.factories.bot import (
     BotUpdateFactory,
     CallBackFactory,
 )
+from tests.integration.utils import mocked_ask_question_api
 
 pytestmark = [
     pytest.mark.asyncio,
@@ -29,11 +30,6 @@ pytestmark = [
 
 
 faker = Faker()
-
-
-async def test_bot_updates(rest_client: AsyncClient) -> None:
-    response = await rest_client.get("/api/healthcheck")
-    assert response.status_code == 200
 
 
 async def test_bot_webhook_endpoint(
@@ -169,8 +165,8 @@ async def test_about_bot_callback_action(
 
         assert mocked_reply_text.call_args.args == (
             f"Бот использует бесплатную модель {settings.GPT_MODEL} для ответов на вопросы. "
-            f"Принимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
-            f"Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
+            f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения "
+            f"в текст. Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
         )
         assert mocked_reply_text.call_args.kwargs == {"parse_mode": "Markdown"}
 
@@ -198,7 +194,10 @@ async def test_ask_question_action(
 ) -> None:
     with mock.patch.object(
         telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message, mocked_ask_question_api(host=test_settings.GPT_BASE_HOST):
+    ) as mocked_send_message, mocked_ask_question_api(
+        host=test_settings.GPT_BASE_HOST,
+        return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+    ):
         bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="Привет!"))
         bot_update["message"].pop("entities")
 
@@ -208,6 +207,55 @@ async def test_ask_question_action(
         assert_that(mocked_send_message.call_args.kwargs).is_equal_to(
             {
                 "text": "Привет! Как я могу помочь вам сегодня?",
+                "chat_id": bot_update["message"]["chat"]["id"],
+            },
+            include=["text", "chat_id"],
+        )
+
+
+async def test_ask_question_action_not_success(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    with mock.patch.object(
+        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+    ) as mocked_send_message, mocked_ask_question_api(
+        host=test_settings.GPT_BASE_HOST, return_value=Response(status_code=httpx.codes.INTERNAL_SERVER_ERROR)
+    ):
+        bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="Привет!"))
+        bot_update["message"].pop("entities")
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+        assert_that(mocked_send_message.call_args.kwargs).is_equal_to(
+            {
+                "text": "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору",
+                "chat_id": bot_update["message"]["chat"]["id"],
+            },
+            include=["text", "chat_id"],
+        )
+
+
+async def test_ask_question_action_critical_error(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    with mock.patch.object(
+        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+    ) as mocked_send_message, mocked_ask_question_api(
+        host=test_settings.GPT_BASE_HOST,
+        side_effect=Exception(),
+    ):
+        bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="Привет!"))
+        bot_update["message"].pop("entities")
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+        assert_that(mocked_send_message.call_args.kwargs).is_equal_to(
+            {
+                "text": "Вообще всё сломалось :(",
                 "chat_id": bot_update["message"]["chat"]["id"],
             },
             include=["text", "chat_id"],
