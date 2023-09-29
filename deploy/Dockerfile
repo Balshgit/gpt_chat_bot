@@ -63,23 +63,3 @@ COPY --from=compile-image /app/.venv /app/.venv
 USER ${USER}
 
 ENV PATH="/app/.venv/bin:$PATH"
-
-
-##===================== chat-service ================================
-#FROM compile-image as chat-service
-#
-#RUN printf "================ Start build chat-service. with USER: ${USER} ==============="
-#
-#WORKDIR /app/
-#
-## Copying bot service
-#COPY --chown=${USER}:${USER} ../chat_gpt_microservice /app/
-#
-#COPY --from=compile-image /app/.venv /app/.venv
-#ENV PATH="/app/.venv/bin:$PATH"
-#
-#USER ${USER}
-#
-#RUN chmod -R 777 translations
-#
-#CMD ["python3", "./run.py"]
