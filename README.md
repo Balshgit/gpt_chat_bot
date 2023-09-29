@@ -65,9 +65,9 @@ methods:
 ## Chat:
 
 ```shell
-cd bot_microservice
-python3 run.py
+docker run -p 8858:8858 -it --name freegpt --rm -e CHAT_PATH=/chat balshdocker/freegpt:latest
 ```
+Open http://localhost:8858/chat/
 
 
 ```bash
@@ -85,11 +85,13 @@ gunicorn main:create_app --workers 10 --bind 0.0.0.0:8083 --worker-class uvicorn
 
 ### Run local tests:
 ```bash
-poetry run pytest
+cd bot_microservice
+STAGE=runtests poetry run pytest
 ```
 
 ### Run tests in docker compose:
 ```bash
+cd bot_microservice
 STAGE=runtests docker compose run bot bash -c "coverage run -m pytest -vv --exitfirst && poetry run coverage report"
 ```
 
@@ -101,14 +103,17 @@ Docs can be found at
 
 on local start can be found at http://localhost/gpt/api/docs
 
+prod docs https://bot.mywistr.ru/gpt/api/docs/
+
 ## Help article
 
-[Пишем асинхронного Телеграм-бота](https://habr.com/ru/company/kts/blog/598575/)
+[Следить за обновлениями этого репозитория](https://github.com/fantasy-peak/cpp-freegpt-webui)
 
 
 ## TODO
 
-- [x] Добавить очередь сообщений
-- [x] Исправить запуск локально
-- [x] Добавить тестов
-- [x] Close connection
+- [] Добавить базу данных с моделями
+- [] Добавить миграции через alembic
+- [] Добавить веса моделей и их смену
+- [] Добавить тестов
+- [] Добавить сентри

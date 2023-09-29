@@ -2,8 +2,6 @@ from fastapi import APIRouter, Request
 from starlette import status
 from starlette.responses import Response
 
-from constants import INVALID_GPT_MODEL_MESSAGE
-from core.utils import ChatGptService
 from settings.config import settings
 
 router = APIRouter()
@@ -19,27 +17,3 @@ router = APIRouter()
 )
 async def process_bot_updates(request: Request) -> None:
     await request.app.state.queue.put_updates_on_queue(request)
-
-
-@router.get(
-    "/bot-healthcheck",
-    name="bot:gpt_healthcheck",
-    response_class=Response,
-    summary="bot healthcheck",
-    responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Request to chat gpt not success"},
-        status.HTTP_200_OK: {"description": "Successful Response"},
-    },
-)
-async def gpt_healthcheck(response: Response) -> Response:
-    chatgpt_service = ChatGptService(chat_gpt_model=settings.GPT_MODEL)
-    data = chatgpt_service.build_request_data("Привет!")
-    response.status_code = status.HTTP_200_OK
-    try:
-        chatgpt_response = await chatgpt_service.do_request(data)
-        if chatgpt_response.status_code != status.HTTP_200_OK or chatgpt_response.text == INVALID_GPT_MODEL_MESSAGE:
-            response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    except Exception:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-    return Response(status_code=response.status_code, content=None)

@@ -20,7 +20,7 @@ from speech_recognition import (
 from constants import (
     AUDIO_SEGMENT_DURATION,
     CHAT_GPT_BASE_URI,
-    INVALID_GPT_MODEL_MESSAGE,
+    INVALID_GPT_REQUEST_MESSAGES,
 )
 from settings.config import settings
 
@@ -124,10 +124,11 @@ class ChatGptService:
         try:
             response = await self.do_request(chat_gpt_request)
             status = response.status_code
-            if response.text == INVALID_GPT_MODEL_MESSAGE:
-                message = f"{INVALID_GPT_MODEL_MESSAGE}: {settings.GPT_MODEL}"
-                logger.info(message, data=chat_gpt_request)
-                return message
+            for message in INVALID_GPT_REQUEST_MESSAGES:
+                if message in response.text:
+                    message = f"{message}: {settings.GPT_MODEL}"
+                    logger.info(message, data=chat_gpt_request)
+                    return message
             if status != httpx.codes.OK:
                 logger.info(f"got response status: {status} from chat api", data=chat_gpt_request)
                 return "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору"
