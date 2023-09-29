@@ -8,7 +8,7 @@ from typing import Any
 
 from fastapi import Request, Response
 from loguru import logger
-from telegram import Update
+from telegram import Bot, Update
 from telegram.ext import Application
 
 from settings.config import AppSettings
@@ -19,15 +19,18 @@ class BotApplication:
         self,
         settings: AppSettings,
         handlers: list[Any],
-        application: Application | None = None,  # type: ignore[type-arg]
     ) -> None:
-        self.application: Application = application or (  # type: ignore
+        self.application: Application = (  # type: ignore[type-arg]
             Application.builder().token(token=settings.TELEGRAM_API_TOKEN).build()
         )
         self.handlers = handlers
         self.settings = settings
         self.start_with_webhook = settings.START_WITH_WEBHOOK
         self._add_handlers()
+
+    @property
+    def bot(self) -> Bot:
+        return self.application.bot
 
     async def set_webhook(self) -> None:
         _, webhook_info = await asyncio.gather(self.application.initialize(), self.application.bot.get_webhook_info())

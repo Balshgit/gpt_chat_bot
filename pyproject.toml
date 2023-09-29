@@ -63,6 +63,7 @@ pytest-split = "^0.8"
 pytest-freezegun = "^0.4"
 pytest-socket = "^0.6"
 assertpy = "^1.1"
+respx = "^0.20"
 
 coverage = "^7.3"
 

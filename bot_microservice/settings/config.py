@@ -49,6 +49,7 @@ class AppSettings(SentrySettings, BaseSettings):
     URL_PREFIX: str = ""
 
     GPT_MODEL: str = "gpt-3.5-turbo-stream-AItianhuSpace"
+    GPT_BASE_HOST: str = "http://chat_service:8858"
     # quantity of workers for uvicorn
     WORKERS_COUNT: int = 1
     # Enable uvicorn reloading

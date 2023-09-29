@@ -55,7 +55,7 @@ class SpeechToTextService:
         self._convert_audio_to_text()
 
     def _convert_audio_to_text(self) -> None:
-        wav_filename = f'{self.filename}.wav'
+        wav_filename = f"{self.filename}.wav"
 
         speech = AudioSegment.from_wav(wav_filename)
         speech_duration = len(speech)
@@ -82,8 +82,8 @@ class SpeechToTextService:
             logger.error("error temps files not deleted", error=error, filenames=[self.filename, self.filename])
 
     def _convert_file_to_wav(self) -> None:
-        new_filename = self.filename + '.wav'
-        cmd = ['ffmpeg', '-loglevel', 'quiet', '-i', self.filename, '-vn', new_filename]
+        new_filename = self.filename + ".wav"
+        cmd = ["ffmpeg", "-loglevel", "quiet", "-i", self.filename, "-vn", new_filename]
         try:
             subprocess.run(args=cmd)  # noqa: S603
             logger.info("file has been converted to wav", filename=new_filename)
@@ -96,7 +96,7 @@ class SpeechToTextService:
         with AudioFile(tmp_filename) as source:
             audio_text = self.recognizer.listen(source)
             try:
-                text = self.recognizer.recognize_google(audio_text, language='ru-RU')
+                text = self.recognizer.recognize_google(audio_text, language="ru-RU")
                 os.remove(tmp_filename)
                 return text
             except SpeechRecognizerError as error:

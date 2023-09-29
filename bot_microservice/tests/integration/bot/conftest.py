@@ -4,23 +4,25 @@ pytest framework. A common change is to allow monkeypatching of the class member
 enforcing slots in the subclasses."""
 import asyncio
 from asyncio import AbstractEventLoop
+from contextlib import contextmanager
 from datetime import tzinfo
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Iterator
 
 import pytest
 import pytest_asyncio
-from fastapi import FastAPI
-from httpx import AsyncClient
+import respx
+from httpx import AsyncClient, Response
 from pytest_asyncio.plugin import SubRequest
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
+from constants import CHAT_GPT_BASE_URI
 from core.bot import BotApplication
 from core.handlers import bot_event_handlers
 from main import Application as AppApplication
 from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
-from tests.integration.factories.bot import BotInfoFactory
+from tests.integration.factories.bot import BotInfoFactory, BotUserFactory
 
 
 @pytest.fixture(scope="session")
@@ -123,6 +125,7 @@ def bot_info() -> dict[str, Any]:
 async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]:
     # We build a new bot each time so that we use `app` in a context manager without problems
     application = ApplicationBuilder().bot(make_bot(bot_info)).application_class(PytestApplication).build()
+    await application.initialize()
     yield application
     if application.running:
         await application.stop()
@@ -226,27 +229,41 @@ def provider_token(bot_info: dict[str, Any]) -> str:
 @pytest_asyncio.fixture(scope="session")
 async def main_application(
     bot_application: PytestApplication, test_settings: AppSettings
-) -> AsyncGenerator[FastAPI, None]:
+) -> AsyncGenerator[AppApplication, None]:
     bot_app = BotApplication(
-        application=bot_application,
         settings=test_settings,
         handlers=bot_event_handlers.handlers,
     )
-    fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app).fastapi_app
+    bot_app.application._initialized = True
+    bot_app.application.bot = make_bot(BotInfoFactory())
+    bot_app.application.bot._bot_user = BotUserFactory()
+    fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app)
     yield fast_api_app
 
 
 @pytest_asyncio.fixture()
 async def rest_client(
-    main_application: FastAPI,
+    main_application: AppApplication,
 ) -> AsyncGenerator[AsyncClient, None]:
     """
     Default http client. Use to test unauthorized requests, public endpoints
     or special authorization methods.
     """
     async with AsyncClient(
-        app=main_application,
+        app=main_application.fastapi_app,
         base_url="http://test",
         headers={"Content-Type": "application/json"},
     ) as client:
         yield client
+
+
+@contextmanager
+def mocked_ask_question_api(host: str) -> Iterator[respx.MockRouter]:
+    with respx.mock(
+        assert_all_mocked=True,
+        assert_all_called=True,
+        base_url=host,
+    ) as respx_mock:
+        ask_question_route = respx_mock.post(url=CHAT_GPT_BASE_URI, name="ask_question")
+        ask_question_route.return_value = Response(status_code=200, text="Привет! Как я могу помочь вам сегодня?")
+        yield respx_mock
