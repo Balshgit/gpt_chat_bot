@@ -32,11 +32,12 @@ async def process_bot_updates(request: Request) -> None:
     },
 )
 async def gpt_healthcheck(response: Response) -> Response:
-    chat_gpt_service = ChatGptService(chat_gpt_model=settings.GPT_MODEL)
-    data = chat_gpt_service.build_request_data('Привет!')
+    chatgpt_service = ChatGptService(chat_gpt_model=settings.GPT_MODEL)
+    data = chatgpt_service.build_request_data("Привет!")
+    response.status_code = status.HTTP_200_OK
     try:
-        gpt_response = await chat_gpt_service.do_request(data)
-        if gpt_response.text == INVALID_GPT_MODEL_MESSAGE or response.status_code != status.HTTP_200_OK:
+        chatgpt_response = await chatgpt_service.do_request(data)
+        if chatgpt_response.status_code != status.HTTP_200_OK or chatgpt_response.text == INVALID_GPT_MODEL_MESSAGE:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     except Exception:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
