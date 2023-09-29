@@ -10,7 +10,7 @@ from loguru import logger
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from constants import CHAT_GPT_BASE_URL, BotEntryPoints
+from constants import CHAT_GPT_BASE_URI, BotEntryPoints
 from core.keyboards import main_keyboard
 from core.utils import SpeechToTextService
 from settings.config import settings
@@ -88,9 +88,9 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     }
 
     transport = AsyncHTTPTransport(retries=3)
-    async with AsyncClient(transport=transport, timeout=50) as client:
+    async with AsyncClient(base_url=settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
         try:
-            response = await client.post(CHAT_GPT_BASE_URL, json=chat_gpt_request, timeout=50)
+            response = await client.post(CHAT_GPT_BASE_URI, json=chat_gpt_request, timeout=50)
             status = response.status_code
             if status != httpx.codes.OK:
                 logger.info(f"got response status: {status} from chat api", data=chat_gpt_request)

@@ -4,16 +4,19 @@ pytest framework. A common change is to allow monkeypatching of the class member
 enforcing slots in the subclasses."""
 import asyncio
 from asyncio import AbstractEventLoop
+from contextlib import contextmanager
 from datetime import tzinfo
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Iterator
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+import respx
+from httpx import AsyncClient, Response
 from pytest_asyncio.plugin import SubRequest
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
+from constants import CHAT_GPT_BASE_URI
 from core.bot import BotApplication
 from core.handlers import bot_event_handlers
 from main import Application as AppApplication
@@ -252,3 +255,15 @@ async def rest_client(
         headers={"Content-Type": "application/json"},
     ) as client:
         yield client
+
+
+@contextmanager
+def mocked_ask_question_api(host: str) -> Iterator[respx.MockRouter]:
+    with respx.mock(
+        assert_all_mocked=True,
+        assert_all_called=True,
+        base_url=host,
+    ) as respx_mock:
+        ask_question_route = respx_mock.post(url=CHAT_GPT_BASE_URI, name="ask_question")
+        ask_question_route.return_value = Response(status_code=200, text="Привет! Как я могу помочь вам сегодня?")
+        yield respx_mock
