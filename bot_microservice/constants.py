@@ -3,7 +3,7 @@ from enum import StrEnum
 AUDIO_SEGMENT_DURATION = 120 * 1000
 
 API_PREFIX = "/api"
-CHAT_GPT_BASE_URI = "backend-api/v2/conversation"
+CHAT_GPT_BASE_URI = "/backend-api/v2/conversation"
 
 
 class BotStagesEnum(StrEnum):
