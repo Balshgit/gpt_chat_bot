@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 
 from constants import BotEntryPoints, BotStagesEnum
-from core.commands import (
+from core.bot.commands import (
     about_bot,
     about_me,
     ask_question,

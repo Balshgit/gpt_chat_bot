@@ -6,9 +6,9 @@ from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
 from constants import LogLevelEnum
-from core.bot import BotApplication, BotQueue
-from core.handlers import bot_event_handlers
-from core.logging import configure_logging
+from core.bot.app import BotApplication, BotQueue
+from core.bot.handlers import bot_event_handlers
+from infra.logging_conf import configure_logging
 from routers import api_router
 from settings.config import AppSettings, get_settings
 

@@ -91,6 +91,7 @@ flake8-mock = "^0.4"
 flake8-comments = "^0.1"
 flake8-newspaper-style = "^0.4"
 Flake8-pyproject = "^1.2.3"
+
 [tool.flake8]
 inline-quotes = "double"
 max-line-length = 120
@@ -109,7 +110,9 @@ ignore = [
     # use isort instead
     "I",
     # use black style
-    "E203", "W", "G004", "VNE003"
+    "E203", "W", "G004", "VNE003",
+    # user FastAPI Depends in function calls
+    "B008"
 ]
 per-file-ignores = [
     # too complex queries

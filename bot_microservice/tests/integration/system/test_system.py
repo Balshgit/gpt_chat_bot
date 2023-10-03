@@ -3,6 +3,7 @@ import pytest
 from faker import Faker
 from httpx import AsyncClient, Response
 
+from api.exceptions import BaseAPIException
 from settings.config import AppSettings
 from tests.integration.utils import mocked_ask_question_api
 
@@ -50,7 +51,7 @@ async def test_bot_healthcheck_not_ok(
 ) -> None:
     with mocked_ask_question_api(
         host=test_settings.GPT_BASE_HOST,
-        side_effect=Exception(),
+        side_effect=BaseAPIException(),
     ):
         response = await rest_client.get("/api/bot-healthcheck")
         assert response.status_code == httpx.codes.INTERNAL_SERVER_ERROR

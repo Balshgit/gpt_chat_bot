@@ -31,10 +31,13 @@ class InterceptHandler(logging.Handler):
             frame = cast(FrameType, frame.f_back)
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level,
-            record.getMessage().replace(settings.TELEGRAM_API_TOKEN, "TELEGRAM_API_TOKEN".center(24, "*")),
-        )
+        logger.opt(depth=depth, exception=record.exc_info).log(level, self._scrap_sensitive_info(record))
+
+    @staticmethod
+    def _scrap_sensitive_info(record: logging.LogRecord) -> str:
+        message = record.getMessage()
+        message.replace(settings.TELEGRAM_API_TOKEN, "TELEGRAM_API_TOKEN".center(24, "*"))
+        return message
 
 
 def configure_logging(
