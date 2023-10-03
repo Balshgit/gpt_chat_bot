@@ -1000,6 +1000,21 @@ gitdb = ">=4.0.1,<5"
 test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-sugar"]
 
 [[package]]
+name = "graypy"
+version = "2.1.0"
+description = "Python logging handlers that send messages in the Graylog Extended Log Format (GELF)."
+optional = false
+python-versions = "*"
+files = [
+    {file = "graypy-2.1.0-py2.py3-none-any.whl", hash = "sha256:5df0102ed52fdaa24dd579bc1e4904480c2c9bbb98917a0b3241ecf510c94207"},
+    {file = "graypy-2.1.0.tar.gz", hash = "sha256:fd8dc4a721de1278576d92db10ac015e99b4e480cf1b18892e79429fd9236e16"},
+]
+
+[package.extras]
+amqp = ["amqplib (==1.0.2)"]
+docs = ["sphinx (>=2.1.2,<3.0.0)", "sphinx-autodoc-typehints (>=1.6.0,<2.0.0)", "sphinx-rtd-theme (>=0.4.3,<1.0.0)"]
+
+[[package]]
 name = "greenlet"
 version = "2.0.2"
 description = "Lightweight in-process concurrent programming"
@@ -3110,4 +3125,4 @@ dev = ["doc8", "flake8", "flake8-import-order", "rstcheck[sphinx]", "sphinx"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "f8faa71d22eb911772b7607eb35d2feb1e5dbe0b0bf2c602373b1e31bffaf820"
+content-hash = "ab644b9882ee200392911afc6b71bf87fdb413e4fdd9f06a460ce33da98687d7"

@@ -4,7 +4,7 @@ AUDIO_SEGMENT_DURATION = 120 * 1000
 
 API_PREFIX = "/api"
 CHAT_GPT_BASE_URI = "/backend-api/v2/conversation"
-INVALID_GPT_MODEL_MESSAGE = "Invalid request model"
+INVALID_GPT_REQUEST_MESSAGES = ("Invalid request model", "return unexpected http status code")
 
 
 class BotStagesEnum(StrEnum):

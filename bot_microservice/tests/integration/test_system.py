@@ -32,13 +32,13 @@ async def test_bot_healthcheck_is_ok(
         assert response.status_code == httpx.codes.OK
 
 
+@pytest.mark.parametrize("text", ["Invalid request model", "return unexpected http status code"])
 async def test_bot_healthcheck_invalid_request_model(
-    rest_client: AsyncClient,
-    test_settings: AppSettings,
+    rest_client: AsyncClient, test_settings: AppSettings, text: str
 ) -> None:
     with mocked_ask_question_api(
         host=test_settings.GPT_BASE_HOST,
-        return_value=Response(status_code=httpx.codes.OK, text="Invalid request model"),
+        return_value=Response(status_code=httpx.codes.OK, text=text),
     ):
         response = await rest_client.get("/api/bot-healthcheck")
         assert response.status_code == httpx.codes.INTERNAL_SERVER_ERROR

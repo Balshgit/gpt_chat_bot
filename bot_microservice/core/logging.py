@@ -3,6 +3,7 @@ import sys
 from types import FrameType
 from typing import TYPE_CHECKING, Any, cast
 
+import graypy
 from loguru import logger
 from sentry_sdk.integrations.logging import EventHandler
 
@@ -40,20 +41,35 @@ def configure_logging(*, level: LogLevelEnum, enable_json_logs: bool, enable_sen
 
     intercept_handler = InterceptHandler()
 
-    logging.basicConfig(handlers=[intercept_handler], level=logging_level)
-
     formatter = _json_formatter if enable_json_logs else _text_formatter
-    logger.configure(
-        handlers=[
+
+    base_config_handlers = [intercept_handler]
+
+    loguru_handlers = [
+        {
+            "sink": sys.stdout,
+            "level": logging_level,
+            "serialize": enable_json_logs,
+            "format": formatter,
+            "colorize": True,
+        }
+    ]
+
+    if settings.GRAYLOG_HOST:
+        graylog_handler = graypy.GELFTCPHandler(settings.GRAYLOG_HOST, 12201)
+        base_config_handlers.append(graylog_handler)
+        loguru_handlers.append(
             {
-                "sink": sys.stdout,
+                "sink": graylog_handler,
                 "level": logging_level,
                 "serialize": enable_json_logs,
                 "format": formatter,
-                "colorize": True,
+                "colorize": False,
             }
-        ],
-    )
+        )
+
+    logging.basicConfig(handlers=base_config_handlers, level=logging_level)
+    logger.configure(handlers=loguru_handlers)
 
     # sentry sdk не умеет из коробки работать с loguru, нужно добавлять хандлер
     # https://github.com/getsentry/sentry-python/issues/653#issuecomment-788854865

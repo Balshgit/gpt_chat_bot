@@ -48,8 +48,11 @@ class AppSettings(SentrySettings, BaseSettings):
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
+    GRAYLOG_HOST: str | None = None
+
     GPT_MODEL: str = "gpt-3.5-turbo-stream-AItianhuSpace"
     GPT_BASE_HOST: str = "http://chat_service:8858"
+
     # quantity of workers for uvicorn
     WORKERS_COUNT: int = 1
     # Enable uvicorn reloading
