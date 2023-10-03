@@ -64,6 +64,7 @@ class AppSettings(SentrySettings, BaseSettings):
 
     @model_validator(mode="before")  # type: ignore[arg-type]
     def validate_boolean_fields(self) -> Any:
+        values_dict: dict[str, Any] = self  # type: ignore[assignment]
         for value in (
             "ENABLE_JSON_LOGS",
             "ENABLE_SENTRY_LOGS",
@@ -71,10 +72,10 @@ class AppSettings(SentrySettings, BaseSettings):
             "RELOAD",
             "DEBUG",
         ):
-            setting_value: str = self.get(value)  # type: ignore[attr-defined]
+            setting_value: str | None = values_dict.get(value)
             if setting_value and setting_value.lower() == "false":
-                self[value] = False  # type: ignore[index]
-        return self
+                values_dict[value] = False
+        return values_dict
 
     @cached_property
     def api_prefix(self) -> str:
