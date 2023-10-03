@@ -11,7 +11,7 @@ from httpx import AsyncClient, Response
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 
 from constants import BotStagesEnum
-from core.bot import BotApplication, BotQueue
+from core.bot.app import BotApplication, BotQueue
 from main import Application
 from settings.config import AppSettings, settings
 from tests.integration.bot.networking import MockedRequest
@@ -37,7 +37,7 @@ async def test_bot_webhook_endpoint(
     main_application: Application,
 ) -> None:
     bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/help"))
-    response = await rest_client.post(url="/api/123456789:AABBCCDDEEFFaabbccddeeff-1234567890", json=bot_update)
+    response = await rest_client.post(url="/api/CDDEEFFaabbccdd", json=bot_update)
     assert response.status_code == 202
     update = await main_application.fastapi_app.state._state["queue"].queue.get()
     update = update.to_dict()

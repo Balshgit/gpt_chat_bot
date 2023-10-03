@@ -7,8 +7,8 @@ from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from constants import BotEntryPoints
-from core.keyboards import main_keyboard
-from core.utils import ChatGptService, SpeechToTextService
+from core.bot.keyboards import main_keyboard
+from core.bot.services import ChatGptService, SpeechToTextService
 from settings.config import settings
 
 

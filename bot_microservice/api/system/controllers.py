@@ -1,11 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import ORJSONResponse
 from starlette import status
 from starlette.responses import Response
 
+from api.bot.deps import get_chat_gpt_service
+from api.exceptions import BaseAPIException
 from constants import INVALID_GPT_REQUEST_MESSAGES
-from core.utils import ChatGptService
-from settings.config import settings
+from core.bot.services import ChatGptService
 
 router = APIRouter()
 
@@ -30,8 +31,10 @@ async def healthcheck() -> ORJSONResponse:
         status.HTTP_200_OK: {"description": "Successful Response"},
     },
 )
-async def gpt_healthcheck(response: Response) -> Response:
-    chatgpt_service = ChatGptService(chat_gpt_model=settings.GPT_MODEL)
+async def gpt_healthcheck(
+    response: Response,
+    chatgpt_service: ChatGptService = Depends(get_chat_gpt_service),
+) -> Response:
     data = chatgpt_service.build_request_data("Привет!")
     response.status_code = status.HTTP_200_OK
     try:
@@ -41,7 +44,7 @@ async def gpt_healthcheck(response: Response) -> Response:
         for message in INVALID_GPT_REQUEST_MESSAGES:
             if message in chatgpt_response.text:
                 response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    except Exception:
+    except BaseAPIException:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     return Response(status_code=response.status_code, content=None)

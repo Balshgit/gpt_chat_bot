@@ -1,0 +1,2 @@
+class BaseAPIException(Exception):
+    pass

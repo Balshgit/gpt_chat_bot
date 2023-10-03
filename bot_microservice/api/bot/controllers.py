@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.post(
-    f"/{settings.TELEGRAM_API_TOKEN}",
+    f"/{settings.token_part}",
     name="bot:process_bot_updates",
     response_class=Response,
     status_code=status.HTTP_202_ACCEPTED,

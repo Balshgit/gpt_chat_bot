@@ -1,4 +1,4 @@
-from functools import cached_property
+from functools import cached_property, lru_cache
 from os import environ
 from pathlib import Path
 from typing import Any
@@ -84,13 +84,18 @@ class AppSettings(SentrySettings, BaseSettings):
         return API_PREFIX
 
     @cached_property
+    def token_part(self) -> str:
+        return self.TELEGRAM_API_TOKEN[15:30]
+
+    @cached_property
     def bot_webhook_url(self) -> str:
-        return "/".join([self.api_prefix, self.TELEGRAM_API_TOKEN])
+        return "/".join([self.api_prefix, self.token_part])
 
     class Config:
         case_sensitive = True
 
 
+@lru_cache(maxsize=None)
 def get_settings() -> AppSettings:
     return AppSettings()
 

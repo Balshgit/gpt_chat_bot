@@ -1,39 +1,31 @@
 # Chat gpt bot
-Бот для запросов в chatgpt
-
-Использует **Selenium** и API chatgpt для запросов 
+Telegram bot with proxy to chatgpt
 
 ## Install & Update
 
-install service
+### Install service
 
 ```bash
-sudo cp scripts/gptchatbot.service /etc/systemd/system
+git clone https://github.com/Balshgit/gpt_chat_bot.git
+cd gpt_chat_bot
+sudo rsync -a --delete --progress ./* /opt/gpt_chat_bot/ --exclude .git
+cd /opt/gpt_chat_bot
+sudo cp ./bot_microservice/settings/.env.template ./bot_microservice/settings/.env
+sudo cp ./scripts/gptchatbot.service /etc/systemd/system
 sudo systemctl enable gptchatbot.service
 sudo systemctl start gptchatbot.service
-sudo 
 ```
 
-### Update
+### Update service
 
 ```bash
 git pull balshgit main
-sudo rsync -a --delete --progress /home/balsh/Pycharmprojects/gpt_chat_bot/* /opt/gpt_chat_bot/ --exclude .git
+sudo rsync -a --delete --progress ./* /opt/gpt_chat_bot/ --exclude .git
 cd /opt/gpt_chat_bot/
 docker pull balshdocker/freegpt
 docker compose build
 sudo systemctl stop gptchatbot.service
 sudo systemctl start gptchatbot.service
-```
-
-    
-
-```bash
-cd ~/PycharmProjects/chat_gpt_bot
-sudo systemctl stop chat_gpt_bot.service
-git pull balshgit main
-sudo rsync -a --delete --progress ~/PycharmProjects/chat_gpt_bot/* /opt/chat_gpt_bot/ --exclude .git
-sudo systemctl start chat_gpt_bot.service
 ```
 
 ## Local start
@@ -72,12 +64,7 @@ Open http://localhost:8858/chat/
 
 ```bash
 cd bot_microservice
-poetry run uvicorn --host 0.0.0.0 --factory run:create_app --port 1338 --reload
-```
-
-```bash
-cd bot_microservice
-gunicorn main:create_app --workers 10 --bind 0.0.0.0:8083 --worker-class uvicorn.workers.UvicornWorker --timeout 150 --max-requests 2000 --max-requests-jitter 400
+gunicorn main:create_app --workers 10 --bind 0.0.0.0:8000 --worker-class uvicorn.workers.UvicornWorker --timeout 150 --max-requests 2000 --max-requests-jitter 400
 ```
 
 
@@ -112,8 +99,10 @@ prod docs https://bot.mywistr.ru/gpt/api/docs/
 
 ## TODO
 
-- [] Добавить базу данных с моделями
-- [] Добавить миграции через alembic
-- [] Добавить веса моделей и их смену
-- [] Добавить тестов
-- [] Добавить сентри
+- [] add Database and models
+- [] add alembic migrations
+- [] add models priority and their rotation
+- [] add more tests
+- [] reformat conftest.py file
+- [x] Add sentry
+- [x] Add graylog integration and availability to log to file

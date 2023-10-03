@@ -14,8 +14,8 @@ from pytest_asyncio.plugin import SubRequest
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
-from core.bot import BotApplication
-from core.handlers import bot_event_handlers
+from core.bot.app import BotApplication
+from core.bot.handlers import bot_event_handlers
 from main import Application as AppApplication
 from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
