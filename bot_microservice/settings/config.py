@@ -71,7 +71,8 @@ class AppSettings(SentrySettings, BaseSettings):
             "RELOAD",
             "DEBUG",
         ):
-            if self.get(value).lower() == "false":  # type: ignore[attr-defined]
+            setting_value: str = self.get(value)  # type: ignore[attr-defined]
+            if setting_value and setting_value.lower() == "false":
                 self[value] = False  # type: ignore[index]
         return self
 
