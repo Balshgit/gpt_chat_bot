@@ -19,11 +19,12 @@ services:
       dockerfile: deploy/Dockerfile
       target: bot-service
       args:
-        STAGE: ${STAGE}
+        STAGE: ${STAGE:-production}
     restart: unless-stopped
     env_file:
       - bot_microservice/settings/.env
     volumes:
+      - ./bot_microservice/settings/.env:/app/settings/.env:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
       chat-gpt-network:
