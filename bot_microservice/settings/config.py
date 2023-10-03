@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from pydantic import HttpUrl, ValidationInfo, field_validator
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 from constants import API_PREFIX
@@ -28,7 +28,7 @@ load_dotenv(env_path, override=True)
 
 
 class SentrySettings(BaseSettings):
-    SENTRY_DSN: HttpUrl | None = None
+    SENTRY_DSN: str | None = None
     DEPLOY_ENVIRONMENT: str | None = None
     SENTRY_TRACES_SAMPLE_RATE: float = 0.95
 
@@ -41,6 +41,10 @@ class AppSettings(SentrySettings, BaseSettings):
     APP_PORT: int = 8000
     STAGE: str = "dev"
     DEBUG: bool = False
+    # quantity of workers for uvicorn
+    WORKERS_COUNT: int = 1
+    # Enable uvicorn reloading
+    RELOAD: bool = False
 
     TELEGRAM_API_TOKEN: str = "123456789:AABBCCDDEEFFaabbccddeeff-1234567890"
     # webhook settings
@@ -48,21 +52,28 @@ class AppSettings(SentrySettings, BaseSettings):
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
-    GRAYLOG_HOST: str | None = None
-
-    GPT_MODEL: str = "gpt-3.5-turbo-stream-AItianhuSpace"
+    # ==== gpt settings ====
+    GPT_MODEL: str = "gpt-3.5-turbo-stream-DeepAi"
     GPT_BASE_HOST: str = "http://chat_service:8858"
 
-    # quantity of workers for uvicorn
-    WORKERS_COUNT: int = 1
-    # Enable uvicorn reloading
-    RELOAD: bool = False
+    ENABLE_JSON_LOGS: bool = True
+    ENABLE_SENTRY_LOGS: bool = False
+    GRAYLOG_HOST: str | None = None
+    GRAYLOG_PORT: int | None = None
+    LOG_TO_FILE: str | None = None
 
-    @field_validator("START_WITH_WEBHOOK")
-    def star_with_webhook_validator(cls, field_value: Any, info: ValidationInfo) -> Any:
-        if field_value == "false":
-            return False
-        return field_value
+    @model_validator(mode="before")  # type: ignore[arg-type]
+    def validate_boolean_fields(self) -> Any:
+        for value in (
+            "ENABLE_JSON_LOGS",
+            "ENABLE_SENTRY_LOGS",
+            "START_WITH_WEBHOOK",
+            "RELOAD",
+            "DEBUG",
+        ):
+            if self.get(value).lower() == "false":  # type: ignore[attr-defined]
+                self[value] = False  # type: ignore[index]
+        return self
 
     @cached_property
     def api_prefix(self) -> str:

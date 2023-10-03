@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from types import FrameType
 from typing import TYPE_CHECKING, Any, cast
@@ -8,7 +9,7 @@ from loguru import logger
 from sentry_sdk.integrations.logging import EventHandler
 
 from constants import LogLevelEnum
-from settings.config import settings
+from settings.config import DIR_LOGS, settings
 
 if TYPE_CHECKING:
     from loguru import Record
@@ -36,39 +37,37 @@ class InterceptHandler(logging.Handler):
         )
 
 
-def configure_logging(*, level: LogLevelEnum, enable_json_logs: bool, enable_sentry_logs: bool) -> None:
-    logging_level = level.name
-
+def configure_logging(
+    *, level: LogLevelEnum, enable_json_logs: bool, enable_sentry_logs: bool, log_to_file: str | None = None
+) -> None:
     intercept_handler = InterceptHandler()
 
     formatter = _json_formatter if enable_json_logs else _text_formatter
 
     base_config_handlers = [intercept_handler]
 
+    base_loguru_handler = {
+        "level": level.name,
+        "serialize": enable_json_logs,
+        "format": formatter,
+        "colorize": False,
+    }
     loguru_handlers = [
-        {
-            "sink": sys.stdout,
-            "level": logging_level,
-            "serialize": enable_json_logs,
-            "format": formatter,
-            "colorize": True,
-        }
+        {**base_loguru_handler, "colorize": True, "sink": sys.stdout},
     ]
 
-    if settings.GRAYLOG_HOST:
-        graylog_handler = graypy.GELFTCPHandler(settings.GRAYLOG_HOST, 12201)
+    if settings.GRAYLOG_HOST and settings.GRAYLOG_PORT:
+        graylog_handler = graypy.GELFUDPHandler(settings.GRAYLOG_HOST, settings.GRAYLOG_PORT)
         base_config_handlers.append(graylog_handler)
-        loguru_handlers.append(
-            {
-                "sink": graylog_handler,
-                "level": logging_level,
-                "serialize": enable_json_logs,
-                "format": formatter,
-                "colorize": False,
-            }
-        )
+        loguru_handlers.append({**base_loguru_handler, "sink": graylog_handler})
+    if log_to_file:
+        file_path = os.path.join(DIR_LOGS, log_to_file)
+        if not os.path.exists(log_to_file):
+            with open(file_path, 'w') as f:
+                f.write('')
+        loguru_handlers.append({**base_loguru_handler, "sink": file_path})
 
-    logging.basicConfig(handlers=base_config_handlers, level=logging_level)
+    logging.basicConfig(handlers=base_config_handlers, level=level.name)
     logger.configure(handlers=loguru_handlers)
 
     # sentry sdk не умеет из коробки работать с loguru, нужно добавлять хандлер
