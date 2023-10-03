@@ -21,7 +21,7 @@ git pull balshgit main
 sudo rsync -a --delete --progress /home/balsh/Pycharmprojects/gpt_chat_bot/* /opt/gpt_chat_bot/ --exclude .git
 cd /opt/gpt_chat_bot/
 docker pull balshdocker/freegpt
-STAGE=production docker compose build
+docker compose build
 sudo systemctl stop gptchatbot.service
 sudo systemctl start gptchatbot.service
 ```

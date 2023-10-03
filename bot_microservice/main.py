@@ -30,11 +30,16 @@ class Application:
 
         self.app.include_router(api_router)
         self.configure_hooks()
-        configure_logging(level=LogLevelEnum.INFO, enable_json_logs=True, enable_sentry_logs=True)
+        configure_logging(
+            level=LogLevelEnum.INFO,
+            enable_json_logs=settings.ENABLE_JSON_LOGS,
+            enable_sentry_logs=settings.ENABLE_SENTRY_LOGS,
+            log_to_file=settings.LOG_TO_FILE,
+        )
 
         if settings.SENTRY_DSN is not None:
             sentry_sdk.init(
-                dsn=settings.SENTRY_DSN,  # type: ignore[arg-type]
+                dsn=settings.SENTRY_DSN,
                 environment=settings.DEPLOY_ENVIRONMENT,
                 traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
                 send_client_reports=False,
