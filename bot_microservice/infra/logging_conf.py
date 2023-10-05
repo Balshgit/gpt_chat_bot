@@ -110,7 +110,7 @@ def configure_logging(
         base_config_handlers.append(graylog_handler)
         loguru_handlers.append({**base_loguru_handler, "sink": graylog_handler})
     if log_to_file:
-        file_path = os.path.join(DIR_LOGS, log_to_file)
+        file_path = DIR_LOGS / log_to_file
         if not os.path.exists(log_to_file):
             with open(file_path, 'w') as f:
                 f.write('')

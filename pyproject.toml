@@ -8,9 +8,9 @@ authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 python = "^3.11"
 
 fastapi = "^0.103.1"
-python-telegram-bot = {version = "^20.5", extras=["ext"]}
+python-telegram-bot = {version = "^20.6", extras=["ext"]}
 python-dotenv = "^1.0"
-httpx = "^0.24"
+httpx = "^0.25"
 loguru = "^0.7"
 pydantic = "^2.4"
 pydantic-settings = "^2.0.3"
@@ -21,8 +21,12 @@ orjson = "^3.9"
 sentry-sdk = "^1.31.0"
 SpeechRecognition = "^3.8"
 pydub = "^0.25"
-greenlet = "^2.0.2"
+greenlet = "^3.0"
 graypy = "^2.1.0"
+aiosqlite = "^0.19.0"
+yarl = "^1.9.2"
+sqlalchemy = "^2.0.21"
+alembic = "^1.12.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -159,7 +163,8 @@ warn_unused_configs = true
 warn_unreachable = true
 warn_no_return = true
 exclude = [
-    "chat_gpt_microservice"
+    "chat_gpt_microservice",
+    "bot_microservice/infra/database/migrations/versions/*"
 ]
 
 [tool.black]

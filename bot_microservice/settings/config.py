@@ -6,6 +6,7 @@ from typing import Any
 from dotenv import load_dotenv
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
+from yarl import URL
 
 from constants import API_PREFIX
 
@@ -52,6 +53,9 @@ class AppSettings(SentrySettings, BaseSettings):
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
+    DB_FILE: Path = SHARED_DIR / 'chat_gpt.db'
+    DB_ECHO: bool = False
+
     # ==== gpt settings ====
     GPT_MODEL: str = "gpt-3.5-turbo-stream-DeepAi"
     GPT_BASE_HOST: str = "http://chat_service:8858"
@@ -90,6 +94,18 @@ class AppSettings(SentrySettings, BaseSettings):
     @cached_property
     def bot_webhook_url(self) -> str:
         return "/".join([self.api_prefix, self.token_part])
+
+    @cached_property
+    def db_url(self) -> URL:
+        """
+        Assemble database URL from settings.
+
+        :return: database URL.
+        """
+        return URL.build(
+            scheme='sqlite+aiosqlite',
+            path=f'///{self.DB_FILE}',
+        )
 
     class Config:
         case_sensitive = True
