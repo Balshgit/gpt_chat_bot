@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -e
+
+alembic upgrade "head"
+
 echo "starting the bot"
 
 if [[ "${START_WITH_WEBHOOK}" == "true" ]]

@@ -92,6 +92,39 @@ on local start can be found at http://localhost/gpt/api/docs
 
 prod docs https://bot.mywistr.ru/gpt/api/docs/
 
+
+## Create migrations
+
+Init alembic
+
+    alembic init alembic
+
+
+```bash
+cd bot_microservice
+alembic revision --autogenerate -m 'create_quads_table'
+alembic upgrade head
+```
+
+
+Create table in alembic versions
+
+```bash
+alembic --config ./alembic.ini revision -m "create account table"
+alembic --config ./alembic.ini revision --autogenerate -m 'create_quads_table'
+```
+
+
+
+Run migrations
+
+```bash
+cd ./bot_microservice # alembic root
+alembic --config ./alembic.ini upgrade head
+alembic --config ./alembic.ini downgrade 389018a3e0f0
+```
+
+
 ## Help article
 
 [Следить за обновлениями этого репозитория](https://github.com/fantasy-peak/cpp-freegpt-webui)
@@ -99,10 +132,12 @@ prod docs https://bot.mywistr.ru/gpt/api/docs/
 
 ## TODO
 
-- [] add Database and models
-- [] add alembic migrations
+- [x] add Database and models
+- [x] add alembic migrations
 - [] add models priority and their rotation
-- [] add more tests
+- [x] add update model priority endpoint
+- [] add more tests for gpt model selection
+- [] add authorisation for api
 - [] reformat conftest.py file
 - [x] Add sentry
 - [x] Add graylog integration and availability to log to file

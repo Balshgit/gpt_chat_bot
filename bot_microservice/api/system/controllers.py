@@ -3,7 +3,7 @@ from fastapi.responses import ORJSONResponse
 from starlette import status
 from starlette.responses import Response
 
-from api.bot.deps import get_chat_gpt_service
+from api.deps import get_chatgpt_service
 from api.exceptions import BaseAPIException
 from constants import INVALID_GPT_REQUEST_MESSAGES
 from core.bot.services import ChatGptService
@@ -33,12 +33,11 @@ async def healthcheck() -> ORJSONResponse:
 )
 async def gpt_healthcheck(
     response: Response,
-    chatgpt_service: ChatGptService = Depends(get_chat_gpt_service),
+    chatgpt_service: ChatGptService = Depends(get_chatgpt_service),
 ) -> Response:
-    data = chatgpt_service.build_request_data("Привет!")
     response.status_code = status.HTTP_200_OK
     try:
-        chatgpt_response = await chatgpt_service.do_request(data)
+        chatgpt_response = await chatgpt_service.request_to_chatgpt_microservice(question="Привет!")
         if chatgpt_response.status_code != status.HTTP_200_OK:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         for message in INVALID_GPT_REQUEST_MESSAGES:

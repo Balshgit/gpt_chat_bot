@@ -92,6 +92,18 @@ boost::asio::awaitable<void> sendHttpResponse(auto& stream, auto& request, auto 
     co_return;
 }
 
+void setContentType(auto& res, const std::string& file) {
+    SPDLOG_INFO("file: {}", file);
+    if (file.ends_with("js")) {
+        res.set(boost::beast::http::field::content_type, "text/javascript");
+    } else if (file.ends_with("css")) {
+        res.set(boost::beast::http::field::content_type, "text/css");
+    } else if (file.ends_with("png")) {
+        res.set(boost::beast::http::field::content_type, "image/png");
+    } else
+        SPDLOG_ERROR("invalid file type: {}", file);
+}
+
 boost::asio::awaitable<void> startSession(boost::asio::ip::tcp::socket sock, Config& cfg,
                                           boost::asio::io_context& context) {
     boost::beast::tcp_stream stream{std::move(sock)};
@@ -172,7 +184,7 @@ boost::asio::awaitable<void> startSession(boost::asio::ip::tcp::socket sock, Con
                 boost::beast::http::response<boost::beast::http::string_body> res{boost::beast::http::status::ok,
                                                                                   request.version()};
                 res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(boost::beast::http::field::content_type, "text/javascript");
+                setContentType(res, file);
                 res.keep_alive(request.keep_alive());
                 res.body() = std::move(chat_js_content);
                 res.prepare_payload();
@@ -191,8 +203,7 @@ boost::asio::awaitable<void> startSession(boost::asio::ip::tcp::socket sock, Con
                     std::piecewise_construct, std::make_tuple(std::move(body)),
                     std::make_tuple(boost::beast::http::status::ok, request.version())};
                 res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(boost::beast::http::field::content_type,
-                        req_path.contains("css") ? "text/css" : "text/javascript");
+                setContentType(res, file);
                 res.content_length(size);
                 res.keep_alive(request.keep_alive());
                 boost::beast::http::message_generator rsp = std::move(res);
@@ -324,24 +335,25 @@ int main(int argc, char** argv) {
         ADD_METHOD("gpt-3.5-turbo-stream-openai", FreeGpt::openAi);
     ADD_METHOD("gpt-3.5-turbo-Aichat", FreeGpt::aiChat);
     ADD_METHOD("gpt-4-ChatgptAi", FreeGpt::chatGptAi);
-    // ADD_METHOD("gpt-3.5-turbo-weWordle", FreeGpt::weWordle);
     ADD_METHOD("gpt-3.5-turbo-acytoo", FreeGpt::acytoo);
     ADD_METHOD("gpt-3.5-turbo-stream-DeepAi", FreeGpt::deepAi);
     ADD_METHOD("gpt-3.5-turbo-stream-H2o", FreeGpt::h2o);
     ADD_METHOD("gpt-3.5-turbo-stream-yqcloud", FreeGpt::yqcloud);
     ADD_METHOD("gpt-OpenAssistant-stream-HuggingChat", FreeGpt::huggingChat)
     ADD_METHOD("gpt-4-turbo-stream-you", FreeGpt::you);
-    ADD_METHOD("gpt-3.5-turbo-AItianhu", FreeGpt::aiTianhu);
+    // ADD_METHOD("gpt-3.5-turbo-AItianhu", FreeGpt::aiTianhu);
     ADD_METHOD("gpt-3-stream-binjie", FreeGpt::binjie);
-    // ADD_METHOD("gpt-3.5-turbo-stream-CodeLinkAva", FreeGpt::codeLinkAva);
     ADD_METHOD("gpt-4-stream-ChatBase", FreeGpt::chatBase);
     ADD_METHOD("gpt-3.5-turbo-stream-aivvm", FreeGpt::aivvm);
     ADD_METHOD("gpt-3.5-turbo-16k-stream-Ylokh", FreeGpt::ylokh);
     ADD_METHOD("gpt-3.5-turbo-stream-Vitalentum", FreeGpt::vitalentum);
     ADD_METHOD("gpt-3.5-turbo-stream-GptGo", FreeGpt::gptGo);
-    ADD_METHOD("gpt-3.5-turbo-stream-AItianhuSpace", FreeGpt::aiTianhuSpace);
+    // ADD_METHOD("gpt-3.5-turbo-stream-AItianhuSpace", FreeGpt::aiTianhuSpace);
     ADD_METHOD("gpt-3.5-turbo-stream-Aibn", FreeGpt::aibn);
     ADD_METHOD("gpt-3.5-turbo-ChatgptDuo", FreeGpt::chatGptDuo);
+    ADD_METHOD("gpt-3.5-turbo-stream-ChatForAi", FreeGpt::chatForAi);
+    ADD_METHOD("gpt-3.5-turbo-stream-FreeGpt", FreeGpt::freeGpt);
+    ADD_METHOD("gpt-3.5-turbo-stream-Cromicle", FreeGpt::cromicle);
 
     IoContextPool pool{cfg.work_thread_num};
     pool.start();
