@@ -29,9 +29,15 @@ def upgrade() -> None:
         results = session.execute(query)
         models = results.scalars().all()
 
-        if not models:
-            session.add_all([ChatGpt(model=model) for model in ChatGptModelsEnum])
-            session.commit()
+        if models:
+            return None
+        models = []
+        for model in ChatGptModelsEnum:
+            priority = 0 if model != "gpt-3.5-turbo-stream-FreeGpt" else 1
+            fields = {"model": model, "priority": priority}
+            models.append(ChatGpt(**fields))
+        session.add_all(models)
+        session.commit()
 
 
 def downgrade() -> None:
