@@ -6,7 +6,7 @@ from functools import cached_property
 from http import HTTPStatus
 from typing import Any
 
-from fastapi import Request, Response
+from fastapi import Response
 from loguru import logger
 from telegram import Bot, Update
 from telegram.ext import Application
@@ -68,14 +68,11 @@ class BotQueue:
     bot_app: BotApplication
     queue: Queue = asyncio.Queue()  # type: ignore[type-arg]
 
-    async def put_updates_on_queue(self, request: Request) -> Response:
+    async def put_updates_on_queue(self, tg_update: Update) -> Response:
         """
         Listen /{URL_PREFIX}/{API_PREFIX}/{TELEGRAM_WEB_TOKEN} path and proxy post request to bot
         """
-        data = await request.json()
-        tg_update = Update.de_json(data=data, bot=self.bot_app.application.bot)
         self.queue.put_nowait(tg_update)
-
         return Response(status_code=HTTPStatus.ACCEPTED)
 
     async def get_updates_from_queue(self) -> None:

@@ -27,6 +27,7 @@ class Application:
         )
         self.app.state.settings = settings
         self.app.state.queue = BotQueue(bot_app=bot_app)
+        self.app.state.bot_app = bot_app
         self.bot_app = bot_app
 
         self.app.on_event('startup')(startup(self.app, settings))

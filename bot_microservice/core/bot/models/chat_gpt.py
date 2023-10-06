@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.sqlite import INTEGER, SMALLINT, VARCHAR
+from sqlalchemy import INTEGER, SMALLINT, VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infra.database.base import Base

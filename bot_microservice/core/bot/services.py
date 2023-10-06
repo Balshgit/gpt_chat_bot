@@ -1,12 +1,10 @@
 import os
-import random
 import subprocess  # noqa
 from concurrent.futures.thread import ThreadPoolExecutor
+from dataclasses import dataclass
 from typing import Any
-from uuid import uuid4
 
-import httpx
-from httpx import AsyncClient, AsyncHTTPTransport, Response
+from httpx import Response
 from loguru import logger
 from pydub import AudioSegment
 from speech_recognition import (
@@ -15,33 +13,29 @@ from speech_recognition import (
     UnknownValueError as SpeechRecognizerError,
 )
 
-from constants import (
-    AUDIO_SEGMENT_DURATION,
-    CHAT_GPT_BASE_URI,
-    INVALID_GPT_REQUEST_MESSAGES,
-)
+from constants import AUDIO_SEGMENT_DURATION
+from core.bot.repository import ChatGPTRepository
+from infra.database.db_adapter import Database
 from settings.config import settings
 
 
 class SpeechToTextService:
-    def __init__(self, filename: str) -> None:
+    def __init__(self) -> None:
         self.executor = ThreadPoolExecutor()
-
-        self.filename = filename
         self.recognizer = Recognizer()
         self.recognizer.energy_threshold = 50
         self.text_parts: dict[int, str] = {}
         self.text_recognised = False
 
-    def get_text_from_audio(self) -> None:
-        self.executor.submit(self.worker)
+    def get_text_from_audio(self, filename: str) -> None:
+        self.executor.submit(self.worker, filename=filename)
 
-    def worker(self) -> Any:
-        self._convert_file_to_wav()
-        self._convert_audio_to_text()
+    def worker(self, filename: str) -> Any:
+        self._convert_file_to_wav(filename)
+        self._convert_audio_to_text(filename)
 
-    def _convert_audio_to_text(self) -> None:
-        wav_filename = f"{self.filename}.wav"
+    def _convert_audio_to_text(self, filename: str) -> None:
+        wav_filename = f"{filename}.wav"
 
         speech = AudioSegment.from_wav(wav_filename)
         speech_duration = len(speech)
@@ -63,18 +57,19 @@ class SpeechToTextService:
         # clean temp voice message main files
         try:
             os.remove(wav_filename)
-            os.remove(self.filename)
+            os.remove(filename)
         except FileNotFoundError as error:
-            logger.error("error temps files not deleted", error=error, filenames=[self.filename, self.filename])
+            logger.error("error temps files not deleted", error=error, filenames=[filename, wav_filename])
 
-    def _convert_file_to_wav(self) -> None:
-        new_filename = self.filename + ".wav"
-        cmd = ["ffmpeg", "-loglevel", "quiet", "-i", self.filename, "-vn", new_filename]
+    @staticmethod
+    def _convert_file_to_wav(filename: str) -> None:
+        new_filename = filename + ".wav"
+        cmd = ["ffmpeg", "-loglevel", "quiet", "-i", filename, "-vn", new_filename]
         try:
             subprocess.run(args=cmd)  # noqa: S603
             logger.info("file has been converted to wav", filename=new_filename)
         except Exception as error:
-            logger.error("cant convert voice", error=error, filename=self.filename)
+            logger.error("cant convert voice", error=error, filename=filename)
 
     def _recognize_by_google(self, filename: str, sound_segment: AudioSegment) -> str:
         tmp_filename = f"{filename}_tmp_part"
@@ -91,48 +86,24 @@ class SpeechToTextService:
                 raise error
 
 
+@dataclass
 class ChatGptService:
-    def __init__(self, chat_gpt_model: str) -> None:
-        self.chat_gpt_model = chat_gpt_model
+    repository: ChatGPTRepository
 
     async def request_to_chatgpt(self, question: str | None) -> str:
         question = question or "Привет!"
-        chat_gpt_request = self.build_request_data(question)
-        try:
-            response = await self.do_request(chat_gpt_request)
-            status = response.status_code
-            for message in INVALID_GPT_REQUEST_MESSAGES:
-                if message in response.text:
-                    message = f"{message}: {settings.GPT_MODEL}"
-                    logger.info(message, data=chat_gpt_request)
-                    return message
-            if status != httpx.codes.OK:
-                logger.info(f"got response status: {status} from chat api", data=chat_gpt_request)
-                return "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору"
-            return response.text
-        except Exception as error:
-            logger.error("error get data from chat api", error=error)
-        return "Вообще всё сломалось :("
+        chat_gpt_model = await self.get_current_chatgpt_model()
+        return await self.repository.ask_question(question=question, chat_gpt_model=chat_gpt_model)
 
-    @staticmethod
-    async def do_request(data: dict[str, Any]) -> Response:
-        transport = AsyncHTTPTransport(retries=3)
-        async with AsyncClient(base_url=settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
-            return await client.post(CHAT_GPT_BASE_URI, json=data, timeout=50)
+    async def request_to_chatgpt_microservice(self, question: str) -> Response:
+        chat_gpt_model = await self.get_current_chatgpt_model()
+        return await self.repository.request_to_chatgpt_microservice(question=question, chat_gpt_model=chat_gpt_model)
 
-    def build_request_data(self, question: str) -> dict[str, Any]:
-        return {
-            "conversation_id": str(uuid4()),
-            "action": "_ask",
-            "model": self.chat_gpt_model,
-            "jailbreak": "default",
-            "meta": {
-                "id": random.randint(10**18, 10**19 - 1),  # noqa: S311
-                "content": {
-                    "conversation": [],
-                    "internet_access": False,
-                    "content_type": "text",
-                    "parts": [{"content": question, "role": "user"}],
-                },
-            },
-        }
+    async def get_current_chatgpt_model(self) -> str:
+        return await self.repository.get_current_chatgpt_model()
+
+    @classmethod
+    def build(cls) -> "ChatGptService":
+        db = Database(settings=settings)
+        repository = ChatGPTRepository(settings=settings, db=db)
+        return ChatGptService(repository=repository)

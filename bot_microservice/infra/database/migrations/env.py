@@ -5,8 +5,8 @@ from alembic import context
 from sqlalchemy.ext.asyncio.engine import create_async_engine
 from sqlalchemy.future import Connection
 
+from infra.database.db_adapter import load_all_models
 from infra.database.meta import meta
-from infra.utils import load_all_models
 from settings.config import settings
 
 # this is the Alembic Config object, which provides
