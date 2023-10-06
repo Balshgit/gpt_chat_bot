@@ -112,8 +112,8 @@ def configure_logging(
     if log_to_file:
         file_path = DIR_LOGS / log_to_file
         if not os.path.exists(log_to_file):
-            with open(file_path, 'w') as f:
-                f.write('')
+            with open(file_path, "w") as f:
+                f.write("")
         loguru_handlers.append({**base_loguru_handler, "sink": file_path})
 
     logging.basicConfig(handlers=base_config_handlers, level=level.name)

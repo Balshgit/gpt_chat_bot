@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import StrEnum, unique
 
 AUDIO_SEGMENT_DURATION = 120 * 1000
 
@@ -28,6 +28,7 @@ class LogLevelEnum(StrEnum):
     NOTSET = ""
 
 
+@unique
 class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_openai = "gpt-3.5-turbo-stream-openai"
     gpt_3_5_turbo_Aichat = "gpt-3.5-turbo-Aichat"

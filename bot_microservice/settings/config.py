@@ -53,7 +53,7 @@ class AppSettings(SentrySettings, BaseSettings):
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
-    DB_FILE: Path = SHARED_DIR / 'chat_gpt.db'
+    DB_FILE: Path = SHARED_DIR / "chat_gpt.db"
     DB_ECHO: bool = False
 
     # ==== gpt settings ====
@@ -103,8 +103,8 @@ class AppSettings(SentrySettings, BaseSettings):
         :return: database URL.
         """
         return URL.build(
-            scheme='sqlite+aiosqlite',
-            path=f'///{self.DB_FILE}',
+            scheme="sqlite+aiosqlite",
+            path=f"///{self.DB_FILE}",
         )
 
     class Config:

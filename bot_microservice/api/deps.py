@@ -44,7 +44,7 @@ def new_bot_queue(bot_app: BotApplication = Depends(get_bot_app)) -> BotQueue:
     return BotQueue(bot_app=bot_app)
 
 
-def get_chat_gpt_service(
+def get_chatgpt_service(
     chat_gpt_repository: ChatGPTRepository = Depends(get_chat_gpt_repository),
 ) -> ChatGptService:
     return ChatGptService(repository=chat_gpt_repository)

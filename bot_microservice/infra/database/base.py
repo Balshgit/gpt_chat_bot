@@ -1,4 +1,4 @@
-from sqlalchemy import Table
+from sqlalchemy import Table, inspect
 from sqlalchemy.orm import as_declarative, declared_attr
 
 from infra.database.meta import meta
@@ -14,11 +14,15 @@ class Base:
     """
 
     # Generate __tablename__ automatically
-    @declared_attr  # type: ignore[arg-type]
+    @declared_attr
     def __tablename__(self) -> str:
-        return self.__name__.lower()  # type: ignore[attr-defined]
+        return self.__name__.lower()
 
     __table__: Table
+
+    @classmethod
+    def get_real_column_name(cls, attr_name: str) -> str:
+        return getattr(inspect(cls).c, attr_name).name  # type: ignore
 
     def __str__(self) -> str:
         return self.__repr__()

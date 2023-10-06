@@ -2,7 +2,7 @@ import os
 import subprocess  # noqa
 from concurrent.futures.thread import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Sequence
 
 from httpx import Response
 from loguru import logger
@@ -14,6 +14,7 @@ from speech_recognition import (
 )
 
 from constants import AUDIO_SEGMENT_DURATION
+from core.bot.models.chat_gpt import ChatGpt
 from core.bot.repository import ChatGPTRepository
 from infra.database.db_adapter import Database
 from settings.config import settings
@@ -90,6 +91,9 @@ class SpeechToTextService:
 class ChatGptService:
     repository: ChatGPTRepository
 
+    async def get_chatgpt_models(self) -> Sequence[ChatGpt]:
+        return await self.repository.get_chatgpt_models()
+
     async def request_to_chatgpt(self, question: str | None) -> str:
         question = question or "Привет!"
         chat_gpt_model = await self.get_current_chatgpt_model()
@@ -101,6 +105,15 @@ class ChatGptService:
 
     async def get_current_chatgpt_model(self) -> str:
         return await self.repository.get_current_chatgpt_model()
+
+    async def change_chatgpt_model_priority(self, model_id: int, priority: int) -> None:
+        return await self.repository.change_chatgpt_model_priority(model_id=model_id, priority=priority)
+
+    async def add_chatgpt_model(self, gpt_model: str, priority: int) -> dict[str, str | int]:
+        return await self.repository.add_chatgpt_model(model=gpt_model, priority=priority)
+
+    async def delete_chatgpt_model(self, model_id: int) -> None:
+        return await self.repository.delete_chatgpt_model(model_id=model_id)
 
     @classmethod
     def build(cls) -> "ChatGptService":

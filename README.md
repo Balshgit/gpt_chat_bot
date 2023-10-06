@@ -132,10 +132,12 @@ alembic --config ./alembic.ini downgrade 389018a3e0f0
 
 ## TODO
 
-- [] add Database and models
-- [] add alembic migrations
+- [x] add Database and models
+- [x] add alembic migrations
 - [] add models priority and their rotation
-- [] add more tests
+- [x] add update model priority endpoint
+- [] add more tests for gpt model selection
+- [] add authorisation for api
 - [] reformat conftest.py file
 - [x] Add sentry
 - [x] Add graylog integration and availability to log to file

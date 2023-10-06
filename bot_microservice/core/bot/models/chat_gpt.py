@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from infra.database.base import Base
 
-__slots__ = ('ChatGpt',)
+__slots__ = ("ChatGpt",)
 
 
 class ChatGpt(Base):

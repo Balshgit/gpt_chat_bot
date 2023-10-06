@@ -25,13 +25,14 @@ class Database:
         self._engine: AsyncEngine = create_async_engine(
             str(settings.db_url),
             echo=settings.DB_ECHO,
-            execution_options={'isolation_level': 'AUTOCOMMIT'},
+            execution_options={"isolation_level": "AUTOCOMMIT"},
         )
         self._async_session_factory = async_scoped_session(
             async_sessionmaker(
-                self._engine,
-                expire_on_commit=False,
+                autoflush=False,
                 class_=AsyncSession,
+                expire_on_commit=False,
+                bind=self._engine,
             ),
             scopefunc=current_task,
         )
@@ -46,6 +47,15 @@ class Database:
             except Exception:
                 await session.rollback()
                 raise
+
+    @asynccontextmanager
+    async def get_transaction_session(self) -> AsyncGenerator[AsyncSession, None]:
+        async with self._async_session_factory() as session, session.begin():
+            try:
+                yield session
+            except Exception as error:
+                await session.rollback()
+                raise error
 
     async def create_database(self) -> None:
         """

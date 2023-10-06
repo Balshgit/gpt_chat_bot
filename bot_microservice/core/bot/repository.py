@@ -1,12 +1,13 @@
 import random
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Sequence
 from uuid import uuid4
 
 import httpx
 from httpx import AsyncClient, AsyncHTTPTransport, Response
 from loguru import logger
-from sqlalchemy import desc, select
+from sqlalchemy import delete, desc, select, update
+from sqlalchemy.dialects.sqlite import insert
 
 from constants import CHAT_GPT_BASE_URI, INVALID_GPT_REQUEST_MESSAGES
 from core.bot.models.chat_gpt import ChatGpt
@@ -18,6 +19,42 @@ from settings.config import AppSettings
 class ChatGPTRepository:
     settings: AppSettings
     db: Database
+
+    async def get_chatgpt_models(self) -> Sequence[ChatGpt]:
+        query = select(ChatGpt).order_by(desc(ChatGpt.priority))
+
+        async with self.db.session() as session:
+            result = await session.execute(query)
+            return result.scalars().all()
+
+    async def change_chatgpt_model_priority(self, model_id: int, priority: int) -> None:
+        current_model = await self.get_current_chatgpt_model()
+
+        reset_priority_query = update(ChatGpt).values(priority=0).filter(ChatGpt.model == current_model)
+        set_new_priority_query = update(ChatGpt).values(priority=priority).filter(ChatGpt.model == model_id)
+
+        async with self.db.get_transaction_session() as session:
+            await session.execute(reset_priority_query)
+            await session.execute(set_new_priority_query)
+
+    async def add_chatgpt_model(self, model: str, priority: int) -> dict[str, str | int]:
+        query = (
+            insert(ChatGpt)
+            .values(
+                {ChatGpt.model: model, ChatGpt.priority: priority},
+            )
+            .prefix_with("OR IGNORE")
+        )
+        async with self.db.session() as session:
+            await session.execute(query)
+            await session.commit()
+            return {"model": model, "priority": priority}
+
+    async def delete_chatgpt_model(self, model_id: int) -> None:
+        query = delete(ChatGpt).filter_by(id=model_id)
+
+        async with self.db.session() as session:
+            await session.execute(query)
 
     async def get_current_chatgpt_model(self) -> str:
         query = select(ChatGpt.model).order_by(desc(ChatGpt.priority)).limit(1)

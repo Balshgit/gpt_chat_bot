@@ -25,7 +25,7 @@ greenlet = "^3.0"
 graypy = "^2.1.0"
 aiosqlite = "^0.19.0"
 yarl = "^1.9.2"
-sqlalchemy = "^2.0.21"
+sqlalchemy = {version = "^2.0.21", extras=["mypy"]}
 alembic = "^1.12.0"
 
 
@@ -165,6 +165,9 @@ warn_no_return = true
 exclude = [
     "chat_gpt_microservice",
     "bot_microservice/infra/database/migrations/versions/*"
+]
+plugins = [
+    "sqlalchemy.ext.mypy.plugin",
 ]
 
 [tool.black]

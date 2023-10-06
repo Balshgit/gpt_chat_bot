@@ -3,7 +3,7 @@ from fastapi.responses import ORJSONResponse
 from starlette import status
 from starlette.responses import Response
 
-from api.deps import get_chat_gpt_service
+from api.deps import get_chatgpt_service
 from api.exceptions import BaseAPIException
 from constants import INVALID_GPT_REQUEST_MESSAGES
 from core.bot.services import ChatGptService
@@ -33,7 +33,7 @@ async def healthcheck() -> ORJSONResponse:
 )
 async def gpt_healthcheck(
     response: Response,
-    chatgpt_service: ChatGptService = Depends(get_chat_gpt_service),
+    chatgpt_service: ChatGptService = Depends(get_chatgpt_service),
 ) -> Response:
     response.status_code = status.HTTP_200_OK
     try:

@@ -59,7 +59,7 @@ def _setup_db(app: FastAPI, settings: AppSettings) -> None:
     engine = create_async_engine(
         str(settings.db_url),
         echo=settings.DB_ECHO,
-        execution_options={'isolation_level': 'AUTOCOMMIT'},
+        execution_options={"isolation_level": "AUTOCOMMIT"},
     )
     session_factory = async_scoped_session(
         async_sessionmaker(

@@ -30,8 +30,8 @@ class Application:
         self.app.state.bot_app = bot_app
         self.bot_app = bot_app
 
-        self.app.on_event('startup')(startup(self.app, settings))
-        self.app.on_event('shutdown')(shutdown(self.app))
+        self.app.on_event("startup")(startup(self.app, settings))
+        self.app.on_event("shutdown")(shutdown(self.app))
 
         self.app.include_router(api_router)
         self.configure_hooks()

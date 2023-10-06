@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
+from inspect import cleandoc
 from typing import Any
 
 
@@ -22,3 +23,9 @@ def timed_cache(**timedelta_kwargs: Any) -> Any:
         return _wrapped
 
     return _wrapper
+
+
+def clean_doc(cls: Any) -> str | None:
+    if cls.__doc__ is None:
+        return None
+    return cleandoc(cls.__doc__)
