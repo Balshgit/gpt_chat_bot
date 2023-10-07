@@ -89,9 +89,9 @@ async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     logger.info("file has been saved", filename=tmpfile.name)
 
-    speech_to_text_service = SpeechToTextService()
+    speech_to_text_service = SpeechToTextService(filename=tmpfile.name)
 
-    speech_to_text_service.get_text_from_audio(filename=tmpfile.name)
+    speech_to_text_service.get_text_from_audio()
 
     part = 0
     while speech_to_text_service.text_parts or not speech_to_text_service.text_recognised:

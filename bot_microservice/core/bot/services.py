@@ -1,5 +1,6 @@
 import os
 import subprocess  # noqa
+import tempfile
 from concurrent.futures.thread import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any, Sequence
@@ -21,22 +22,23 @@ from settings.config import settings
 
 
 class SpeechToTextService:
-    def __init__(self) -> None:
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
         self.executor = ThreadPoolExecutor()
         self.recognizer = Recognizer()
         self.recognizer.energy_threshold = 50
         self.text_parts: dict[int, str] = {}
         self.text_recognised = False
 
-    def get_text_from_audio(self, filename: str) -> None:
-        self.executor.submit(self.worker, filename=filename)
+    def get_text_from_audio(self) -> None:
+        self.executor.submit(self._worker)
 
-    def worker(self, filename: str) -> Any:
-        self._convert_file_to_wav(filename)
-        self._convert_audio_to_text(filename)
+    def _worker(self) -> Any:
+        self._convert_file_to_wav()
+        self._convert_audio_to_text()
 
-    def _convert_audio_to_text(self, filename: str) -> None:
-        wav_filename = f"{filename}.wav"
+    def _convert_audio_to_text(self) -> None:
+        wav_filename = f"{self.filename}.wav"
 
         speech = AudioSegment.from_wav(wav_filename)
         speech_duration = len(speech)
@@ -51,40 +53,38 @@ class SpeechToTextService:
                 sound_segment = speech[i * AUDIO_SEGMENT_DURATION - 250 : i * AUDIO_SEGMENT_DURATION + ending]
             else:
                 sound_segment = speech[i * AUDIO_SEGMENT_DURATION - 250 : (i + 1) * AUDIO_SEGMENT_DURATION]
-            self.text_parts[i] = self._recognize_by_google(wav_filename, sound_segment)
+            self.text_parts[i] = self._recognize_by_google(sound_segment)
 
         self.text_recognised = True
 
         # clean temp voice message main files
         try:
             os.remove(wav_filename)
-            os.remove(filename)
+            os.remove(self.filename)
         except FileNotFoundError as error:
-            logger.error("error temps files not deleted", error=error, filenames=[filename, wav_filename])
+            logger.error("error temps files not deleted", error=error, filenames=[self.filename, wav_filename])
 
-    @staticmethod
-    def _convert_file_to_wav(filename: str) -> None:
-        new_filename = filename + ".wav"
-        cmd = ["ffmpeg", "-loglevel", "quiet", "-i", filename, "-vn", new_filename]
+    def _convert_file_to_wav(self) -> None:
+        new_filename = self.filename + ".wav"
+        cmd = ["ffmpeg", "-loglevel", "quiet", "-i", self.filename, "-vn", new_filename]
         try:
             subprocess.run(args=cmd)  # noqa: S603
             logger.info("file has been converted to wav", filename=new_filename)
         except Exception as error:
-            logger.error("cant convert voice", error=error, filename=filename)
+            logger.error("cant convert voice", error=error, filename=self.filename)
 
-    def _recognize_by_google(self, filename: str, sound_segment: AudioSegment) -> str:
-        tmp_filename = f"{filename}_tmp_part"
-        sound_segment.export(tmp_filename, format="wav")
-        with AudioFile(tmp_filename) as source:
-            audio_text = self.recognizer.listen(source)
-            try:
-                text = self.recognizer.recognize_google(audio_text, language="ru-RU")
-                os.remove(tmp_filename)
-                return text
-            except SpeechRecognizerError as error:
-                os.remove(tmp_filename)
-                logger.error("error recognizing text with google", error=error)
-                raise error
+    def _recognize_by_google(self, sound_segment: AudioSegment) -> str:
+        with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
+            tmpfile.write(sound_segment.raw_data)
+            sound_segment.export(tmpfile, format="wav")
+            with AudioFile(tmpfile) as source:
+                audio_text = self.recognizer.listen(source)
+                try:
+                    text = self.recognizer.recognize_google(audio_text, language="ru-RU")
+                    return text
+                except SpeechRecognizerError as error:
+                    logger.error("error recognizing text with google", error=error)
+                    raise error
 
 
 @dataclass
@@ -108,6 +108,9 @@ class ChatGptService:
 
     async def change_chatgpt_model_priority(self, model_id: int, priority: int) -> None:
         return await self.repository.change_chatgpt_model_priority(model_id=model_id, priority=priority)
+
+    async def reset_all_chatgpt_models_priority(self) -> None:
+        return await self.repository.reset_all_chatgpt_models_priority()
 
     async def add_chatgpt_model(self, gpt_model: str, priority: int) -> dict[str, str | int]:
         return await self.repository.add_chatgpt_model(model=gpt_model, priority=priority)

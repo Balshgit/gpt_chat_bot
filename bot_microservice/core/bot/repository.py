@@ -28,14 +28,15 @@ class ChatGPTRepository:
             return result.scalars().all()
 
     async def change_chatgpt_model_priority(self, model_id: int, priority: int) -> None:
-        current_model = await self.get_current_chatgpt_model()
-
-        reset_priority_query = update(ChatGpt).values(priority=0).filter(ChatGpt.model == current_model)
-        set_new_priority_query = update(ChatGpt).values(priority=priority).filter(ChatGpt.model == model_id)
-
+        query = update(ChatGpt).values(priority=priority).filter(ChatGpt.id == model_id)
         async with self.db.get_transaction_session() as session:
-            await session.execute(reset_priority_query)
-            await session.execute(set_new_priority_query)
+            await session.execute(query)
+
+    async def reset_all_chatgpt_models_priority(self) -> None:
+        query = update(ChatGpt).values(priority=0)
+
+        async with self.db.session() as session:
+            await session.execute(query)
 
     async def add_chatgpt_model(self, model: str, priority: int) -> dict[str, str | int]:
         query = (

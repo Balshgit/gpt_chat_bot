@@ -50,7 +50,7 @@ async def models_list(
     )
 
 
-@router.post(
+@router.put(
     "/models/{model_id}/priority",
     name="bot:change_model_priority",
     response_class=Response,
@@ -64,6 +64,20 @@ async def change_model_priority(
 ) -> None:
     """Изменить приоритет модели в выдаче"""
     await chatgpt_service.change_chatgpt_model_priority(model_id=model_id, priority=gpt_model.priority)
+
+
+@router.put(
+    "/models/priority/reset",
+    name="bot:reset_models_priority",
+    response_class=Response,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="reset all model priority to default",
+)
+async def reset_models_priority(
+    chatgpt_service: ChatGptService = Depends(get_chatgpt_service),
+) -> None:
+    """Сбросить приоритеты у всех моделей на дефолтное значение - 0"""
+    await chatgpt_service.reset_all_chatgpt_models_priority()
 
 
 @router.post(
