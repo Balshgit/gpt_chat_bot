@@ -19,7 +19,7 @@ down_revision = "eb78565abec7"
 branch_labels: str | None = None
 depends_on: str | None = None
 
-engine = create_engine(str(settings.db_url), echo=settings.DB_ECHO)
+engine = create_engine(str(settings.async_db_url), echo=settings.DB_ECHO)
 session_factory = sessionmaker(engine)
 
 

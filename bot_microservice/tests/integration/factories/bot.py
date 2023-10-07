@@ -1,15 +1,33 @@
 import string
 import time
-from typing import Any
+from typing import Any, NamedTuple
 
 import factory
 import factory.fuzzy
 from faker import Faker
 
 from constants import BotStagesEnum
-from tests.integration.factories.models import Chat, User
+from core.bot.models.chat_gpt import ChatGpt
+from tests.integration.factories.utils import BaseModelFactory
 
 faker = Faker("ru_RU")
+
+
+class User(NamedTuple):
+    id: int
+    is_bot: bool
+    first_name: str | None
+    last_name: str | None
+    username: str | None
+    language_code: str
+
+
+class Chat(NamedTuple):
+    id: int
+    first_name: str | None
+    last_name: str | None
+    username: str
+    type: str
 
 
 class BotUserFactory(factory.Factory):
@@ -33,6 +51,15 @@ class BotChatFactory(factory.Factory):
 
     class Meta:
         model = Chat
+
+
+class ChatGptModelFactory(BaseModelFactory):
+    id = factory.Sequence(lambda n: n + 1)
+    model = factory.Faker("word")
+    priority = factory.Faker("random_int", min=0, max=42)
+
+    class Meta:
+        model = ChatGpt
 
 
 class BotInfoFactory(factory.DictFactory):

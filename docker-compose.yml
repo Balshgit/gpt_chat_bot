@@ -24,7 +24,7 @@ services:
     env_file:
       - bot_microservice/settings/.env
     volumes:
-      - ./bot_microservice/settings/.env:/app/settings/.env:ro
+      - ./bot_microservice/settings:/app/settings:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
       chat-gpt-network:

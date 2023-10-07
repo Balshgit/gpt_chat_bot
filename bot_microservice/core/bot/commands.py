@@ -32,8 +32,10 @@ async def about_me(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
         return None
+    chat_gpt_service = ChatGptService.build()
+    model = await chat_gpt_service.get_current_chatgpt_model()
     await update.effective_message.reply_text(
-        f"Бот использует бесплатную модель {settings.GPT_MODEL} для ответов на вопросы. "
+        f"Бот использует бесплатную модель {model} для ответов на вопросы. "
         f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
         f"Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
         parse_mode="Markdown",

@@ -5,17 +5,21 @@ enforcing slots in the subclasses."""
 import asyncio
 from asyncio import AbstractEventLoop
 from datetime import tzinfo
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from pytest_asyncio.plugin import SubRequest
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 from telegram import Bot, User
 from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
 
 from core.bot.app import BotApplication
 from core.bot.handlers import bot_event_handlers
+from infra.database.db_adapter import Database
+from infra.database.meta import meta
 from main import Application as AppApplication
 from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
@@ -25,6 +29,55 @@ from tests.integration.factories.bot import BotInfoFactory, BotUserFactory
 @pytest.fixture(scope="session")
 def test_settings() -> AppSettings:
     return get_settings()
+
+
+@pytest.fixture(scope="session")
+def engine(test_settings: AppSettings) -> Generator[Engine, None, None]:
+    """
+    Create engine and databases.
+
+    :yield: new engine.
+    """
+    engine: Engine = create_engine(
+        str(test_settings.sync_db_url),
+        echo=test_settings.DB_ECHO,
+        isolation_level="AUTOCOMMIT",
+    )
+
+    try:
+        yield engine
+    finally:
+        engine.dispose()
+
+
+@pytest_asyncio.fixture(scope="function")
+def dbsession(engine: Engine) -> Generator[Session, None, None]:
+    """
+    Get session to database.
+
+    Fixture that returns a SQLAlchemy session with a SAVEPOINT, and the rollback to it
+    after the test completes.
+
+    :param engine: current engine.
+    :yields: async session.
+    """
+    connection = engine.connect()
+    trans = connection.begin()
+
+    session_maker = sessionmaker(
+        connection,
+        expire_on_commit=False,
+    )
+    session = session_maker()
+
+    try:
+        meta.create_all(engine)
+        yield session
+    finally:
+        meta.drop_all(engine)
+        session.close()
+        trans.rollback()
+        connection.close()
 
 
 class PytestExtBot(ExtBot):  # type: ignore
@@ -101,7 +154,7 @@ def _get_bot_user(token: str) -> User:
 
 # Redefine the event_loop fixture to have a session scope. Otherwise `bot` fixture can't be
 # session. See https://github.com/pytest-dev/pytest-asyncio/issues/68 for more details.
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def event_loop(request: SubRequest) -> AbstractEventLoop:
     """
     Пересоздаем луп для изоляции тестов. В основном нужно для запуска юнит тестов
@@ -235,7 +288,10 @@ async def main_application(
     bot_app.application.bot = make_bot(BotInfoFactory())
     bot_app.application.bot._bot_user = BotUserFactory()
     fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app)
+    database = Database(test_settings)
+    await database.create_database()
     yield fast_api_app
+    await database.drop_database()
 
 
 @pytest_asyncio.fixture()

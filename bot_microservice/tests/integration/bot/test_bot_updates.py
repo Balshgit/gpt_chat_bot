@@ -8,18 +8,20 @@ import telegram
 from assertpy import assert_that
 from faker import Faker
 from httpx import AsyncClient, Response
+from sqlalchemy.orm import Session
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 
 from constants import BotStagesEnum
 from core.bot.app import BotApplication, BotQueue
 from main import Application
-from settings.config import AppSettings, settings
+from settings.config import AppSettings
 from tests.integration.bot.networking import MockedRequest
 from tests.integration.factories.bot import (
     BotCallBackQueryFactory,
     BotMessageFactory,
     BotUpdateFactory,
     CallBackFactory,
+    ChatGptModelFactory,
 )
 from tests.integration.utils import mocked_ask_question_api
 
@@ -150,9 +152,12 @@ async def test_about_me_callback_action(
 
 
 async def test_about_bot_callback_action(
+    dbsession: Session,
     main_application: Application,
     test_settings: AppSettings,
 ) -> None:
+    ChatGptModelFactory(priority=0)
+    model_with_highest_priority = ChatGptModelFactory(priority=1)
     with mock.patch.object(telegram._message.Message, "reply_text") as mocked_reply_text:
         bot_update = BotCallBackQueryFactory(
             message=BotMessageFactory.create_instance(text="Список основных команд:"),
@@ -164,7 +169,7 @@ async def test_about_bot_callback_action(
         )
 
         assert mocked_reply_text.call_args.args == (
-            f"Бот использует бесплатную модель {settings.GPT_MODEL} для ответов на вопросы. "
+            f"Бот использует бесплатную модель {model_with_highest_priority.model} для ответов на вопросы. "
             f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения "
             f"в текст. Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
         )
@@ -189,9 +194,11 @@ async def test_website_callback_action(
 
 
 async def test_ask_question_action(
+    dbsession: Session,
     main_application: Application,
     test_settings: AppSettings,
 ) -> None:
+    ChatGptModelFactory.create_batch(size=3)
     with mock.patch.object(
         telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
     ) as mocked_send_message, mocked_ask_question_api(
@@ -214,9 +221,11 @@ async def test_ask_question_action(
 
 
 async def test_ask_question_action_not_success(
+    dbsession: Session,
     main_application: Application,
     test_settings: AppSettings,
 ) -> None:
+    ChatGptModelFactory.create_batch(size=3)
     with mock.patch.object(
         telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
     ) as mocked_send_message, mocked_ask_question_api(
@@ -238,9 +247,11 @@ async def test_ask_question_action_not_success(
 
 
 async def test_ask_question_action_critical_error(
+    dbsession: Session,
     main_application: Application,
     test_settings: AppSettings,
 ) -> None:
+    ChatGptModelFactory.create_batch(size=3)
     with mock.patch.object(
         telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
     ) as mocked_send_message, mocked_ask_question_api(
