@@ -59,4 +59,14 @@ class ChatGptModelsEnum(StrEnum):
 
     @classmethod
     def values(cls) -> set[str]:
-        return set(map(str, set(ChatGptModelsEnum)))
+        return set(map(str, filter(lambda m: m not in ChatGptModelsEnum._deprecated(), cls)))
+
+    @staticmethod
+    def _deprecated() -> set[str]:
+        return {
+            "gpt-3.5-turbo-Aichat",
+            "gpt-3.5-turbo-stream-ChatForAi",
+            "gpt-3.5-turbo-stream-AItianhuSpace",
+            "gpt-3.5-turbo-AItianhu",
+            "gpt-3.5-turbo-acytoo",
+        }
