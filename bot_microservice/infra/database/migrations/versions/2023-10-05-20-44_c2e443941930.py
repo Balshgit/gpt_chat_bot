@@ -32,7 +32,7 @@ def upgrade() -> None:
         if models:
             return None
         models = []
-        for model in ChatGptModelsEnum:
+        for model in ChatGptModelsEnum.values():
             priority = 0 if model != "gpt-3.5-turbo-stream-FreeGpt" else 1
             fields = {"model": model, "priority": priority}
             models.append(ChatGpt(**fields))
