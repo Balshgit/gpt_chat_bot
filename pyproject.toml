@@ -105,7 +105,7 @@ ban-relative-imports = true
 nested-classes-whitelist = ["Config", "Meta"]
 pytest-parametrize-names-type = "csv"
 exclude = [
-    "chat_gpt_microservice/*",
+    "chatgpt_microservice/*",
     ".cache/*",
     ".pytest_cache/*",
     "*/__pycache__/*",
@@ -163,7 +163,7 @@ warn_unused_configs = true
 warn_unreachable = true
 warn_no_return = true
 exclude = [
-    "chat_gpt_microservice",
+    "chatgpt_microservice/*",
     "bot_microservice/infra/database/migrations/versions/*"
 ]
 plugins = [
