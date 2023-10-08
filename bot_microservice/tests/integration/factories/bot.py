@@ -2,7 +2,6 @@ import string
 import time
 from typing import Any, NamedTuple
 
-import factory
 import factory.fuzzy
 from faker import Faker
 
@@ -22,14 +21,6 @@ class User(NamedTuple):
     language_code: str
 
 
-class Chat(NamedTuple):
-    id: int
-    first_name: str | None
-    last_name: str | None
-    username: str
-    type: str
-
-
 class BotUserFactory(factory.Factory):
     id = factory.Sequence(lambda n: 1000 + n)
     is_bot = False
@@ -40,6 +31,14 @@ class BotUserFactory(factory.Factory):
 
     class Meta:
         model = User
+
+
+class Chat(NamedTuple):
+    id: int
+    first_name: str | None
+    last_name: str | None
+    username: str
+    type: str
 
 
 class BotChatFactory(factory.Factory):
@@ -94,6 +93,7 @@ class BotMessageFactory(factory.DictFactory):
     date = time.time()
     text = factory.Faker("text")
     entities = factory.LazyFunction(lambda: [BotEntitleFactory()])
+    voice = None
 
     @classmethod
     def create_instance(cls, **kwargs: Any) -> dict[str, Any]:
@@ -121,3 +121,13 @@ class CallBackFactory(factory.DictFactory):
 class BotCallBackQueryFactory(factory.DictFactory):
     update_id = factory.Faker("random_int", min=10**8, max=10**9 - 1)
     callback_query = factory.LazyFunction(lambda: BotMessageFactory.create_instance())
+
+
+class BotVoiceFactory(factory.DictFactory):
+    duration = factory.Faker("random_int", min=1, max=700)
+    file_id = factory.Faker(
+        "lexify", text="????????????????????????????????????????????????????????????????????????", locale="en_US"
+    )
+    file_size = factory.Faker("random_int")
+    file_unique_id = factory.Faker("lexify", text="???????????????", locale="en_US")
+    mime_type = "audio/ogg"

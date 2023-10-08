@@ -1,10 +1,10 @@
-from typing import Any, Callable, Optional
+from typing import Any
 
 import pytest
 from httpx import AsyncClient, Response
 from telegram._utils.defaultvalue import DEFAULT_NONE
 from telegram._utils.types import ODVInput
-from telegram.error import BadRequest, RetryAfter, TimedOut
+from telegram.error import RetryAfter, TimedOut
 from telegram.request import HTTPXRequest, RequestData
 
 
@@ -17,7 +17,7 @@ class NonchalantHttpxRequest(HTTPXRequest):
         self,
         url: str,
         method: str,
-        request_data: Optional[RequestData] = None,
+        request_data: RequestData | None = None,
         read_timeout: ODVInput[float] = DEFAULT_NONE,
         write_timeout: ODVInput[float] = DEFAULT_NONE,
         connect_timeout: ODVInput[float] = DEFAULT_NONE,
@@ -37,29 +37,6 @@ class NonchalantHttpxRequest(HTTPXRequest):
             pytest.xfail(f"Not waiting for flood control: {e}")
         except TimedOut as e:
             pytest.xfail(f"Ignoring TimedOut error: {e}")
-
-
-async def expect_bad_request(func: Callable[..., Any], message: str, reason: str) -> Callable[..., Any]:
-    """
-    Wrapper for testing bot functions expected to result in an :class:`telegram.error.BadRequest`.
-    Makes it XFAIL, if the specified error message is present.
-
-    Args:
-        func: The awaitable to be executed.
-        message: The expected message of the bad request error. If another message is present,
-            the error will be reraised.
-        reason: Explanation for the XFAIL.
-
-    Returns:
-        On success, returns the return value of :attr:`func`
-    """
-    try:
-        return await func()
-    except BadRequest as e:
-        if message in str(e):
-            pytest.xfail(f"{reason}. {e}")
-        else:
-            raise e
 
 
 async def send_webhook_message(

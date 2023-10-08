@@ -64,6 +64,22 @@ async def test_bot_queue(
     assert bot_queue.queue.empty()
 
 
+async def test_no_update_message(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    with mock.patch.object(
+        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+    ) as mocked_send_message:
+        bot_update = BotUpdateFactory(message=None)
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+
+        assert mocked_send_message.called is False
+
+
 async def test_help_command(
     main_application: Application,
     test_settings: AppSettings,
@@ -271,19 +287,3 @@ async def test_ask_question_action_critical_error(
             },
             include=["text", "chat_id"],
         )
-
-
-async def test_no_update_message(
-    main_application: Application,
-    test_settings: AppSettings,
-) -> None:
-    with mock.patch.object(
-        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message:
-        bot_update = BotUpdateFactory(message=None)
-
-        await main_application.bot_app.application.process_update(
-            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
-        )
-
-        assert mocked_send_message.called is False
