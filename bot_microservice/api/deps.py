@@ -30,7 +30,7 @@ def get_database(settings: AppSettings = Depends(get_settings)) -> Database:
     return Database(settings=settings)
 
 
-def get_chat_gpt_repository(
+def get_chatgpt_repository(
     db: Database = Depends(get_database), settings: AppSettings = Depends(get_settings)
 ) -> ChatGPTRepository:
     return ChatGPTRepository(settings=settings, db=db)
@@ -41,6 +41,6 @@ def new_bot_queue(bot_app: BotApplication = Depends(get_bot_app)) -> BotQueue:
 
 
 def get_chatgpt_service(
-    chat_gpt_repository: ChatGPTRepository = Depends(get_chat_gpt_repository),
+    chatgpt_repository: ChatGPTRepository = Depends(get_chatgpt_repository),
 ) -> ChatGptService:
-    return ChatGptService(repository=chat_gpt_repository)
+    return ChatGptService(repository=chatgpt_repository)

@@ -96,12 +96,12 @@ class ChatGptService:
 
     async def request_to_chatgpt(self, question: str | None) -> str:
         question = question or "Привет!"
-        chat_gpt_model = await self.get_current_chatgpt_model()
-        return await self.repository.ask_question(question=question, chat_gpt_model=chat_gpt_model)
+        chatgpt_model = await self.get_current_chatgpt_model()
+        return await self.repository.ask_question(question=question, chatgpt_model=chatgpt_model)
 
     async def request_to_chatgpt_microservice(self, question: str) -> Response:
-        chat_gpt_model = await self.get_current_chatgpt_model()
-        return await self.repository.request_to_chatgpt_microservice(question=question, chat_gpt_model=chat_gpt_model)
+        chatgpt_model = await self.get_current_chatgpt_model()
+        return await self.repository.request_to_chatgpt_microservice(question=question, chatgpt_model=chatgpt_model)
 
     async def get_current_chatgpt_model(self) -> str:
         return await self.repository.get_current_chatgpt_model()

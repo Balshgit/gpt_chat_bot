@@ -9,7 +9,7 @@ from loguru import logger
 from sqlalchemy import delete, desc, select, update
 from sqlalchemy.dialects.sqlite import insert
 
-from constants import CHAT_GPT_BASE_URI, INVALID_GPT_REQUEST_MESSAGES
+from constants import CHATGPT_BASE_URI, INVALID_GPT_REQUEST_MESSAGES
 from core.bot.models.chat_gpt import ChatGpt
 from infra.database.db_adapter import Database
 from settings.config import AppSettings
@@ -64,14 +64,14 @@ class ChatGPTRepository:
             result = await session.execute(query)
             return result.scalar_one()
 
-    async def ask_question(self, question: str, chat_gpt_model: str) -> str:
+    async def ask_question(self, question: str, chatgpt_model: str) -> str:
         try:
-            response = await self.request_to_chatgpt_microservice(question=question, chat_gpt_model=chat_gpt_model)
+            response = await self.request_to_chatgpt_microservice(question=question, chatgpt_model=chatgpt_model)
             status = response.status_code
             for message in INVALID_GPT_REQUEST_MESSAGES:
                 if message in response.text:
-                    message = f"{message}: {chat_gpt_model}"
-                    logger.info(message, question=question, chat_gpt_model=chat_gpt_model)
+                    message = f"{message}: {chatgpt_model}"
+                    logger.info(message, question=question, chatgpt_model=chatgpt_model)
                     return message
             if status != httpx.codes.OK:
                 logger.info(f"got response status: {status} from chat api", response.text)
@@ -81,19 +81,19 @@ class ChatGPTRepository:
             logger.error("error get data from chat api", error=error)
         return "Вообще всё сломалось :("
 
-    async def request_to_chatgpt_microservice(self, question: str, chat_gpt_model: str) -> Response:
-        data = self._build_request_data(question=question, chat_gpt_model=chat_gpt_model)
+    async def request_to_chatgpt_microservice(self, question: str, chatgpt_model: str) -> Response:
+        data = self._build_request_data(question=question, chatgpt_model=chatgpt_model)
 
         transport = AsyncHTTPTransport(retries=3)
         async with AsyncClient(base_url=self.settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
-            return await client.post(CHAT_GPT_BASE_URI, json=data, timeout=50)
+            return await client.post(CHATGPT_BASE_URI, json=data, timeout=50)
 
     @staticmethod
-    def _build_request_data(*, question: str, chat_gpt_model: str) -> dict[str, Any]:
+    def _build_request_data(*, question: str, chatgpt_model: str) -> dict[str, Any]:
         return {
             "conversation_id": str(uuid4()),
             "action": "_ask",
-            "model": chat_gpt_model,
+            "model": chatgpt_model,
             "jailbreak": "default",
             "meta": {
                 "id": random.randint(10**18, 10**19 - 1),  # noqa: S311

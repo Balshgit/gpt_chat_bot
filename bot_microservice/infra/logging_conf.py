@@ -105,10 +105,11 @@ def configure_logging(
         {**base_loguru_handler, "colorize": True, "sink": sys.stdout},
     ]
 
-    if settings.GRAYLOG_HOST and settings.GRAYLOG_PORT:
+    if settings.ENABLE_GRAYLOG:
         graylog_handler = graypy.GELFUDPHandler(settings.GRAYLOG_HOST, settings.GRAYLOG_PORT)
         base_config_handlers.append(graylog_handler)
         loguru_handlers.append({**base_loguru_handler, "sink": graylog_handler})
+
     if log_to_file:
         file_path = DIR_LOGS / log_to_file
         if not os.path.exists(log_to_file):
