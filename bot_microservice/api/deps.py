@@ -4,7 +4,7 @@ from telegram import Update
 
 from core.bot.app import BotApplication, BotQueue
 from core.bot.repository import ChatGPTRepository
-from core.bot.services import ChatGptService, SpeechToTextService
+from core.bot.services import ChatGptService
 from infra.database.db_adapter import Database
 from settings.config import AppSettings
 
@@ -34,10 +34,6 @@ def get_chat_gpt_repository(
     db: Database = Depends(get_database), settings: AppSettings = Depends(get_settings)
 ) -> ChatGPTRepository:
     return ChatGPTRepository(settings=settings, db=db)
-
-
-def get_speech_to_text_service() -> SpeechToTextService:
-    return SpeechToTextService()
 
 
 def new_bot_queue(bot_app: BotApplication = Depends(get_bot_app)) -> BotQueue:

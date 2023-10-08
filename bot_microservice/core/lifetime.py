@@ -57,7 +57,7 @@ def _setup_db(app: FastAPI, settings: AppSettings) -> None:
     :param app: fastAPI application.
     """
     engine = create_async_engine(
-        str(settings.db_url),
+        str(settings.async_db_url),
         echo=settings.DB_ECHO,
         execution_options={"isolation_level": "AUTOCOMMIT"},
     )

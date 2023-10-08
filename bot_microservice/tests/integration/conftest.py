@@ -1,21 +1,20 @@
-"""This module contains subclasses of classes from the python-telegram-bot library that
-modify behavior of the respective parent classes in order to make them easier to use in the
-pytest framework. A common change is to allow monkeypatching of the class members by not
-enforcing slots in the subclasses."""
 import asyncio
 from asyncio import AbstractEventLoop
-from datetime import tzinfo
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from pytest_asyncio.plugin import SubRequest
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 from telegram import Bot, User
-from telegram.ext import Application, ApplicationBuilder, Defaults, ExtBot
+from telegram.ext import Application, ApplicationBuilder, ExtBot
 
 from core.bot.app import BotApplication
 from core.bot.handlers import bot_event_handlers
+from infra.database.db_adapter import Database
+from infra.database.meta import meta
 from main import Application as AppApplication
 from settings.config import AppSettings, get_settings
 from tests.integration.bot.networking import NonchalantHttpxRequest
@@ -25,6 +24,55 @@ from tests.integration.factories.bot import BotInfoFactory, BotUserFactory
 @pytest.fixture(scope="session")
 def test_settings() -> AppSettings:
     return get_settings()
+
+
+@pytest.fixture(scope="session")
+def engine(test_settings: AppSettings) -> Generator[Engine, None, None]:
+    """
+    Create engine and databases.
+
+    :yield: new engine.
+    """
+    engine: Engine = create_engine(
+        str(test_settings.sync_db_url),
+        echo=test_settings.DB_ECHO,
+        isolation_level="AUTOCOMMIT",
+    )
+
+    try:
+        yield engine
+    finally:
+        engine.dispose()
+
+
+@pytest_asyncio.fixture(scope="function")
+def dbsession(engine: Engine) -> Generator[Session, None, None]:
+    """
+    Get session to database.
+
+    Fixture that returns a SQLAlchemy session with a SAVEPOINT, and the rollback to it
+    after the test completes.
+
+    :param engine: current engine.
+    :yields: async session.
+    """
+    connection = engine.connect()
+    trans = connection.begin()
+
+    session_maker = sessionmaker(
+        connection,
+        expire_on_commit=False,
+    )
+    session = session_maker()
+
+    try:
+        meta.create_all(engine)
+        yield session
+    finally:
+        meta.drop_all(engine)
+        session.close()
+        trans.rollback()
+        connection.close()
 
 
 class PytestExtBot(ExtBot):  # type: ignore
@@ -101,7 +149,7 @@ def _get_bot_user(token: str) -> User:
 
 # Redefine the event_loop fixture to have a session scope. Otherwise `bot` fixture can't be
 # session. See https://github.com/pytest-dev/pytest-asyncio/issues/68 for more details.
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def event_loop(request: SubRequest) -> AbstractEventLoop:
     """
     Пересоздаем луп для изоляции тестов. В основном нужно для запуска юнит тестов
@@ -137,92 +185,6 @@ async def bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[
         yield _bot
 
 
-@pytest.fixture()
-def one_time_bot(bot_info: dict[str, Any], bot_application: Any) -> PytestExtBot:
-    """A function scoped bot since the session bot would shutdown when `async with app` finishes"""
-    bot = make_bot(bot_info)
-    bot.application = bot_application
-    return bot
-
-
-@pytest_asyncio.fixture(scope="session")
-async def cdc_bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[PytestExtBot, None]:
-    """Makes an ExtBot instance with the given bot_info that uses arbitrary callback_data"""
-    async with make_bot(bot_info, arbitrary_callback_data=True) as _bot:
-        _bot.application = bot_application
-        yield _bot
-
-
-@pytest_asyncio.fixture(scope="session")
-async def raw_bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[PytestBot, None]:
-    """Makes an regular Bot instance with the given bot_info"""
-    async with PytestBot(
-        bot_info["token"],
-        private_key=None,
-        request=NonchalantHttpxRequest(8),
-        get_updates_request=NonchalantHttpxRequest(1),
-    ) as _bot:
-        _bot.application = bot_application
-        yield _bot
-
-
-# Here we store the default bots so that we don't have to create them again and again.
-# They are initialized but not shutdown on pytest_sessionfinish because it is causing
-# problems with the event loop (Event loop is closed).
-_default_bots: dict[Defaults, PytestExtBot] = {}
-
-
-@pytest_asyncio.fixture(scope="session")
-async def default_bot(request: SubRequest, bot_info: dict[str, Any]) -> PytestExtBot:
-    param = request.param if hasattr(request, "param") else {}
-    defaults = Defaults(**param)
-
-    # If the bot is already created, return it. Else make a new one.
-    default_bot = _default_bots.get(defaults)
-    if default_bot is None:
-        default_bot = make_bot(bot_info, defaults=defaults)
-        await default_bot.initialize()
-        _default_bots[defaults] = default_bot  # Defaults object is hashable
-    return default_bot
-
-
-@pytest_asyncio.fixture(scope="session")
-async def tz_bot(timezone: tzinfo, bot_info: dict[str, Any]) -> PytestExtBot:
-    defaults = Defaults(tzinfo=timezone)
-    try:  # If the bot is already created, return it. Saves time since get_me is not called again.
-        return _default_bots[defaults]
-    except KeyError:
-        default_bot = make_bot(bot_info, defaults=defaults)
-        await default_bot.initialize()
-        _default_bots[defaults] = default_bot
-        return default_bot
-
-
-@pytest.fixture(scope="session")
-def chat_id(bot_info: dict[str, Any]) -> int:
-    return bot_info["chat_id"]
-
-
-@pytest.fixture(scope="session")
-def super_group_id(bot_info: dict[str, Any]) -> int:
-    return bot_info["super_group_id"]
-
-
-@pytest.fixture(scope="session")
-def forum_group_id(bot_info: dict[str, Any]) -> int:
-    return int(bot_info["forum_group_id"])
-
-
-@pytest.fixture(scope="session")
-def channel_id(bot_info: dict[str, Any]) -> int:
-    return bot_info["channel_id"]
-
-
-@pytest.fixture(scope="session")
-def provider_token(bot_info: dict[str, Any]) -> str:
-    return bot_info["payment_provider_token"]
-
-
 @pytest_asyncio.fixture(scope="session")
 async def main_application(
     bot_application: PytestApplication, test_settings: AppSettings
@@ -235,7 +197,10 @@ async def main_application(
     bot_app.application.bot = make_bot(BotInfoFactory())
     bot_app.application.bot._bot_user = BotUserFactory()
     fast_api_app = AppApplication(settings=test_settings, bot_app=bot_app)
+    database = Database(test_settings)
+    await database.create_database()
     yield fast_api_app
+    await database.drop_database()
 
 
 @pytest_asyncio.fixture()

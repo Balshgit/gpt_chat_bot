@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import AsyncGenerator
 
 from loguru import logger
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -13,17 +14,17 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from settings.config import AppSettings
 
 
 class Database:
     def __init__(self, settings: AppSettings) -> None:
-        self.db_connect_url = settings.db_url
         self.echo_logs = settings.DB_ECHO
-        self.db_file = settings.DB_FILE
-        self._engine: AsyncEngine = create_async_engine(
-            str(settings.db_url),
+        self.db_file = settings.db_file
+        self._async_engine: AsyncEngine = create_async_engine(
+            str(settings.async_db_url),
             echo=settings.DB_ECHO,
             execution_options={"isolation_level": "AUTOCOMMIT"},
         )
@@ -32,10 +33,23 @@ class Database:
                 autoflush=False,
                 class_=AsyncSession,
                 expire_on_commit=False,
-                bind=self._engine,
+                bind=self._async_engine,
             ),
             scopefunc=current_task,
         )
+        self._sync_engine = create_engine(str(settings.sync_db_url), echo=settings.DB_ECHO)
+        self._sync_session_factory = scoped_session(sessionmaker(self._sync_engine))
+
+    def get_sync_db_session(self) -> Session:
+        session: Session = self._sync_session_factory()
+        try:
+            return session
+        except Exception as err:
+            session.rollback()
+            raise err
+        finally:
+            session.commit()
+            session.close()
 
     @asynccontextmanager
     async def session(self) -> AsyncGenerator[AsyncSession, None]:
@@ -70,7 +84,7 @@ class Database:
 
             load_all_models()
             try:
-                async with self._engine.begin() as connection:
+                async with self._async_engine.begin() as connection:
                     await connection.run_sync(meta.create_all)
 
                 logger.info("all migrations are applied")

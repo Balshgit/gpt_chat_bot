@@ -53,7 +53,7 @@ class AppSettings(SentrySettings, BaseSettings):
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
 
-    DB_FILE: Path = SHARED_DIR / "chat_gpt.db"
+    DB_NAME: str = "chatgpt.db"
     DB_ECHO: bool = False
 
     # ==== gpt settings ====
@@ -96,15 +96,21 @@ class AppSettings(SentrySettings, BaseSettings):
         return "/".join([self.api_prefix, self.token_part])
 
     @cached_property
-    def db_url(self) -> URL:
-        """
-        Assemble database URL from settings.
+    def db_file(self) -> Path:
+        return SHARED_DIR / self.DB_NAME
 
-        :return: database URL.
-        """
+    @cached_property
+    def async_db_url(self) -> URL:
         return URL.build(
             scheme="sqlite+aiosqlite",
-            path=f"///{self.DB_FILE}",
+            path=f"///{self.db_file}",
+        )
+
+    @cached_property
+    def sync_db_url(self) -> URL:
+        return URL.build(
+            scheme="sqlite",
+            path=f"///{self.db_file}",
         )
 
     class Config:

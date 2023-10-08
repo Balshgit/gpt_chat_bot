@@ -1,15 +1,24 @@
 import string
 import time
-from typing import Any
+from typing import Any, NamedTuple
 
-import factory
 import factory.fuzzy
 from faker import Faker
 
 from constants import BotStagesEnum
-from tests.integration.factories.models import Chat, User
+from core.bot.models.chat_gpt import ChatGpt
+from tests.integration.factories.utils import BaseModelFactory
 
 faker = Faker("ru_RU")
+
+
+class User(NamedTuple):
+    id: int
+    is_bot: bool
+    first_name: str | None
+    last_name: str | None
+    username: str | None
+    language_code: str
 
 
 class BotUserFactory(factory.Factory):
@@ -24,6 +33,14 @@ class BotUserFactory(factory.Factory):
         model = User
 
 
+class Chat(NamedTuple):
+    id: int
+    first_name: str | None
+    last_name: str | None
+    username: str
+    type: str
+
+
 class BotChatFactory(factory.Factory):
     id = factory.Sequence(lambda n: 1 + n)
     first_name = factory.Faker("first_name")
@@ -33,6 +50,15 @@ class BotChatFactory(factory.Factory):
 
     class Meta:
         model = Chat
+
+
+class ChatGptModelFactory(BaseModelFactory):
+    id = factory.Sequence(lambda n: n + 1)
+    model = factory.Faker("word")
+    priority = factory.Faker("random_int", min=0, max=42)
+
+    class Meta:
+        model = ChatGpt
 
 
 class BotInfoFactory(factory.DictFactory):
@@ -67,6 +93,7 @@ class BotMessageFactory(factory.DictFactory):
     date = time.time()
     text = factory.Faker("text")
     entities = factory.LazyFunction(lambda: [BotEntitleFactory()])
+    voice = None
 
     @classmethod
     def create_instance(cls, **kwargs: Any) -> dict[str, Any]:
@@ -94,3 +121,13 @@ class CallBackFactory(factory.DictFactory):
 class BotCallBackQueryFactory(factory.DictFactory):
     update_id = factory.Faker("random_int", min=10**8, max=10**9 - 1)
     callback_query = factory.LazyFunction(lambda: BotMessageFactory.create_instance())
+
+
+class BotVoiceFactory(factory.DictFactory):
+    duration = factory.Faker("random_int", min=1, max=700)
+    file_id = factory.Faker(
+        "lexify", text="????????????????????????????????????????????????????????????????????????", locale="en_US"
+    )
+    file_size = factory.Faker("random_int")
+    file_unique_id = factory.Faker("lexify", text="???????????????", locale="en_US")
+    mime_type = "audio/ogg"

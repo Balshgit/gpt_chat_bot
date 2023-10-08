@@ -33,7 +33,7 @@ async def process_bot_updates(
 
 
 @router.get(
-    "/models",
+    "/chatgpt/models",
     name="bot:models_list",
     response_class=JSONResponse,
     response_model=list[ChatGptModelSerializer],
@@ -50,8 +50,8 @@ async def models_list(
     )
 
 
-@router.post(
-    "/models/{model_id}/priority",
+@router.put(
+    "/chatgpt/models/{model_id}/priority",
     name="bot:change_model_priority",
     response_class=Response,
     status_code=status.HTTP_202_ACCEPTED,
@@ -66,8 +66,22 @@ async def change_model_priority(
     await chatgpt_service.change_chatgpt_model_priority(model_id=model_id, priority=gpt_model.priority)
 
 
+@router.put(
+    "/chatgpt/models/priority/reset",
+    name="bot:reset_models_priority",
+    response_class=Response,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="reset all model priority to default",
+)
+async def reset_models_priority(
+    chatgpt_service: ChatGptService = Depends(get_chatgpt_service),
+) -> None:
+    """Сбросить приоритеты у всех моделей на дефолтное значение - 0"""
+    await chatgpt_service.reset_all_chatgpt_models_priority()
+
+
 @router.post(
-    "/models",
+    "/chatgpt/models",
     name="bot:add_new_model",
     response_model=ChatGptModelSerializer,
     status_code=status.HTTP_201_CREATED,
@@ -84,7 +98,7 @@ async def add_new_model(
 
 
 @router.delete(
-    "/models/{model_id}",
+    "/chatgpt/models/{model_id}",
     name="bot:delete_gpt_model",
     response_class=Response,
     status_code=status.HTTP_204_NO_CONTENT,
