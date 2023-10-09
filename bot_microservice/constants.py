@@ -31,16 +31,13 @@ class LogLevelEnum(StrEnum):
 @unique
 class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_openai = "gpt-3.5-turbo-stream-openai"
-    gpt_3_5_turbo_Aichat = "gpt-3.5-turbo-Aichat"
     gpt_4_ChatgptAi = "gpt-4-ChatgptAi"
     gpt_3_5_turbo_weWordle = "gpt-3.5-turbo-weWordle"
-    gpt_3_5_turbo_acytoo = "gpt-3.5-turbo-acytoo"
     gpt_3_5_turbo_stream_DeepAi = "gpt-3.5-turbo-stream-DeepAi"
     gpt_3_5_turbo_stream_H2o = "gpt-3.5-turbo-stream-H2o"
     gpt_3_5_turbo_stream_yqcloud = "gpt-3.5-turbo-stream-yqcloud"
     gpt_OpenAssistant_stream_HuggingChat = "gpt-OpenAssistant-stream-HuggingChat"
     gpt_4_turbo_stream_you = "gpt-4-turbo-stream-you"
-    gpt_3_5_turbo_AItianhu = "gpt-3.5-turbo-AItianhu"
     gpt_3_stream_binjie = "gpt-3-stream-binjie"
     gpt_3_5_turbo_stream_CodeLinkAva = "gpt-3.5-turbo-stream-CodeLinkAva"
     gpt_4_stream_ChatBase = "gpt-4-stream-ChatBase"
@@ -48,11 +45,9 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_16k_stream_Ylokh = "gpt-3.5-turbo-16k-stream-Ylokh"
     gpt_3_5_turbo_stream_Vitalentum = "gpt-3.5-turbo-stream-Vitalentum"
     gpt_3_5_turbo_stream_GptGo = "gpt-3.5-turbo-stream-GptGo"
-    gpt_3_5_turbo_stream_AItianhuSpace = "gpt-3.5-turbo-stream-AItianhuSpace"
     gpt_3_5_turbo_stream_Aibn = "gpt-3.5-turbo-stream-Aibn"
     gpt_3_5_turbo_ChatgptDuo = "gpt-3.5-turbo-ChatgptDuo"
     gpt_3_5_turbo_stream_FreeGpt = "gpt-3.5-turbo-stream-FreeGpt"
-    gpt_3_5_turbo_stream_ChatForAi = "gpt-3.5-turbo-stream-ChatForAi"
     gpt_3_5_turbo_stream_Cromicle = "gpt-3.5-turbo-stream-Cromicle"
     gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
@@ -64,9 +59,5 @@ class ChatGptModelsEnum(StrEnum):
     @staticmethod
     def _deprecated() -> set[str]:
         return {
-            "gpt-3.5-turbo-Aichat",
-            "gpt-3.5-turbo-stream-ChatForAi",
-            "gpt-3.5-turbo-stream-AItianhuSpace",
-            "gpt-3.5-turbo-AItianhu",
-            "gpt-3.5-turbo-acytoo",
+            "gpt-3.5-turbo-stream-gptforlove",
         }
