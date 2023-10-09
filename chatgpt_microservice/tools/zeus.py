@@ -5,7 +5,7 @@ import time
 import traceback
 
 import execjs
-from flask import Flask, request
+from flask import Flask
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from werkzeug.serving import ThreadedWSGIServer
@@ -25,10 +25,10 @@ def deepai_refresh():
         driver = webdriver.Chrome(options=options)
         try:
             driver.get("https://deepai.org")
-            wait = WebDriverWait(driver, 15)
+            WebDriverWait(driver, 15)
             cookies = driver.get_cookies()
             print(cookies)
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
         driver.quit()
         time.sleep(600)
