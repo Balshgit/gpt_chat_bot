@@ -1,12 +1,12 @@
 import os
-import typing
+from typing import TYPE_CHECKING
 
 from sqladmin import Admin, ModelView
 
 from core.bot.models.chat_gpt import ChatGpt
 from settings.config import settings
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from main import Application
 
 
