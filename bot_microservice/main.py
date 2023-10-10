@@ -9,6 +9,8 @@ from constants import LogLevelEnum
 from core.bot.app import BotApplication, BotQueue
 from core.bot.handlers import bot_event_handlers
 from core.lifetime import shutdown, startup
+from infra.admin import create_admin
+from infra.database.db_adapter import Database
 from infra.logging_conf import configure_logging
 from routers import api_router
 from settings.config import AppSettings, get_settings
@@ -28,6 +30,7 @@ class Application:
         self.app.state.settings = settings
         self.app.state.queue = BotQueue(bot_app=bot_app)
         self.app.state.bot_app = bot_app
+        self.db = Database(settings)
         self.bot_app = bot_app
 
         self.app.on_event("startup")(startup(self.app, settings))
@@ -75,7 +78,10 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
     settings = settings or get_settings()
     bot_app = BotApplication(settings=settings, handlers=bot_event_handlers.handlers)
 
-    return Application(settings=settings, bot_app=bot_app).fastapi_app
+    application = Application(settings=settings, bot_app=bot_app)
+    create_admin(application)
+
+    return application.fastapi_app
 
 
 def main() -> None:

@@ -51,6 +51,10 @@ class Database:
             session.commit()
             session.close()
 
+    @property
+    def async_engine(self) -> AsyncEngine:
+        return self._async_engine
+
     @asynccontextmanager
     async def session(self) -> AsyncGenerator[AsyncSession, None]:
         session: AsyncSession = self._async_session_factory()
