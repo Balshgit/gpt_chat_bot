@@ -57,7 +57,8 @@ methods:
 ## Chat:
 
 ```shell
-docker run -p 8858:8858 -it --name freegpt --rm -e CHAT_PATH=/chat balshdocker/freegpt:latest
+docker run --rm --net=host --name freegpt --rm -e CHAT_PATH=/chat balshdocker/freegpt:latest
+docker run --rm --net=host --name zeus --rm balshdocker/freegpt-zeus:latest
 ```
 Open http://localhost:8858/chat/
 
