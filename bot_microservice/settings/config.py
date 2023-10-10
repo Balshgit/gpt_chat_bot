@@ -82,7 +82,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
 
     # ==== gpt settings ====
     GPT_MODEL: str = "gpt-3.5-turbo-stream-DeepAi"
-    GPT_BASE_HOST: str = "http://chathpt_service:8858"
+    GPT_BASE_HOST: str = "http://chathpt_chat_service:8858"
 
     @model_validator(mode="before")  # type: ignore[arg-type]
     def validate_boolean_fields(self) -> Any:

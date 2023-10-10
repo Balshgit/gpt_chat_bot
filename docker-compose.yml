@@ -36,7 +36,7 @@ services:
   chatgpt_chat:
     image: "balshdocker/freegpt:latest"
     container_name: "chatgpt_chat_service"
-    hostname: "chatgpt_service"
+    hostname: "chatgpt_chat_service"
     restart: unless-stopped
     environment:
       CHAT_PATH: "/gpt/chat"
@@ -52,8 +52,8 @@ services:
     hostname: "caddy_service"
     restart: unless-stopped
     ports:
-      - '8083:8083'
-      - '8084:8084'
+      - "8083:8083"
+      - "8084:8084"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
     networks:

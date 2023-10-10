@@ -334,7 +334,6 @@ int main(int argc, char** argv) {
 
     ADD_METHOD("gpt-4-ChatgptAi", FreeGpt::chatGptAi);
     ADD_METHOD("gpt-3.5-turbo-stream-DeepAi", FreeGpt::deepAi);
-    ADD_METHOD("gpt-3.5-turbo-stream-H2o", FreeGpt::h2o);
     ADD_METHOD("gpt-3.5-turbo-stream-yqcloud", FreeGpt::yqcloud);
     ADD_METHOD("gpt-OpenAssistant-stream-HuggingChat", FreeGpt::huggingChat)
     ADD_METHOD("gpt-4-turbo-stream-you", FreeGpt::you);
@@ -351,6 +350,7 @@ int main(int argc, char** argv) {
     ADD_METHOD("gpt-3.5-turbo-stream-gptalk", FreeGpt::gptalk);
     ADD_METHOD("gpt-3.5-turbo-stream-ChatForAi", FreeGpt::chatForAi);
     ADD_METHOD("gpt-3.5-turbo-stream-gptforlove", FreeGpt::gptForLove);
+    ADD_METHOD("gpt-3.5-turbo-stream-ChatgptDemo", FreeGpt::chatGptDemo);
 
     SPDLOG_INFO("active provider:");
     for (auto& [provider, _] : gpt_function)
