@@ -40,6 +40,7 @@ services:
     restart: unless-stopped
     environment:
       CHAT_PATH: "/gpt/chat"
+      API_KEY: "a40f22f2-c1a2-4b1d-a47f-55ae1a7ddbed"
     networks:
       chatgpt-network:
         ipv4_address: 200.20.0.11
