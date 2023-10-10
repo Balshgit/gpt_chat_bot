@@ -1,4 +1,4 @@
-# Telegram bot. Redirects to bot-service
+# Redirects to bot-service
 :8083 {
     reverse_proxy bot_service:8000
     header Strict-Transport-Security max-age=31536000;
@@ -7,9 +7,9 @@
     header -Server
 }
 
-# Telegram bot. Redirects to test-server ip
+# Redirects to chat service
 :8084 {
-    reverse_proxy chat_service:8858
+    reverse_proxy chatgpt_chat_service:8858
     header Strict-Transport-Security max-age=31536000;
 
     # Removing some headers for improved security:

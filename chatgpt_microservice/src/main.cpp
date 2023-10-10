@@ -65,6 +65,8 @@ void setEnvironment(auto& cfg) {
         if (!ip_white_list.is_discarded())
             cfg.ip_white_list = ip_white_list.get<std::vector<std::string>>();
     }
+    if (auto [zeus] = getEnv("ZEUS"); !zeus.empty())
+        cfg.zeus = std::move(zeus);
 }
 
 std::string createIndexHtml(const std::string& file, const Config& cfg) {
@@ -324,10 +326,6 @@ int main(int argc, char** argv) {
 
     setEnvironment(cfg);
     auto [yaml_cfg_str, _] = yaml_cpp_struct::to_yaml(cfg);
-    SPDLOG_INFO("\n{}", yaml_cpp_struct::yaml_to_json(yaml_cfg_str.value()).dump(2));
-    std::cout << "\033[32m"
-              << "GitHub: https://github.com/fantasy-peak/cpp-freegpt-webui"
-              << "\033[0m" << std::endl;
 
     FreeGpt app{cfg};
 
@@ -336,7 +334,6 @@ int main(int argc, char** argv) {
 
     ADD_METHOD("gpt-4-ChatgptAi", FreeGpt::chatGptAi);
     ADD_METHOD("gpt-3.5-turbo-stream-DeepAi", FreeGpt::deepAi);
-    ADD_METHOD("gpt-3.5-turbo-stream-H2o", FreeGpt::h2o);
     ADD_METHOD("gpt-3.5-turbo-stream-yqcloud", FreeGpt::yqcloud);
     ADD_METHOD("gpt-OpenAssistant-stream-HuggingChat", FreeGpt::huggingChat)
     ADD_METHOD("gpt-4-turbo-stream-you", FreeGpt::you);
@@ -349,14 +346,20 @@ int main(int argc, char** argv) {
     ADD_METHOD("gpt-3.5-turbo-stream-Aibn", FreeGpt::aibn);
     ADD_METHOD("gpt-3.5-turbo-ChatgptDuo", FreeGpt::chatGptDuo);
     ADD_METHOD("gpt-3.5-turbo-stream-FreeGpt", FreeGpt::freeGpt);
-    ADD_METHOD("gpt-3.5-turbo-stream-Cromicle", FreeGpt::cromicle);
     ADD_METHOD("gpt-4-stream-Chatgpt4Online", FreeGpt::chatGpt4Online);
     ADD_METHOD("gpt-3.5-turbo-stream-gptalk", FreeGpt::gptalk);
-    // ADD_METHOD("gpt-3.5-turbo-Aichat", FreeGpt::aiChat);
-    // ADD_METHOD("gpt-3.5-turbo-stream-ChatForAi", FreeGpt::chatForAi);
-    // ADD_METHOD("gpt-3.5-turbo-stream-AItianhuSpace", FreeGpt::aiTianhuSpace);
-    // ADD_METHOD("gpt-3.5-turbo-AItianhu", FreeGpt::aiTianhu);
-    // ADD_METHOD("gpt-3.5-turbo-acytoo", FreeGpt::acytoo);
+    ADD_METHOD("gpt-3.5-turbo-stream-ChatForAi", FreeGpt::chatForAi);
+    ADD_METHOD("gpt-3.5-turbo-stream-gptforlove", FreeGpt::gptForLove);
+    ADD_METHOD("gpt-3.5-turbo-stream-ChatgptDemo", FreeGpt::chatGptDemo);
+
+    SPDLOG_INFO("active provider:");
+    for (auto& [provider, _] : gpt_function)
+        SPDLOG_INFO("      {}", provider);
+
+    SPDLOG_INFO("\n{}", yaml_cpp_struct::yaml_to_json(yaml_cfg_str.value()).dump(2));
+    std::cout << "\033[32m"
+              << "GitHub: https://github.com/fantasy-peak/cpp-freegpt-webui"
+              << "\033[0m" << std::endl;
 
     IoContextPool pool{cfg.work_thread_num};
     pool.start();

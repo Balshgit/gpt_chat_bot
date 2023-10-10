@@ -42,7 +42,7 @@ class Application:
             log_to_file=settings.LOG_TO_FILE,
         )
 
-        if settings.SENTRY_DSN is not None:
+        if settings.ENABLE_SENTRY:
             sentry_sdk.init(
                 dsn=settings.SENTRY_DSN,
                 environment=settings.DEPLOY_ENVIRONMENT,

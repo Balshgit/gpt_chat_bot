@@ -47,7 +47,7 @@ async def test_get_chatgpt_models(
     )
 
 
-async def test_change_chagpt_model_priority(
+async def test_change_chatgpt_model_priority(
     dbsession: Session,
     rest_client: AsyncClient,
     faker: Faker,
@@ -61,10 +61,9 @@ async def test_change_chagpt_model_priority(
     upd_model1, upd_model2 = dbsession.query(ChatGpt).order_by(ChatGpt.priority).all()
 
     assert model1.model == upd_model1.model
+    assert model1.priority == upd_model1.priority
     assert model2.model == upd_model2.model
-
-    updated_from_db_model = dbsession.get(ChatGpt, model2.id)
-    assert updated_from_db_model.priority == priority  # type: ignore[union-attr]
+    assert upd_model2.priority == priority
 
 
 async def test_reset_chatgpt_models_priority(

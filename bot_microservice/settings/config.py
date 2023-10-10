@@ -29,12 +29,36 @@ load_dotenv(env_path, override=True)
 
 
 class SentrySettings(BaseSettings):
+    ENABLE_SENTRY: bool = False
     SENTRY_DSN: str | None = None
     DEPLOY_ENVIRONMENT: str | None = None
     SENTRY_TRACES_SAMPLE_RATE: float = 0.95
 
+    @model_validator(mode="after")
+    def validate_sentry_enabled(self) -> "SentrySettings":
+        if self.ENABLE_SENTRY and not self.SENTRY_DSN:
+            raise RuntimeError("sentry dsn must be set")
+        return self
 
-class AppSettings(SentrySettings, BaseSettings):
+
+class LoggingSettings(BaseSettings):
+    ENABLE_JSON_LOGS: bool = True
+    ENABLE_SENTRY_LOGS: bool = False
+
+    ENABLE_GRAYLOG: bool = False
+    GRAYLOG_HOST: str | None = None
+    GRAYLOG_PORT: int | None = None
+
+    LOG_TO_FILE: str | None = None
+
+    @model_validator(mode="after")
+    def validate_graylog_enabled(self) -> "LoggingSettings":
+        if self.ENABLE_GRAYLOG and not all([self.GRAYLOG_HOST, self.GRAYLOG_PORT]):
+            raise RuntimeError("graylog host and port must be set")
+        return self
+
+
+class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     """Application settings."""
 
     PROJECT_NAME: str = "chat gpt bot"
@@ -58,13 +82,7 @@ class AppSettings(SentrySettings, BaseSettings):
 
     # ==== gpt settings ====
     GPT_MODEL: str = "gpt-3.5-turbo-stream-DeepAi"
-    GPT_BASE_HOST: str = "http://chat_service:8858"
-
-    ENABLE_JSON_LOGS: bool = True
-    ENABLE_SENTRY_LOGS: bool = False
-    GRAYLOG_HOST: str | None = None
-    GRAYLOG_PORT: int | None = None
-    LOG_TO_FILE: str | None = None
+    GPT_BASE_HOST: str = "http://chathpt_chat_service:8858"
 
     @model_validator(mode="before")  # type: ignore[arg-type]
     def validate_boolean_fields(self) -> Any:
@@ -75,6 +93,8 @@ class AppSettings(SentrySettings, BaseSettings):
             "START_WITH_WEBHOOK",
             "RELOAD",
             "DEBUG",
+            "ENABLE_GRAYLOG",
+            "ENABLE_SENTRY",
         ):
             setting_value: str | None = values_dict.get(value)
             if setting_value and setting_value.lower() == "false":

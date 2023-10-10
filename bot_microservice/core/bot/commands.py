@@ -32,8 +32,8 @@ async def about_me(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
         return None
-    chat_gpt_service = ChatGptService.build()
-    model = await chat_gpt_service.get_current_chatgpt_model()
+    chatgpt_service = ChatGptService.build()
+    model = await chatgpt_service.get_current_chatgpt_model()
     await update.effective_message.reply_text(
         f"Бот использует бесплатную модель {model} для ответов на вопросы. "
         f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
@@ -69,9 +69,9 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     await update.message.reply_text("Пожалуйста подождите, ответ в среднем занимает 10-15 секунд")
 
-    chat_gpt_service = ChatGptService.build()
+    chatgpt_service = ChatGptService.build()
     logger.warning("question asked", user=update.message.from_user, question=update.message.text)
-    answer = await chat_gpt_service.request_to_chatgpt(question=update.message.text)
+    answer = await chatgpt_service.request_to_chatgpt(question=update.message.text)
     await update.message.reply_text(answer)
 
 

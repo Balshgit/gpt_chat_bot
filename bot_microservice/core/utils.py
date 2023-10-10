@@ -1,18 +1,26 @@
 from datetime import datetime, timedelta
-from functools import lru_cache, wraps
+from functools import cache, wraps
 from inspect import cleandoc
-from typing import Any
+from typing import Any, Callable
 
 
-def timed_cache(**timedelta_kwargs: Any) -> Any:
-    def _wrapper(func: Any) -> Any:
-        update_delta = timedelta(**timedelta_kwargs)
+def timed_lru_cache(
+    microseconds: int = 0,
+    milliseconds: int = 0,
+    seconds: int = 0,
+    minutes: int = 0,
+    hours: int = 0,
+) -> Any:
+    def _wrapper(func: Any) -> Callable[[Any], Any]:
+        update_delta = timedelta(
+            microseconds=microseconds, milliseconds=milliseconds, seconds=seconds, minutes=minutes, hours=hours
+        )
         next_update = datetime.utcnow() + update_delta
-        # Apply @lru_cache to f with no cache size limit
-        cached_func = lru_cache(None)(func)
+
+        cached_func = cache(func)
 
         @wraps(func)
-        def _wrapped(*args: Any, **kwargs: Any) -> Any:
+        def _wrapped(*args: Any, **kwargs: Any) -> Callable[[Any], Any]:
             nonlocal next_update
             now = datetime.utcnow()
             if now >= next_update:
