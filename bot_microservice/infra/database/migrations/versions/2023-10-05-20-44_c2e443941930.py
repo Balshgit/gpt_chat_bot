@@ -30,7 +30,7 @@ def upgrade() -> None:
         models = results.scalars().all()
 
         if models:
-            return None
+            return
         models = []
         for model in ChatGptModelsEnum.values():
             priority = 0 if model != "gpt-3.5-turbo-stream-FreeGpt" else 1

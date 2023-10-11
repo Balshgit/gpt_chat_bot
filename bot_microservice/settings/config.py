@@ -1,4 +1,4 @@
-from functools import cached_property, lru_cache
+from functools import cache, cached_property
 from os import environ
 from pathlib import Path
 from typing import Any
@@ -71,9 +71,11 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     # Enable uvicorn reloading
     RELOAD: bool = False
 
+    # telegram settings
     TELEGRAM_API_TOKEN: str = "123456789:AABBCCDDEEFFaabbccddeeff-1234567890"
-    # webhook settings
     START_WITH_WEBHOOK: bool = False
+
+    # domain settings
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
     CHAT_PREFIX: str = ""
@@ -82,7 +84,6 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     DB_ECHO: bool = False
 
     # ==== gpt settings ====
-    GPT_MODEL: str = "gpt-3.5-turbo-stream-DeepAi"
     GPT_BASE_HOST: str = "http://chathpt_chat_service:8858"
 
     @model_validator(mode="before")  # type: ignore[arg-type]
@@ -146,7 +147,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
         case_sensitive = True
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_settings() -> AppSettings:
     return AppSettings()
 

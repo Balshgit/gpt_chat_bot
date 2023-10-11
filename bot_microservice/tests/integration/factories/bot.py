@@ -97,8 +97,7 @@ class BotMessageFactory(factory.DictFactory):
 
     @classmethod
     def create_instance(cls, **kwargs: Any) -> dict[str, Any]:
-        data = {**cls.build(**kwargs), "from": BotUserFactory()._asdict()}
-        return data
+        return {**cls.build(**kwargs), "from": BotUserFactory()._asdict()}
 
 
 class BotUpdateFactory(factory.DictFactory):
@@ -114,8 +113,7 @@ class CallBackFactory(factory.DictFactory):
 
     @classmethod
     def create_instance(cls, **kwargs: Any) -> dict[str, Any]:
-        data = {**cls.build(**kwargs), "from": BotUserFactory()._asdict()}
-        return data
+        return {**cls.build(**kwargs), "from": BotUserFactory()._asdict()}
 
 
 class BotCallBackQueryFactory(factory.DictFactory):

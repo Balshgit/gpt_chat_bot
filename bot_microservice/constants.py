@@ -1,10 +1,16 @@
+from datetime import timezone
 from enum import StrEnum, unique
+
+from dateutil import tz
 
 AUDIO_SEGMENT_DURATION = 120 * 1000
 
 API_PREFIX = "/api"
 CHATGPT_BASE_URI = "/backend-api/v2/conversation"
 INVALID_GPT_REQUEST_MESSAGES = ("Invalid request model", "return unexpected http status code")
+
+MOSCOW_TZ = tz.gettz("Europe/Moscow")
+UTC_TZ = timezone.utc
 
 
 class BotStagesEnum(StrEnum):

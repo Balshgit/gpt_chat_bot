@@ -23,7 +23,7 @@ async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> st
 
 async def about_me(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
-        return None
+        return
     await update.effective_message.reply_text(
         "Автор бота: *Дмитрий Афанасьев*\n\nTg nickname: *Balshtg*", parse_mode="MarkdownV2"
     )
@@ -31,7 +31,7 @@ async def about_me(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
-        return None
+        return
     chatgpt_service = ChatGptService.build()
     model = await chatgpt_service.get_current_chatgpt_model()
     await update.effective_message.reply_text(
@@ -44,7 +44,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def website(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
-        return None
+        return
     website = urljoin(settings.DOMAIN, f"{settings.chat_prefix}/")
     await update.effective_message.reply_text(f"Веб версия: {website}")
 
@@ -53,7 +53,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     """Send a message when the command /help is issued."""
 
     if not update.effective_message:
-        return None
+        return
     reply_markup = InlineKeyboardMarkup(main_keyboard)
     await update.effective_message.reply_text(
         "Help!",
@@ -65,7 +65,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
-        return None
+        return
 
     await update.message.reply_text("Пожалуйста подождите, ответ в среднем занимает 10-15 секунд")
 
@@ -77,10 +77,10 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
-        return None
+        return
     await update.message.reply_text("Пожалуйста, ожидайте :)\nТрехминутная запись обрабатывается примерно 30 секунд")
     if not update.message.voice:
-        return None
+        return
 
     sound_file = await update.message.voice.get_file()
     sound_bytes = await sound_file.download_as_bytearray()

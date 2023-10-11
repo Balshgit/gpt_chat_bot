@@ -45,7 +45,7 @@ class BotApplication:
 
     async def polling(self) -> None:
         if self.settings.STAGE == "runtests":
-            return None
+            return
         await self.application.initialize()
         await self.application.start()
         await self.application.updater.start_polling()  # type: ignore

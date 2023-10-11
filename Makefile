@@ -37,6 +37,10 @@ lint-typing:
 lint-complexity:
 	flake8 $(PY_TARGET_DIRS)
 
+## Запустить линтер ruff
+lint-ruff:
+	ruff $(PY_TARGET_DIRS)
+
 ## Проверить зависимостей
 lint-deps:
 	poetry run poetry check
@@ -45,7 +49,7 @@ lint-deps:
 	poetry run pip-audit
 
 ## Запустить все линтеры
-lint: lint-typing lint-complexity check-import-sorting lint-deps
+lint: lint-typing lint-complexity check-import-sorting lint-ruff lint-deps
 
 ## Show help
 help:

@@ -39,7 +39,7 @@ python main.py
 
 ```shell
 cd bot_microservice
-	poetry run uvicorn --host 0.0.0.0 --factory main:create_app --port 8000 --reload
+	poetry run uvicorn --factory --host 0.0.0.0 --port 8080 --reload --workers 2 --log-level warning
 ```
 
 To start on polling mode set `START_WITH_WEBHOOK` to blank
@@ -79,7 +79,7 @@ gunicorn main:create_app --workers 10 --bind 0.0.0.0:8000 --worker-class uvicorn
 ### Run local tests:
 ```bash
 cd bot_microservice
-STAGE=runtests poetry run pytest
+LOCALTEST=1 STAGE=runtests poetry run pytest
 ```
 
 ### Run tests in docker compose:

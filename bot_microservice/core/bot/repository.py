@@ -70,15 +70,16 @@ class ChatGPTRepository:
             status = response.status_code
             for message in INVALID_GPT_REQUEST_MESSAGES:
                 if message in response.text:
-                    message = f"{message}: {chatgpt_model}"
-                    logger.info(message, question=question, chatgpt_model=chatgpt_model)
-                    return message
+                    invalid_model_message = f"{message}: {chatgpt_model}"
+                    logger.info(invalid_model_message, question=question, chatgpt_model=chatgpt_model)
+                    return invalid_model_message
             if status != httpx.codes.OK:
                 logger.info(f"got response status: {status} from chat api", response.text)
                 return "Что-то пошло не так, попробуйте еще раз или обратитесь к администратору"
-            return response.text
         except Exception as error:
             logger.error("error get data from chat api", error=error)
+        else:
+            return response.text
         return "Вообще всё сломалось :("
 
     async def request_to_chatgpt_microservice(self, question: str, chatgpt_model: str) -> Response:
