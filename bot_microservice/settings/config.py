@@ -8,7 +8,7 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 from yarl import URL
 
-from constants import API_PREFIX
+from constants import API_PREFIX, CHATGPT_BASE_URI
 
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
@@ -111,6 +111,10 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     @cached_property
     def chat_prefix(self) -> str:
         return self.URL_PREFIX + self.CHAT_PREFIX
+
+    @cached_property
+    def chatgpt_backend_url(self) -> str:
+        return self.chat_prefix + CHATGPT_BASE_URI
 
     @cached_property
     def token_part(self) -> str:
