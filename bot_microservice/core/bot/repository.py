@@ -86,7 +86,8 @@ class ChatGPTRepository:
 
         transport = AsyncHTTPTransport(retries=3)
         async with AsyncClient(base_url=self.settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
-            return await client.post(CHATGPT_BASE_URI, json=data, timeout=50)
+            url = self.settings.chat_prefix + CHATGPT_BASE_URI
+            return await client.post(url, json=data, timeout=50)
 
     @staticmethod
     def _build_request_data(*, question: str, chatgpt_model: str) -> dict[str, Any]:
