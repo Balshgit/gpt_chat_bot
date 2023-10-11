@@ -204,9 +204,7 @@ async def main_application(
 
 
 @pytest_asyncio.fixture()
-async def rest_client(
-    main_application: AppApplication,
-) -> AsyncGenerator[AsyncClient, None]:
+async def rest_client(main_application: AppApplication) -> AsyncGenerator[AsyncClient, None]:
     """
     Default http client. Use to test unauthorized requests, public endpoints
     or special authorization methods.

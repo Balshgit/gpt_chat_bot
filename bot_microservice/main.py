@@ -27,11 +27,12 @@ class Application:
             openapi_url="/" + "/".join([settings.api_prefix.strip("/"), "openapi.json"]),
             default_response_class=UJSONResponse,
         )
-        self.app.state.settings = settings
-        self.app.state.queue = BotQueue(bot_app=bot_app)
-        self.app.state.bot_app = bot_app
-        self.db = Database(settings)
         self.bot_app = bot_app
+        self.db = Database(settings)
+        self._bot_queue = BotQueue(bot_app=self.bot_app)
+        self.app.state.settings = settings
+        self.app.state.queue = self._bot_queue
+        self.app.state.bot_app = self.bot_app
 
         self.app.on_event("startup")(startup(self.app, settings))
         self.app.on_event("shutdown")(shutdown(self.app))
@@ -56,6 +57,10 @@ class Application:
     @cached_property
     def fastapi_app(self) -> FastAPI:
         return self.app
+
+    @cached_property
+    def bot_queue(self) -> BotQueue:
+        return self._bot_queue
 
     def configure_hooks(self) -> None:
         if self.bot_app.start_with_webhook:
