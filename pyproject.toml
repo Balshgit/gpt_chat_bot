@@ -120,10 +120,10 @@ ignore = [
     "B008"
 ]
 per-file-ignores = [
-    # too complex queries
     "bot_microservice/tests/*: S101",
     "bot_microservice/tests/integration/conftest.py: NEW100",
-    "bot_microservice/settings/config.py: S104"
+    "bot_microservice/settings/config.py: S104",
+    "bot_microservice/tests/unit/test_system_utils.py: S101, AAA01"
 ]
 
 [tool.autoflake]
