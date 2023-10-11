@@ -427,6 +427,12 @@ auto getConversationJson(const nlohmann::json& json) {
     return conversation;
 }
 
+template <typename T = std::chrono::milliseconds>
+uint64_t getTimestamp(std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now()) {
+    uint64_t timestamp = std::chrono::duration_cast<T>(now.time_since_epoch()).count();
+    return timestamp;
+}
+
 struct HttpResponse {
     int32_t http_response_code;
     std::vector<std::unordered_multimap<std::string, std::string>> http_header;
@@ -1881,8 +1887,7 @@ boost::asio::awaitable<void> FreeGpt::aibn(std::shared_ptr<Channel> ch, nlohmann
         }
         return sha_stream.str();
     };
-    uint64_t timestamp =
-        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t timestamp = getTimestamp<std::chrono::seconds>();
     std::string signature = generate_signature(timestamp, prompt);
 
     constexpr std::string_view request_str{R"({
@@ -1909,84 +1914,6 @@ boost::asio::awaitable<void> FreeGpt::aibn(std::shared_ptr<Channel> ch, nlohmann
 
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-    ScopeExit auto_exit{[=] {
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-    }};
-
-    res = curl_easy_perform(curl);
-
-    if (res != CURLE_OK) {
-        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
-        auto error_info = std::format("curl_easy_perform() failed:{}", curl_easy_strerror(res));
-        ch->try_send(err, error_info);
-        co_return;
-    }
-    int32_t response_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    if (response_code != 200) {
-        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
-        ch->try_send(err, std::format("you http code:{}", response_code));
-        co_return;
-    }
-    co_return;
-}
-
-boost::asio::awaitable<void> FreeGpt::chatGptDuo(std::shared_ptr<Channel> ch, nlohmann::json json) {
-    co_await boost::asio::post(boost::asio::bind_executor(*m_thread_pool_ptr, boost::asio::use_awaitable));
-
-    boost::system::error_code err{};
-    ScopeExit _exit{[=] { boost::asio::post(ch->get_executor(), [=] { ch->close(); }); }};
-    auto prompt = json.at("meta").at("content").at("parts").at(0).at("content").get<std::string>();
-
-    CURLcode res;
-    CURL* curl = curl_easy_init();
-    if (!curl) {
-        auto error_info = std::format("curl_easy_init() failed:{}", curl_easy_strerror(res));
-        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
-        ch->try_send(err, error_info);
-        co_return;
-    }
-
-    curl_easy_setopt(curl, CURLOPT_URL, "https://chatgptduo.com/");
-    auto request_data = urlEncode(std::format("prompt=('{}',)&search=('{}',)&purpose=ask", prompt, prompt));
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_data.c_str());
-
-    struct Input {
-        std::shared_ptr<Channel> ch;
-    };
-    Input input{ch};
-    auto action_cb = [](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
-        boost::system::error_code err{};
-        auto input_ptr = static_cast<Input*>(userp);
-        std::string data{(char*)contents, size * nmemb};
-        auto& [ch] = *input_ptr;
-        boost::asio::post(ch->get_executor(), [=, data = std::move(data)] mutable {
-            nlohmann::json json = nlohmann::json::parse(data, nullptr, false);
-            if (json.is_discarded()) {
-                SPDLOG_ERROR("json parse error: [{}]", data);
-                ch->try_send(err, data);
-                return;
-            }
-            if (json.contains("answer")) {
-                auto str = json["answer"].get<std::string>();
-                ch->try_send(err, str);
-            } else {
-                ch->try_send(err, std::format("Invalid JSON: {}", json.dump()));
-            }
-            return;
-        });
-        return size * nmemb;
-    };
-    size_t (*action_fn)(void* contents, size_t size, size_t nmemb, void* userp) = action_cb;
-    curlEasySetopt(curl);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, action_fn);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &input);
-
-    struct curl_slist* headers = nullptr;
-    headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     ScopeExit auto_exit{[=] {
@@ -2049,8 +1976,24 @@ boost::asio::awaitable<void> FreeGpt::chatForAi(std::shared_ptr<Channel> ch, nlo
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, action_fn);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &input);
 
+    auto generate_signature = [](uint64_t timestamp, const std::string& message, const std::string& id) {
+        std::string s = std::to_string(timestamp) + ":" + id + ":" + message + ":7YN8z6d6";
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        SHA256_CTX sha256;
+        if (!SHA256_Init(&sha256))
+            throw std::runtime_error("SHA-256 initialization failed");
+        if (!SHA256_Update(&sha256, s.c_str(), s.length()))
+            throw std::runtime_error("SHA-256 update failed");
+        if (!SHA256_Final(hash, &sha256))
+            throw std::runtime_error("SHA-256 finalization failed");
+        std::stringstream ss;
+        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+            ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
+        return ss.str();
+    };
+    uint64_t timestamp = getTimestamp();
     constexpr std::string_view request_str{R"({
-        "conversationId": "temp",
+        "conversationId": "id_1696984301982",
         "conversationType": "chat_continuous",
         "botId": "chat_continuous",
         "globalSettings": {
@@ -2058,18 +2001,22 @@ boost::asio::awaitable<void> FreeGpt::chatForAi(std::shared_ptr<Channel> ch, nlo
             "model": "gpt-3.5-turbo",
             "messageHistorySize": 5,
             "temperature": 0.7,
-            "top_p": 1,
-            "stream": false
+            "top_p": 1
         },
         "botSettings": {},
         "prompt": "hello",
         "messages": [{
             "role": "user",
             "content": "hello"
-        }]
+        }],
+        "sign": "15d8e701706743ffa74f8b96c97bd1f79354c7da4a97438c81c6bb259004cd77",
+        "timestamp": 1696984302017
     })"};
     nlohmann::json request = nlohmann::json::parse(request_str, nullptr, false);
-
+    auto conversation_id = std::format("id_{}", timestamp - 35);
+    request["conversationId"] = conversation_id;
+    request["timestamp"] = timestamp;
+    request["sign"] = generate_signature(timestamp, prompt, conversation_id);
     request["messages"] = getConversationJson(json);
     request["prompt"] = prompt;
 
@@ -2080,6 +2027,8 @@ boost::asio::awaitable<void> FreeGpt::chatForAi(std::shared_ptr<Channel> ch, nlo
 
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
+    headers = curl_slist_append(headers, "Origin: https://chatforai.store");
+    headers = curl_slist_append(headers, "Referer: https://chatforai.store/");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     ScopeExit auto_exit{[=] {
@@ -2156,8 +2105,7 @@ boost::asio::awaitable<void> FreeGpt::freeGpt(std::shared_ptr<Channel> ch, nlohm
         }
         return sha_stream.str();
     };
-    uint64_t timestamp =
-        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t timestamp = getTimestamp<std::chrono::seconds>();
     std::string signature = generate_signature(timestamp, prompt);
 
     constexpr std::string_view request_str{R"({
@@ -2388,8 +2336,7 @@ boost::asio::awaitable<void> FreeGpt::gptalk(std::shared_ptr<Channel> ch, nlohma
     headers = curl_slist_append(headers, "x-auth-appid: 2229");
     headers = curl_slist_append(headers, "x-auth-openid: ");
     headers = curl_slist_append(headers, "x-auth-platform: ");
-    uint64_t timestamp =
-        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t timestamp = getTimestamp<std::chrono::seconds>();
     auto auth_timestamp = std::format("x-auth-timestamp: {}", timestamp);
     headers = curl_slist_append(headers, auth_timestamp.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -2842,9 +2789,7 @@ boost::asio::awaitable<void> FreeGpt::chatGptDemo(std::shared_ptr<Channel> ch, n
     nlohmann::json ask_request = nlohmann::json::parse(ask_json_str, nullptr, false);
     ask_request["question"] = prompt;
     ask_request["chat_id"] = chat_id;
-    uint64_t timestamp =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-            .count();
+    uint64_t timestamp = getTimestamp();
     request["timestamp"] = timestamp;
     std::string ask_request_str = ask_request.dump();
     SPDLOG_INFO("ask_request_str: [{}]", ask_request_str);

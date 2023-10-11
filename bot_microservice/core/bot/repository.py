@@ -9,7 +9,7 @@ from loguru import logger
 from sqlalchemy import delete, desc, select, update
 from sqlalchemy.dialects.sqlite import insert
 
-from constants import CHATGPT_BASE_URI, INVALID_GPT_REQUEST_MESSAGES
+from constants import INVALID_GPT_REQUEST_MESSAGES
 from core.bot.models.chat_gpt import ChatGpt
 from infra.database.db_adapter import Database
 from settings.config import AppSettings
@@ -86,7 +86,7 @@ class ChatGPTRepository:
 
         transport = AsyncHTTPTransport(retries=3)
         async with AsyncClient(base_url=self.settings.GPT_BASE_HOST, transport=transport, timeout=50) as client:
-            return await client.post(CHATGPT_BASE_URI, json=data, timeout=50)
+            return await client.post(self.settings.chatgpt_backend_url, json=data, timeout=50)
 
     @staticmethod
     def _build_request_data(*, question: str, chatgpt_model: str) -> dict[str, Any]:

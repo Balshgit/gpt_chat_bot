@@ -8,7 +8,7 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 from yarl import URL
 
-from constants import API_PREFIX
+from constants import API_PREFIX, CHATGPT_BASE_URI
 
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
@@ -76,6 +76,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     START_WITH_WEBHOOK: bool = False
     DOMAIN: str = "https://localhost"
     URL_PREFIX: str = ""
+    CHAT_PREFIX: str = ""
 
     DB_NAME: str = "chatgpt.db"
     DB_ECHO: bool = False
@@ -106,6 +107,14 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
         if self.URL_PREFIX:
             return "/" + "/".join([self.URL_PREFIX.strip("/"), API_PREFIX.strip("/")])
         return API_PREFIX
+
+    @cached_property
+    def chat_prefix(self) -> str:
+        return self.URL_PREFIX + self.CHAT_PREFIX
+
+    @cached_property
+    def chatgpt_backend_url(self) -> str:
+        return self.chat_prefix + CHATGPT_BASE_URI
 
     @cached_property
     def token_part(self) -> str:

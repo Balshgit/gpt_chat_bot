@@ -45,7 +45,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def website(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
         return None
-    website = urljoin(settings.DOMAIN, f"{settings.URL_PREFIX}/chat/")
+    website = urljoin(settings.DOMAIN, f"{settings.chat_prefix}/")
     await update.effective_message.reply_text(f"Веб версия: {website}")
 
 

@@ -133,7 +133,8 @@ boost::asio::awaitable<void> startSession(boost::asio::ip::tcp::socket sock, Con
         co_return;
     }
     auto assets_path = std::format("{}{}", cfg.chat_path, ASSETS_PATH);
-    SPDLOG_INFO("assets_path: [{}]", assets_path);
+    auto api_path = std::format("{}{}", cfg.chat_path, API_PATH);
+    SPDLOG_INFO("assets_path: [{}], api_path: [{}]", assets_path, api_path);
     while (true) {
         boost::beast::flat_buffer buffer;
         boost::beast::http::request<boost::beast::http::string_body> request;
@@ -179,6 +180,7 @@ boost::asio::awaitable<void> startSession(boost::asio::ip::tcp::socket sock, Con
                         return std::regex_replace(str, pattern, replacement);
                     };
                     data["chat_path"] = format_string(cfg.chat_path);
+                    data["api_path"] = cfg.chat_path;
                 } else {
                     data["chat_path"] = cfg.chat_path;
                 }
@@ -211,7 +213,7 @@ boost::asio::awaitable<void> startSession(boost::asio::ip::tcp::socket sock, Con
                 boost::beast::http::message_generator rsp = std::move(res);
                 co_await boost::beast::async_write(stream, std::move(rsp), use_nothrow_awaitable);
             }
-        } else if (request.target() == API_PATH) {
+        } else if (request.target() == api_path) {
             std::string model;
             nlohmann::json request_body;
             bool flag = false;
@@ -344,7 +346,6 @@ int main(int argc, char** argv) {
     ADD_METHOD("gpt-3.5-turbo-stream-Vitalentum", FreeGpt::vitalentum);
     ADD_METHOD("gpt-3.5-turbo-stream-GptGo", FreeGpt::gptGo);
     ADD_METHOD("gpt-3.5-turbo-stream-Aibn", FreeGpt::aibn);
-    ADD_METHOD("gpt-3.5-turbo-ChatgptDuo", FreeGpt::chatGptDuo);
     ADD_METHOD("gpt-3.5-turbo-stream-FreeGpt", FreeGpt::freeGpt);
     ADD_METHOD("gpt-4-stream-Chatgpt4Online", FreeGpt::chatGpt4Online);
     ADD_METHOD("gpt-3.5-turbo-stream-gptalk", FreeGpt::gptalk);
