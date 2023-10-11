@@ -1,5 +1,5 @@
 import os
-import subprocess  # noqa
+import subprocess  # noqa: S404
 import tempfile
 from concurrent.futures.thread import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -68,7 +68,7 @@ class SpeechToTextService:
         new_filename = self.filename + ".wav"
         cmd = ["ffmpeg", "-loglevel", "quiet", "-i", self.filename, "-vn", new_filename]
         try:
-            subprocess.run(args=cmd)  # noqa: S603
+            subprocess.run(args=cmd, check=True)  # noqa: S603
             logger.info("file has been converted to wav", filename=new_filename)
         except Exception as error:
             logger.error("cant convert voice", error=error, filename=self.filename)
@@ -80,11 +80,10 @@ class SpeechToTextService:
             with AudioFile(tmpfile) as source:
                 audio_text = self.recognizer.listen(source)
                 try:
-                    text = self.recognizer.recognize_google(audio_text, language="ru-RU")
-                    return text
+                    return self.recognizer.recognize_google(audio_text, language="ru-RU")
                 except SpeechRecognizerError as error:
                     logger.error("error recognizing text with google", error=error)
-                    raise error
+                    raise
 
 
 @dataclass

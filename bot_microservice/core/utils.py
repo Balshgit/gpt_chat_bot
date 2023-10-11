@@ -3,6 +3,8 @@ from functools import cache, wraps
 from inspect import cleandoc
 from typing import Any, Callable
 
+from constants import MOSCOW_TZ
+
 
 def timed_lru_cache(
     microseconds: int = 0,
@@ -15,14 +17,14 @@ def timed_lru_cache(
         update_delta = timedelta(
             microseconds=microseconds, milliseconds=milliseconds, seconds=seconds, minutes=minutes, hours=hours
         )
-        next_update = datetime.utcnow() + update_delta
+        next_update = datetime.now(tz=MOSCOW_TZ) + update_delta
 
         cached_func = cache(func)
 
         @wraps(func)
         def _wrapped(*args: Any, **kwargs: Any) -> Callable[[Any], Any]:
             nonlocal next_update
-            now = datetime.utcnow()
+            now = datetime.now(tz=MOSCOW_TZ)
             if now >= next_update:
                 cached_func.cache_clear()
                 next_update = now + update_delta

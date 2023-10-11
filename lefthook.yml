@@ -45,6 +45,9 @@ format:
     4_black_check:
       glob: "*.py"
       run: black --check -S {staged_files}
+    5_ruff:
+      glob: "*.py"
+      run: ruff bot_microservice
 
 lint:
   parallel: true
@@ -55,6 +58,9 @@ lint:
     flake8:
       glob: "*.py"
       run: flake8 bot_microservice
+    ruff:
+      glob: "*.py"
+      run: ruff bot_microservice
 
 check-format:
   parallel: true

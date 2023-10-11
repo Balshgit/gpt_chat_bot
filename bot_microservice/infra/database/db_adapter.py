@@ -44,9 +44,9 @@ class Database:
         session: Session = self._sync_session_factory()
         try:
             return session
-        except Exception as err:
+        except Exception:
             session.rollback()
-            raise err
+            raise
         finally:
             session.commit()
             session.close()
@@ -71,9 +71,9 @@ class Database:
         async with self._async_session_factory() as session, session.begin():
             try:
                 yield session
-            except Exception as error:
+            except Exception:
                 await session.rollback()
-                raise error
+                raise
 
     async def create_database(self) -> None:
         """

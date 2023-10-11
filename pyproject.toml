@@ -97,6 +97,8 @@ flake8-comments = "^0.1"
 flake8-newspaper-style = "^0.4"
 Flake8-pyproject = "^1.2.3"
 
+ruff = "^0.0.292"
+
 [tool.flake8]
 inline-quotes = "double"
 max-line-length = 120
@@ -214,3 +216,37 @@ addopts = '''
   --cov-context=test
   --no-cov
 '''
+
+
+[tool.ruff]
+extend-select = ["F", "I", "PL", "E", "W", "C4", "PT", "B", "T10", "SIM", "TID", "T20", "PGH", "S", "RET", "ERA", "PIE", "UP", "ASYNC", "ISC", "PERF", "DTZ", "TRY", "C90"]
+ignore = ["S105", "S106", "PGH003", "TRY003", "TRY004", "PT001", "PT023", "I001"]
+line-length = 120
+format="grouped"
+
+[tool.ruff.per-file-ignores]
+"bot_microservice/tests/*" = ["S101", "PLR2004", "PLR0913"]
+"bot_microservice/settings/config.py" = ["S104"]
+
+[tool.ruff.pylint]
+max-args = 15
+
+[tool.ruff.flake8-bugbear]
+# Allow default arguments like, e.g., `data: List[str] = fastapi.Query(None)`.
+extend-immutable-calls = [
+    "fastapi.Depends", "fastapi.Query", "fastapi.Body", "fastapi.File", "fastapi.Cookie", "fastapi.HTTPBearer",
+    "fastapi.Header", "fastapi.Security", "fastapi.Path", "app.api.versioning.APIVersioning", "app.api.openapi.clean_doc",
+    "fastapi.Form"]
+
+[tool.ruff.flake8-pytest-style]
+parametrize-names-type = "csv"
+
+[tool.ruff.mccabe]
+max-complexity = 15
+
+[tool.ruff.isort]
+force-wrap-aliases = true
+combine-as-imports = true
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "double"
