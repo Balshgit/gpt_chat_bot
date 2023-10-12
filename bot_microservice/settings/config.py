@@ -14,8 +14,8 @@ BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
 SHARED_DIR.mkdir(exist_ok=True)
 
-SHARED_DIR.joinpath("logs").mkdir(exist_ok=True)
 DIR_LOGS = SHARED_DIR.joinpath("logs")
+DIR_LOGS.mkdir(exist_ok=True)
 
 env_path = f"{BASE_DIR}/settings/.env"
 

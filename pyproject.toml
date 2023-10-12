@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "chat_gpt_bot"
-version = "0.8.0"
-description = "Bot to integrated with chat-gpt"
+version = "1.2.3"
+description = "Bot to integrated with Chat gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
+
+[build-system]
+requires = ["poetry-core>=1.6.1"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -86,7 +90,7 @@ flake8-warnings = "^0.4"
 flake8-debugger = "^4.1"
 flake8-annotations-complexity = "^0.0.8"
 flake8-fixme = "^1.1"
-flake8-simplify = "^0.20"
+flake8-simplify = "^0.21"
 flake8-variables-names = "^0.0.6"
 flake8-bandit = "^4.1"
 flake8-tidy-imports = "^4.10"

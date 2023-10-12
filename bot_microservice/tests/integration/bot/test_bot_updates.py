@@ -41,7 +41,7 @@ async def test_bot_webhook_endpoint(
     bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/help"))
     response = await rest_client.post(url="/api/CDDEEFFaabbccdd", json=bot_update)
     assert response.status_code == 202
-    update = await main_application.fastapi_app.state._state["queue"].queue.get()
+    update = await main_application.bot_queue.queue.get()
     update = update.to_dict()
     assert update["update_id"] == bot_update["update_id"]
     assert_that(update["message"]).is_equal_to(

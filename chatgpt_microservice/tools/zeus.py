@@ -27,7 +27,7 @@ def deepai_refresh():
             driver.get("https://deepai.org")
             WebDriverWait(driver, 15)
             cookies = driver.get_cookies()
-            print(cookies)
+            print(cookies, flush=True)
         except Exception:
             traceback.print_exc()
         driver.quit()
@@ -60,6 +60,6 @@ if __name__ == "__main__":
     thread.start()
     port = os.getenv("PORT", "8860")
     ip = os.getenv("IP", "0.0.0.0")
-    print(f"start zeus at {ip}:{port}")
+    print(f"start zeus at {ip}:{port}", flush=True)
     server = ThreadedWSGIServer(ip, port, app)
     server.serve_forever()
