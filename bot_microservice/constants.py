@@ -46,7 +46,6 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_stream_binjie = "gpt-3-stream-binjie"
     gpt_3_5_turbo_stream_CodeLinkAva = "gpt-3.5-turbo-stream-CodeLinkAva"
     gpt_4_stream_ChatBase = "gpt-4-stream-ChatBase"
-    gpt_3_5_turbo_stream_aivvm = "gpt-3.5-turbo-stream-aivvm"
     gpt_3_5_turbo_16k_stream_Ylokh = "gpt-3.5-turbo-16k-stream-Ylokh"
     gpt_3_5_turbo_stream_Vitalentum = "gpt-3.5-turbo-stream-Vitalentum"
     gpt_3_5_turbo_stream_GptGo = "gpt-3.5-turbo-stream-GptGo"
@@ -56,9 +55,7 @@ class ChatGptModelsEnum(StrEnum):
     gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
     gpt_3_5_turbo_stream_ChatgptDemo = "gpt-3.5-turbo-stream-ChatgptDemo"
-    gpt_3_5_turbo_stream_H2o = "gpt-3.5-turbo-stream-H2o"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
-    gpt_3_5_turbo_ChatgptDuo = "gpt-3.5-turbo-ChatgptDuo"
 
     @classmethod
     def values(cls) -> set[str]:
@@ -66,4 +63,7 @@ class ChatGptModelsEnum(StrEnum):
 
     @staticmethod
     def _deprecated() -> set[str]:
-        return {"gpt-3.5-turbo-stream-H2o", "gpt-3.5-turbo-stream-gptforlove", "gpt-3.5-turbo-ChatgptDuo"}
+        return {
+            "gpt-3.5-turbo-stream-gptforlove",
+            "gpt-3.5-turbo-stream-aivvm",
+        }
