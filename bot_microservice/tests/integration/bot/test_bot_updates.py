@@ -105,7 +105,7 @@ async def test_help_command(
                             InlineKeyboardButton(callback_data="website", text="Веб версия"),
                         ),
                         (
-                            InlineKeyboardButton(callback_data="help", text="Помощь"),
+                            InlineKeyboardButton(callback_data="github", text="GitHub"),
                             InlineKeyboardButton(callback_data="about_bot", text="О боте"),
                         ),
                     )
@@ -128,7 +128,7 @@ async def test_start_entry(
             update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
         )
 
-        assert_that(mocked_send_message.call_args.kwargs).is_equal_to(
+        assert_that(mocked_send_message.call_args_list[0].kwargs).is_equal_to(
             {
                 "text": "Выберете команду:",
                 "chat_id": bot_update["message"]["chat"]["id"],
@@ -139,11 +139,19 @@ async def test_start_entry(
                             InlineKeyboardButton(callback_data="website", text="Веб версия"),
                         ),
                         (
-                            InlineKeyboardButton(callback_data="help", text="Помощь"),
+                            InlineKeyboardButton(callback_data="github", text="GitHub"),
                             InlineKeyboardButton(callback_data="about_bot", text="О боте"),
                         ),
                     )
                 ),
+            },
+            include=["text", "chat_id", "reply_markup"],
+        )
+        assert_that(mocked_send_message.call_args_list[1].kwargs).is_equal_to(
+            {
+                "text": "Список этих команд всегда можно получить набрав /help",
+                "chat_id": bot_update["message"]["chat"]["id"],
+                "reply_markup": None,
             },
             include=["text", "chat_id", "reply_markup"],
         )
@@ -167,6 +175,24 @@ async def test_about_me_callback_action(
         assert mocked_reply_text.call_args.kwargs == {"parse_mode": "MarkdownV2"}
 
 
+async def test_github_callback_action(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    with mock.patch.object(telegram._message.Message, "reply_text") as mocked_reply_text:
+        bot_update = BotCallBackQueryFactory(
+            message=BotMessageFactory.create_instance(text="Список основных команд:"),
+            callback_query=CallBackFactory(data=BotStagesEnum.github),
+        )
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+
+        assert mocked_reply_text.call_args.args == ("Проект на [GitHub](https://github.com/Balshgit/gpt_chat_bot)",)
+        assert mocked_reply_text.call_args.kwargs == {"parse_mode": "Markdown"}
+
+
 async def test_about_bot_callback_action(
     dbsession: Session,
     main_application: Application,
@@ -185,9 +211,10 @@ async def test_about_bot_callback_action(
         )
 
         assert mocked_reply_text.call_args.args == (
-            f"Бот использует бесплатную модель {model_with_highest_priority.model} для ответов на вопросы. "
-            f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения "
-            f"в текст. Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
+            f"Бот использует бесплатную модель *{model_with_highest_priority.model}* для ответов на вопросы.\n"
+            f"Принимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
+            f"Просто пришлите или перешлите голосовуху боту и получите поток сознания в виде текста, "
+            f"но без знаков препинания.",
         )
         assert mocked_reply_text.call_args.kwargs == {"parse_mode": "Markdown"}
 

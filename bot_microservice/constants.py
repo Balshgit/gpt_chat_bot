@@ -16,8 +16,8 @@ UTC_TZ = timezone.utc
 class BotStagesEnum(StrEnum):
     about_me = "about_me"
     website = "website"
-    help = "help"
     about_bot = "about_bot"
+    github = "github"
 
 
 class BotEntryPoints(StrEnum):

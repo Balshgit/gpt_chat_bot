@@ -18,6 +18,7 @@ async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> st
         return BotEntryPoints.end
     reply_markup = InlineKeyboardMarkup(main_keyboard)
     await update.message.reply_text("Выберете команду:", reply_markup=reply_markup)
+    await update.message.reply_text("Список этих команд всегда можно получить набрав /help")
     return BotEntryPoints.start_routes
 
 
@@ -35,9 +36,9 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chatgpt_service = ChatGptService.build()
     model = await chatgpt_service.get_current_chatgpt_model()
     await update.effective_message.reply_text(
-        f"Бот использует бесплатную модель {model} для ответов на вопросы. "
-        f"\nПринимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
-        f"Просто пришлите голосовуху и получите поток сознания в виде текста, но без знаков препинания",
+        f"Бот использует бесплатную модель *{model}* для ответов на вопросы.\nПринимает запросы на разных языках."
+        f"\n\nБот так же умеет переводить русские голосовые сообщения в текст. Просто пришлите или перешлите "
+        f"голосовуху боту и получите поток сознания в виде текста, но без знаков препинания.",
         parse_mode="Markdown",
     )
 
@@ -60,6 +61,17 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         disable_notification=True,
         api_kwargs={"text": "Список основных команд:"},
         reply_markup=reply_markup,
+    )
+
+
+async def github(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a message when the command /help is issued."""
+
+    if not update.effective_message:
+        return
+    await update.effective_message.reply_text(
+        "Проект на [GitHub](https://github.com/Balshgit/gpt_chat_bot)",
+        parse_mode="Markdown",
     )
 
 
