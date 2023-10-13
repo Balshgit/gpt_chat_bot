@@ -8,7 +8,7 @@ main_keyboard = (
         InlineKeyboardButton("Веб версия", callback_data=str(BotStagesEnum.website)),
     ),
     (
-        InlineKeyboardButton("Помощь", callback_data=str(BotStagesEnum.help)),
+        InlineKeyboardButton("GitHub", callback_data=str(BotStagesEnum.github)),
         InlineKeyboardButton("О боте", callback_data=str(BotStagesEnum.about_bot)),
     ),
 )

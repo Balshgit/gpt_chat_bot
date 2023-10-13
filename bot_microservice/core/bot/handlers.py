@@ -14,6 +14,7 @@ from core.bot.commands import (
     about_bot,
     about_me,
     ask_question,
+    github,
     help_command,
     main_command,
     voice_recognize,
@@ -41,7 +42,7 @@ bot_event_handlers.add_handler(
             BotEntryPoints.start_routes: [
                 CallbackQueryHandler(about_me, pattern="^" + BotStagesEnum.about_me + "$"),
                 CallbackQueryHandler(website, pattern="^" + BotStagesEnum.website + "$"),
-                CallbackQueryHandler(help_command, pattern="^" + BotStagesEnum.help + "$"),
+                CallbackQueryHandler(github, pattern="^" + BotStagesEnum.github + "$"),
                 CallbackQueryHandler(about_bot, pattern="^" + BotStagesEnum.about_bot + "$"),
             ],
         },
@@ -50,5 +51,5 @@ bot_event_handlers.add_handler(
 )
 bot_event_handlers.add_handler(CallbackQueryHandler(about_me, pattern="^" + BotStagesEnum.about_me + "$"))
 bot_event_handlers.add_handler(CallbackQueryHandler(website, pattern="^" + BotStagesEnum.website + "$"))
-bot_event_handlers.add_handler(CallbackQueryHandler(help_command, pattern="^" + BotStagesEnum.help + "$"))
+bot_event_handlers.add_handler(CallbackQueryHandler(github, pattern="^" + BotStagesEnum.github + "$"))
 bot_event_handlers.add_handler(CallbackQueryHandler(about_bot, pattern="^" + BotStagesEnum.about_bot + "$"))
