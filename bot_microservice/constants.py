@@ -18,6 +18,7 @@ class BotStagesEnum(StrEnum):
     website = "website"
     about_bot = "about_bot"
     github = "github"
+    help = "help"
 
 
 class BotEntryPoints(StrEnum):
