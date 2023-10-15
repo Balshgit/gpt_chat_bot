@@ -11,15 +11,8 @@
 #include <curl/curl.h>
 #include <openssl/md5.h>
 #include <spdlog/spdlog.h>
-#include <zlib.h>
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/channel.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <plusaes/plusaes.hpp>
 
 #include "free_gpt.h"
@@ -65,37 +58,6 @@ std::string md5(const std::string& str, bool reverse = true) {
     return md5_str;
 }
 
-std::string generateHexStr(int length) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 15);
-
-    std::stringstream ss;
-    ss << std::hex;
-
-    for (int i = 0; i < length; i++)
-        ss << std::nouppercase << std::setw(1) << std::setfill('0') << dis(gen);
-    return ss.str();
-}
-
-std::string encrypt(const std::string& raw_data) {
-    auto random_key_str = generateHexStr(16);
-    auto random_iv_str = generateHexStr(16);
-    char key_buffer[17]{};
-    memcpy(key_buffer, random_key_str.c_str(), random_key_str.size());
-    std::vector<unsigned char> key = plusaes::key_from_string(&key_buffer);  // 16-char = 128-bit
-    unsigned char iv[16]{};
-    memcpy(iv, random_iv_str.data(), 16);
-    const unsigned long encrypted_size = plusaes::get_padded_encrypted_size(raw_data.size());
-    std::vector<unsigned char> encrypted(encrypted_size);
-    plusaes::encrypt_cbc((unsigned char*)raw_data.data(), raw_data.size(), &key[0], key.size(), &iv, &encrypted[0],
-                         encrypted.size(), true);
-    std::stringstream ss;
-    std::transform(encrypted.begin(), encrypted.end(), std::ostream_iterator<std::string>(ss),
-                   [](unsigned char c) -> std::string { return std::format("{:02x}", int(c)); });
-    return ss.str() + random_key_str + random_iv_str;
-}
-
 auto splitString(const std::string& input, const std::string& delimiter) {
     std::vector<std::string> fields;
     std::string::size_type start = 0;
@@ -123,119 +85,32 @@ std::vector<std::string> findAll(const std::string& pattern, const std::string& 
     return matches;
 }
 
-std::string charToHex(char c) {
-    std::string result;
-    char first, second;
-
-    first = (c & 0xF0) / 16;
-    first += first > 9 ? 'A' - 10 : '0';
-    second = c & 0x0F;
-    second += second > 9 ? 'A' - 10 : '0';
-
-    result.append(1, first);
-    result.append(1, second);
-
-    return result;
-}
-
-std::string urlEncode(const std::string& src) {
-    std::string result;
-    std::string::const_iterator iter;
-
-    for (iter = src.begin(); iter != src.end(); ++iter) {
-        switch (*iter) {
-            case ' ':
-                result.append(1, '+');
-                break;
-            // alnum
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-            case 'G':
-            case 'H':
-            case 'I':
-            case 'J':
-            case 'K':
-            case 'L':
-            case 'M':
-            case 'N':
-            case 'O':
-            case 'P':
-            case 'Q':
-            case 'R':
-            case 'S':
-            case 'T':
-            case 'U':
-            case 'V':
-            case 'W':
-            case 'X':
-            case 'Y':
-            case 'Z':
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e':
-            case 'f':
-            case 'g':
-            case 'h':
-            case 'i':
-            case 'j':
-            case 'k':
-            case 'l':
-            case 'm':
-            case 'n':
-            case 'o':
-            case 'p':
-            case 'q':
-            case 'r':
-            case 's':
-            case 't':
-            case 'u':
-            case 'v':
-            case 'w':
-            case 'x':
-            case 'y':
-            case 'z':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            // mark
-            case '-':
-            case '_':
-            case '.':
-            case '!':
-            case '~':
-            case '*':
-            case '\'':
-            case '(':
-            case ')':
-            case '&':
-            case '=':
-            case '/':
-            case '\\':
-            case '?':
-                result.append(1, *iter);
-                break;
-            // escape
-            default:
-                result.append(1, '%');
-                result.append(charToHex(*iter));
-                break;
+std::string paramsToQueryStr(const std::multimap<std::string, std::string>& params) {
+    auto encode_query_param = [](const std::string& value) {
+        std::ostringstream escaped;
+        escaped.fill('0');
+        escaped << std::hex;
+        for (auto c : value) {
+            if (std::isalnum(static_cast<uint8_t>(c)) || c == '-' || c == '_' || c == '.' || c == '!' || c == '~' ||
+                c == '*' || c == '\'' || c == '(' || c == ')') {
+                escaped << c;
+            } else {
+                escaped << std::uppercase;
+                escaped << '%' << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+                escaped << std::nouppercase;
+            }
         }
+        return escaped.str();
+    };
+    std::string query;
+    for (auto it = params.begin(); it != params.end(); ++it) {
+        if (it != params.begin())
+            query += "&";
+        query += it->first;
+        query += "=";
+        query += encode_query_param(it->second);
     }
-
-    return result;
+    return query;
 }
 
 enum class Status : uint8_t {
@@ -352,28 +227,6 @@ boost::asio::awaitable<Status> sendRequestRecvChunk(
     co_return ret;
 }
 
-std::expected<std::string, std::string> decompress(auto& res) {
-    try {
-        boost::iostreams::array_source src{res.body().data(), res.body().size()};
-        boost::iostreams::filtering_istream is;
-        if (res["Content-Encoding"] == "deflate") {
-            SPDLOG_INFO("decompressing: {}", res["Content-Encoding"]);
-            is.push(boost::iostreams::zlib_decompressor{-MAX_WBITS});  // deflate
-        } else if (res["Content-Encoding"] == "gzip") {
-            SPDLOG_INFO("decompressing: {}", res["Content-Encoding"]);
-            is.push(boost::iostreams::gzip_decompressor{});  // gzip
-        } else if (res["Content-Encoding"] == "") {
-            SPDLOG_INFO("uncompressed: {}", res["Content-Encoding"]);
-        }
-        is.push(src);
-        std::stringstream strstream;
-        boost::iostreams::copy(is, strstream);
-        return strstream.str();
-    } catch (const std::exception& e) {
-        return std::unexpected(e.what());
-    }
-}
-
 boost::asio::awaitable<
     std::expected<std::tuple<boost::beast::http::response<boost::beast::http::string_body>, boost::asio::ssl::context,
                              boost::beast::ssl_stream<boost::beast::tcp_stream>>,
@@ -433,154 +286,12 @@ uint64_t getTimestamp(std::chrono::time_point<std::chrono::system_clock> now = s
     return timestamp;
 }
 
-struct HttpResponse {
-    int32_t http_response_code;
-    std::vector<std::unordered_multimap<std::string, std::string>> http_header;
-    std::string body;
-};
-
-// export CURL_IMPERSONATE=chrome110
-std::optional<HttpResponse> getCookie(CURL* curl, const std::string& url, const std::string& proxy) {
-    bool auto_clean = curl ? false : true;
-
-    if (!curl) {
-        curl = curl_easy_init();
-        if (!curl) {
-            SPDLOG_ERROR("curl_easy_init() failed");
-            return std::nullopt;
-        }
-    }
-
-    HttpResponse http_response;
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    if (!proxy.empty())
-        curl_easy_setopt(curl, CURLOPT_PROXY, proxy.c_str());
-
-    auto write_callback = [](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
-        static_cast<std::string*>(userp)->append((char*)contents, size * nmemb);
-        return size * nmemb;
-    };
-    size_t (*fn_write_callback)(void* contents, size_t size, size_t nmemb, void* userp) = write_callback;
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fn_write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &http_response.body);
-
-    auto header_callback = [](char* buffer, size_t size, size_t nitems, void* userdata) {
-        static_cast<std::string*>(userdata)->append((char*)buffer, size * nitems);
-        return nitems * size;
-    };
-    size_t (*fn_header_callback)(char* buffer, size_t size, size_t nitems, void* userdata) = header_callback;
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, fn_header_callback);
-
-    std::string buffer;
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &buffer);
-    curlEasySetopt(curl);
-
-    ScopeExit auto_exit{[=] {
-        if (auto_clean)
-            curl_easy_cleanup(curl);
-    }};
-
-    CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK) {
-        SPDLOG_ERROR("curl_easy_perform() failed: [{}]", curl_easy_strerror(res));
-        return std::nullopt;
-    }
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response.http_response_code);
-
-    auto header_data = splitString(buffer, "\n");
-
-    std::unordered_multimap<std::string, std::string> headers;
-    for (auto& str : header_data) {
-        // if (str.ends_with("Connection established\n\n"))
-        //     continue;
-        if (str.size() == 1 && !headers.empty()) {
-            http_response.http_header.emplace_back(std::move(headers));
-            headers.clear();
-            continue;
-        }
-        if (!str.contains(": ")) {
-            auto value = splitString(str, " ");
-            if (value.size() >= 2)
-                headers.emplace("http_response_code", value[1]);
-        } else {
-            auto value = splitString(str, ": ");
-            if (value.size() >= 2)
-                headers.emplace(value[0], value[1]);
-        }
-    }
-    if (!headers.empty()) {
-        http_response.http_header.emplace_back(std::move(headers));
-    }
-    for (auto& value : http_response.http_header) {
-        SPDLOG_INFO("=========================================");
-        for (auto& [k, v] : value)
-            SPDLOG_INFO("{}: {}", k, v);
-    }
-    return http_response;
-}
-
-std::expected<nlohmann::json, std::string> callZeus(const std::string& host, const std::string& request_body) {
-    CURLcode res;
-    CURL* curl = curl_easy_init();
-    if (!curl) {
-        auto error_info = std::format("callZeus curl_easy_init() failed:{}", curl_easy_strerror(res));
-        return std::unexpected(error_info);
-    }
-    curl_easy_setopt(curl, CURLOPT_URL, host.data());
-
-    struct Input {
-        std::string recv;
-    };
-    Input input;
-    auto action_cb = [](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
-        auto input_ptr = static_cast<Input*>(userp);
-        std::string data{(char*)contents, size * nmemb};
-        auto& [recv] = *input_ptr;
-        recv.append(data);
-        return size * nmemb;
-    };
-    size_t (*action_fn)(void* contents, size_t size, size_t nmemb, void* userp) = action_cb;
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 120L);
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, action_fn);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &input);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_body.c_str());
-
-    struct curl_slist* headers = nullptr;
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-    ScopeExit auto_exit{[=] {
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-    }};
-
-    res = curl_easy_perform(curl);
-
-    if (res != CURLE_OK) {
-        auto error_info = std::format("callZeus curl_easy_perform() failed:{}", curl_easy_strerror(res));
-        return std::unexpected(error_info);
-    }
-    int32_t response_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    if (response_code != 200) {
-        return std::unexpected(std::format("callZeus http code:{}", response_code));
-    }
-    nlohmann::json rsp = nlohmann::json::parse(input.recv, nullptr, false);
-    if (rsp.is_discarded()) {
-        SPDLOG_ERROR("json parse error");
-        return std::unexpected("parse callZeus error");
-    }
-    return rsp;
-}
-
 struct CurlHttpRequest {
-    CURL* curl;
+    CURL* curl{nullptr};
     std::string url;
     std::string_view http_proxy;
-    size_t (*cb)(void* contents, size_t size, size_t nmemb, void* userp);
-    void* input;
+    size_t (*cb)(void* contents, size_t size, size_t nmemb, void* userp){nullptr};
+    void* input{nullptr};
     std::unordered_map<std::string, std::string>& headers;
     std::string body;
     std::multimap<std::string, std::string>* response_header_ptr{nullptr};
@@ -657,6 +368,49 @@ std::optional<std::string> sendHttpRequest(const CurlHttpRequest& curl_http_requ
         }
     }
     return std::nullopt;
+}
+
+std::expected<nlohmann::json, std::string> callZeus(const std::string& host, const std::string& request_body) {
+    CURLcode res;
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        auto error_info = std::format("callZeus curl_easy_init() failed:{}", curl_easy_strerror(res));
+        return std::unexpected(error_info);
+    }
+    ScopeExit auto_exit{[=] { curl_easy_cleanup(curl); }};
+    std::string http_proxy;
+    std::string recv;
+
+    auto ret = sendHttpRequest(CurlHttpRequest{
+        .curl = curl,
+        .url = host,
+        .http_proxy = http_proxy,
+        .cb = [](void* contents, size_t size, size_t nmemb, void* userp) mutable -> size_t {
+            auto recv_ptr = static_cast<std::string*>(userp);
+            std::string data{(char*)contents, size * nmemb};
+            recv_ptr->append(data);
+            return size * nmemb;
+        },
+        .input = &recv,
+        .headers = [&] -> auto& {
+            static std::unordered_map<std::string, std::string> headers{
+                {"Content-Type", "application/json"},
+            };
+            return headers;
+        }(),
+        .body = request_body,
+        .response_header_ptr = nullptr,
+        .expect_response_code = 200,
+        .ssl_verify = false,
+    });
+    if (ret)
+        return std::unexpected(ret.value());
+    nlohmann::json rsp = nlohmann::json::parse(recv, nullptr, false);
+    if (rsp.is_discarded()) {
+        SPDLOG_ERROR("json parse error");
+        return std::unexpected("parse callZeus error");
+    }
+    return rsp;
 }
 
 }  // namespace
@@ -970,16 +724,17 @@ create_client:
     request.set(boost::beast::http::field::user_agent, user_agent);
     request.set("Content-Type", "application/x-www-form-urlencoded");
 
-    std::stringstream ss;
-    ss << "message=" << urlEncode(std::format("user: {}\nassistant: ", prompt)) << "&";
-    ss << "_wpnonce=" << nonce << "&";
-    ss << "post_id=" << post_id << "&";
-    ss << "url=" << urlEncode("https://chatgpt.ai") << "&";
-    ss << "action=wpaicg_chat_shortcode_message&";
-    ss << "bot_id=" << bot_id;
-
-    SPDLOG_INFO("request: {}", ss.str());
-    request.body() = ss.str();
+    std::multimap<std::string, std::string> params{
+        {"message", std::format("user: {}\nassistant: ", prompt)},
+        {"_wpnonce", nonce},
+        {"post_id", post_id},
+        {"url", "https://chatgpt.ai"},
+        {"action", "wpaicg_chat_shortcode_message"},
+        {"bot_id", bot_id},
+    };
+    auto str = paramsToQueryStr(params);
+    SPDLOG_INFO("request: {}", str);
+    request.body() = str;
     request.prepare_payload();
 
     auto [ec, count] = co_await boost::beast::http::async_write(stream_, request, use_nothrow_awaitable);
@@ -1001,7 +756,7 @@ create_client:
         co_await ch->async_send(err, response.reason(), use_nothrow_awaitable);
         co_return;
     }
-    ss.clear();
+    std::stringstream ss;
     ss << response.base();
     SPDLOG_INFO("{}", ss.str());
     SPDLOG_INFO("response.body(): {}", response.body());
@@ -1310,81 +1065,108 @@ boost::asio::awaitable<void> FreeGpt::huggingChat(std::shared_ptr<Channel> ch, n
 }
 
 boost::asio::awaitable<void> FreeGpt::you(std::shared_ptr<Channel> ch, nlohmann::json json) {
-    boost::asio::post(*m_thread_pool_ptr, [=, this] {
-        boost::system::error_code err{};
-        ScopeExit _exit{[=] { boost::asio::post(ch->get_executor(), [=] { ch->close(); }); }};
+    co_await boost::asio::post(boost::asio::bind_executor(*m_thread_pool_ptr, boost::asio::use_awaitable));
+    boost::system::error_code err{};
+    ScopeExit _exit{[=] { boost::asio::post(ch->get_executor(), [=] { ch->close(); }); }};
 
-        auto prompt = json.at("meta").at("content").at("parts").at(0).at("content").get<std::string>();
+    auto prompt = json.at("meta").at("content").at("parts").at(0).at("content").get<std::string>();
 
-        static std::mutex mtx;
-        static std::queue<std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string>> cookie_queue;
-        std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string> cookie_cache;
-        std::queue<std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string>> tmp_queue;
-        std::unique_lock lk(mtx);
-        while (!cookie_queue.empty()) {
-            auto& [time_point, code] = cookie_queue.front();
-            if (std::chrono::system_clock::now() - time_point < std::chrono::minutes(15))
-                tmp_queue.push(std::move(cookie_queue.front()));
-            cookie_queue.pop();
-        }
-        cookie_queue = std::move(tmp_queue);
-        SPDLOG_INFO("cookie_queue size: {}", cookie_queue.size());
-        if (cookie_queue.empty()) {
-            lk.unlock();
-            auto cookie_opt = getCookie(nullptr, "https://you.com", m_cfg.http_proxy);
-            if (!cookie_opt) {
-                boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, "get cookie error!!!"); });
-                return;
-            }
-            auto& [http_response_code, http_header, body] = cookie_opt.value();
-            if (!cookie_opt) {
-                boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, "http header is empty!!!"); });
-                return;
-            }
-            SPDLOG_INFO("http_response_code: {}", http_response_code);
-            std::string cookie;
-
-            auto range = http_header.back().equal_range("set-cookie");
-            for (auto it = range.first; it != range.second; ++it) {
-                if (it->second.contains("__cf_bm=")) {
-                    auto fields = splitString(it->second, " ");
-                    if (fields.size() < 1) {
-                        boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, "can't get cookie"); });
-                        return;
-                    }
-                    cookie = std::move(fields[0]);
-                    break;
-                }
-            }
-
-            if (cookie.empty()) {
-                boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, "cookie is empty"); });
-                return;
-            }
-            cookie_cache = std::make_tuple(std::chrono::system_clock::now(), std::move(cookie));
-        } else {
-            cookie_cache = std::move(cookie_queue.front());
-            cookie_queue.pop();
-            lk.unlock();
-        }
-        SPDLOG_INFO("cookie: {}", std::get<1>(cookie_cache));
-
+    static std::mutex mtx;
+    static std::queue<std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string>> cookie_queue;
+    std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string> cookie_cache;
+    std::queue<std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string>> tmp_queue;
+    std::unique_lock lk(mtx);
+    while (!cookie_queue.empty()) {
+        auto& [time_point, code] = cookie_queue.front();
+        if (std::chrono::system_clock::now() - time_point < std::chrono::minutes(15))
+            tmp_queue.push(std::move(cookie_queue.front()));
+        cookie_queue.pop();
+    }
+    cookie_queue = std::move(tmp_queue);
+    SPDLOG_INFO("cookie_queue size: {}", cookie_queue.size());
+    if (cookie_queue.empty()) {
+        lk.unlock();
         CURL* curl = curl_easy_init();
         if (!curl) {
-            auto error_info = std::format("curl_easy_init() failed");
-            boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, error_info); });
-            return;
+            co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+            ch->try_send(err, std::format("curl_easy_init() failed"));
+            co_return;
         }
-        auto url = std::format(
-            "https://you.com/api/"
-            "streamingSearch?q={}&page=1&count=10&safeSearch=Off&onShoppingPage=False&mkt=&responseFilter="
-            "WebPages%"
-            "2CTranslations%2CTimeZone%2CComputation%2CRelatedSearches&domain=youchat&queryTraceId={}",
-            urlEncode(prompt), createUuidString());
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        if (!m_cfg.http_proxy.empty())
-            curl_easy_setopt(curl, CURLOPT_PROXY, m_cfg.http_proxy.c_str());
-        auto cb = [](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
+        ScopeExit auto_exit{[=] { curl_easy_cleanup(curl); }};
+        std::multimap<std::string, std::string> response_header;
+        std::unordered_map<std::string, std::string> headers;
+        auto ret = sendHttpRequest(CurlHttpRequest{
+            .curl = curl,
+            .url = "https://you.com",
+            .http_proxy = m_cfg.http_proxy,
+            .cb = [](void* contents, size_t size, size_t nmemb, void* userp) mutable -> size_t {
+                return size * nmemb;
+            },
+            .headers = headers,
+            .response_header_ptr = &response_header,
+        });
+        if (ret) {
+            co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+            ch->try_send(err, ret.value());
+            co_return;
+        }
+        std::string cookie;
+        auto range = response_header.equal_range("set-cookie");
+        for (auto it = range.first; it != range.second; ++it) {
+            if (!(it->second.contains("__cf_bm=")))
+                continue;
+            auto view = it->second | std::views::drop_while(isspace) | std::views::reverse |
+                        std::views::drop_while(isspace) | std::views::reverse;
+            auto fields = splitString(std::string{view.begin(), view.end()}, " ");
+            if (fields.size() < 1) {
+                co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+                ch->try_send(err, "can't get cookie");
+                co_return;
+            }
+            cookie = std::move(fields[0]);
+            break;
+        }
+        if (cookie.empty()) {
+            co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+            ch->try_send(err, "cookie is empty");
+            co_return;
+        }
+        cookie_cache = std::make_tuple(std::chrono::system_clock::now(), std::move(cookie));
+    } else {
+        cookie_cache = std::move(cookie_queue.front());
+        cookie_queue.pop();
+        lk.unlock();
+    }
+    SPDLOG_INFO("cookie: {}", std::get<1>(cookie_cache));
+
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+        ch->try_send(err, std::format("curl_easy_init() failed"));
+        co_return;
+    }
+    ScopeExit auto_exit{[=] { curl_easy_cleanup(curl); }};
+    auto cookie_str =
+        std::format("uuid_guest={}; safesearch_guest=Off; {}", createUuidString(), std::get<1>(cookie_cache));
+    curl_easy_setopt(curl, CURLOPT_COOKIE, std::get<1>(cookie_cache).c_str());
+    auto ret = sendHttpRequest(CurlHttpRequest{
+        .curl = curl,
+        .url = [&] -> auto {
+            std::multimap<std::string, std::string> params{
+                {"q", prompt},
+                {"page", "1"},
+                {"count", "10"},
+                {"safeSearch", "Off"},
+                {"onShoppingPage", "False"},
+                {"mkt", ""},
+                {"responseFilter", "WebPages,Translations,TimeZone,Computation,RelatedSearches"},
+                {"domain", "youchat"},
+                {"queryTraceId", createUuidString()},
+            };
+            return std::format("https://you.com/api/streamingSearch?{}", paramsToQueryStr(params));
+        }(),
+        .http_proxy = m_cfg.http_proxy,
+        .cb = [](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
             boost::system::error_code err{};
             auto ch_ptr = static_cast<FreeGpt::Channel*>(userp);
             std::string data{(char*)contents, size * nmemb};
@@ -1404,41 +1186,25 @@ boost::asio::awaitable<void> FreeGpt::you(std::shared_ptr<Channel> ch, nlohmann:
                 boost::asio::post(ch_ptr->get_executor(), [=] { ch_ptr->try_send(err, str); });
             }
             return size * nmemb;
-        };
-        size_t (*fn)(void* contents, size_t size, size_t nmemb, void* userp) = cb;
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fn);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, ch.get());
-        auto cookie_str =
-            std::format("uuid_guest={}; safesearch_guest=Off; {}", createUuidString(), std::get<1>(cookie_cache));
-        curl_easy_setopt(curl, CURLOPT_COOKIE, std::get<1>(cookie_cache).c_str());
-        curlEasySetopt(curl);
-        struct curl_slist* headers = nullptr;
-        headers = curl_slist_append(headers, "referer: https://you.com/search?q=gpt4&tbm=youchat");
-        headers = curl_slist_append(headers, "Accept: text/event-stream");
-        ScopeExit auto_exit{[=] {
-            curl_slist_free_all(headers);
-            curl_easy_cleanup(curl);
-        }};
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        CURLcode res = curl_easy_perform(curl);
-
-        if (res != CURLE_OK) {
-            auto error_info = std::format("curl_easy_perform() failed:{}", curl_easy_strerror(res));
-            boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, error_info); });
-            return;
-        }
-        int32_t response_code;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-        if (response_code != 200) {
-            boost::asio::post(ch->get_executor(),
-                              [=] { ch->try_send(err, std::format("you http code:{}", response_code)); });
-        }
-        {
-            std::lock_guard lk(mtx);
-            cookie_queue.push(std::move(cookie_cache));
-        }
-        return;
+        },
+        .input = ch.get(),
+        .headers = []() -> auto& {
+            static std::unordered_map<std::string, std::string> headers{
+                {"referer", "https://you.com/search?q=gpt4&tbm=youchat"},
+                {"Accept", "text/event-stream"},
+            };
+            return headers;
+        }(),
     });
+    if (ret) {
+        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+        ch->try_send(err, ret.value());
+        co_return;
+    }
+    {
+        std::lock_guard lk(mtx);
+        cookie_queue.push(std::move(cookie_cache));
+    }
     co_return;
 }
 
@@ -1739,8 +1505,13 @@ boost::asio::awaitable<void> FreeGpt::gptGo(std::shared_ptr<Channel> ch, nlohman
         ch->try_send(err, error_info);
         co_return;
     }
-    auto get_token_url =
-        std::format("https://gptgo.ai/action_get_token.php?q={}&hlgpt=default&hl=en", urlEncode(prompt));
+
+    std::multimap<std::string, std::string> params{
+        {"q", prompt},
+        {"hlgpt", "default"},
+        {"hl", "en"},
+    };
+    auto get_token_url = std::format("https://gptgo.ai/action_get_token.php?{}", paramsToQueryStr(params));
     curl_easy_setopt(curl, CURLOPT_URL, get_token_url.c_str());
     if (!m_cfg.http_proxy.empty())
         curl_easy_setopt(curl, CURLOPT_PROXY, m_cfg.http_proxy.c_str());
@@ -1971,7 +1742,7 @@ boost::asio::awaitable<void> FreeGpt::chatForAi(std::shared_ptr<Channel> ch, nlo
         ch->try_send(err, error_info);
         co_return;
     }
-    curl_easy_setopt(curl, CURLOPT_URL, "https://chatforai.com/api/handle/provider-openai");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://chatforai.store/api/handle/provider-openai");
     if (!m_cfg.http_proxy.empty())
         curl_easy_setopt(curl, CURLOPT_PROXY, m_cfg.http_proxy.c_str());
 
@@ -2581,7 +2352,7 @@ boost::asio::awaitable<void> FreeGpt::gptForLove(std::shared_ptr<Channel> ch, nl
     constexpr std::string_view request_str{R"({
         "prompt": "hello",
         "options": {},
-        "systemMessage": "You are ChatGPT, the version is GPT3.5, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+        "systemMessage": "You are ChatGPT, the version is GPT3.5, a large language model trained by OpenAI. Follow the user's instructions carefully.",
         "temperature": 0.8,
         "top_p": 1,
         "secret": "U2FsdGVkX18vdtlMj0nP1LoUzEqJTP0is+Q2+bQJNMk=",

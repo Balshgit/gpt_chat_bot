@@ -38,9 +38,9 @@ def deepai_refresh():
 @app.route("/gptforlove", methods=["POST"])
 def get_gptforlove_secret():
     dir = os.path.dirname(__file__)
-    dir += "/npm/node_modules/crypto-js"
+    include = dir + "/npm/node_modules/crypto-js/crypto-js"
     source = """
-CryptoJS = require('{dir}/crypto-js')
+CryptoJS = require({include})
 var k = '14487141bvirvvG'
     , e = Math.floor(new Date().getTime() / 1e3);
 var t = CryptoJS.enc.Utf8.parse(e)
@@ -50,7 +50,7 @@ var t = CryptoJS.enc.Utf8.parse(e)
 });
 return o.toString()
 """
-    source = source.replace("{dir}", dir)
+    source = source.replace("{include}", json.dumps(include))
     dict = {"secret": execjs.compile(source).call("")}
     return json.dumps(dict)
 
