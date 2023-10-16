@@ -47,8 +47,6 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_stream_binjie = "gpt-3-stream-binjie"
     gpt_3_5_turbo_stream_CodeLinkAva = "gpt-3.5-turbo-stream-CodeLinkAva"
     gpt_4_stream_ChatBase = "gpt-4-stream-ChatBase"
-    gpt_3_5_turbo_16k_stream_Ylokh = "gpt-3.5-turbo-16k-stream-Ylokh"
-    gpt_3_5_turbo_stream_Vitalentum = "gpt-3.5-turbo-stream-Vitalentum"
     gpt_3_5_turbo_stream_GptGo = "gpt-3.5-turbo-stream-GptGo"
     gpt_3_5_turbo_stream_Aibn = "gpt-3.5-turbo-stream-Aibn"
     gpt_3_5_turbo_stream_FreeGpt = "gpt-3.5-turbo-stream-FreeGpt"
@@ -56,9 +54,11 @@ class ChatGptModelsEnum(StrEnum):
     gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
     llama2 = "llama2"
+    gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
+    gpt_3_5_turbo_16k_stream_Ylokh = "gpt-3.5-turbo-16k-stream-Ylokh"
+    gpt_3_5_turbo_stream_Vitalentum = "gpt-3.5-turbo-stream-Vitalentum"
     gpt_3_5_turbo_stream_GptChatly = "gpt-3.5-turbo-stream-GptChatly"
     gpt_3_5_turbo_stream_ChatgptDemo = "gpt-3.5-turbo-stream-ChatgptDemo"
-    gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
 
     @classmethod
     def values(cls) -> set[str]:
@@ -69,4 +69,7 @@ class ChatGptModelsEnum(StrEnum):
         return {
             "gpt-3.5-turbo-stream-gptforlove",
             "gpt-3.5-turbo-stream-aivvm",
+            "gpt-3.5-turbo-stream-GptChatly",
+            "gpt-3.5-turbo-stream-Vitalentum",
+            "gpt-3.5-turbo-16k-stream-Ylokh",
         }
