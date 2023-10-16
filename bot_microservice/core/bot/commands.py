@@ -12,7 +12,7 @@ from core.bot.services import ChatGptService, SpeechToTextService
 from settings.config import settings
 
 
-async def main_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Send message on `/start`."""
     if not update.message:
         return BotEntryPoints.end
@@ -90,19 +90,17 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
-    await update.message.reply_text("Пожалуйста, ожидайте :)\nТрехминутная запись обрабатывается примерно 30 секунд")
     if not update.message.voice:
+        await update.message.reply_text("Голосовое сообщение не найдено")
         return
-
+    await update.message.reply_text("Пожалуйста, ожидайте :)\nТрехминутная запись обрабатывается примерно 30 секунд")
     sound_file = await update.message.voice.get_file()
     sound_bytes = await sound_file.download_as_bytearray()
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
         tmpfile.write(sound_bytes)
-
     logger.info("file has been saved", filename=tmpfile.name)
 
     speech_to_text_service = SpeechToTextService(filename=tmpfile.name)
-
     speech_to_text_service.get_text_from_audio()
 
     part = 0

@@ -16,7 +16,7 @@ from core.bot.commands import (
     ask_question,
     github,
     help_command,
-    main_command,
+    start_command,
     voice_recognize,
     website,
 )
@@ -37,7 +37,7 @@ bot_event_handlers.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, a
 bot_event_handlers.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_recognize))
 bot_event_handlers.add_handler(
     ConversationHandler(
-        entry_points=[CommandHandler("start", main_command)],
+        entry_points=[CommandHandler("start", start_command)],
         states={
             BotEntryPoints.start_routes: [
                 CallbackQueryHandler(about_me, pattern="^" + BotStagesEnum.about_me + "$"),
@@ -46,7 +46,7 @@ bot_event_handlers.add_handler(
                 CallbackQueryHandler(about_bot, pattern="^" + BotStagesEnum.about_bot + "$"),
             ],
         },
-        fallbacks=[CommandHandler("start", main_command)],
+        fallbacks=[CommandHandler("start", start_command)],
     )
 )
 bot_event_handlers.add_handler(CallbackQueryHandler(about_me, pattern="^" + BotStagesEnum.about_me + "$"))
