@@ -1,5 +1,6 @@
 from datetime import timezone
 from enum import StrEnum, unique
+from typing import Any
 
 from dateutil import tz
 
@@ -60,6 +61,22 @@ class ChatGptModelsEnum(StrEnum):
     @classmethod
     def values(cls) -> set[str]:
         return set(map(str, filter(lambda m: m not in ChatGptModelsEnum._deprecated(), cls)))
+
+    @staticmethod
+    def base_models_priority() -> list[dict[str, Any]]:
+        models = []
+        for model in ChatGptModelsEnum.values():
+            priority = 0
+            match model:
+                case "gpt-3.5-turbo-stream-gptalk":
+                    priority = 2
+                case "gpt-3.5-turbo-stream-GeekGpt":
+                    priority = 1
+                case "llama2":
+                    priority = 1
+            fields = {"model": model, "priority": priority}
+            models.append(fields)
+        return models
 
     @staticmethod
     def _deprecated() -> set[str]:
