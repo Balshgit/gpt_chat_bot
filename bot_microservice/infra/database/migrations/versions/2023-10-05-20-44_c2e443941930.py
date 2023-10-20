@@ -32,10 +32,8 @@ def upgrade() -> None:
         if models:
             return
         models = []
-        for model in ChatGptModelsEnum.values():
-            priority = 0 if model != "gpt-3.5-turbo-stream-FreeGpt" else 1
-            fields = {"model": model, "priority": priority}
-            models.append(ChatGpt(**fields))
+        for data in ChatGptModelsEnum.base_models_priority():
+            models.append(ChatGpt(**data))
         session.add_all(models)
         session.commit()
 
