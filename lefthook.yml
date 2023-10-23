@@ -32,35 +32,34 @@ format:
   piped: true
   parallel: false
   commands:
-    # number prefix used to save ordering
-    1_autoflake:
+    1_ruff:
       glob: "*.py"
-      run: autoflake --recursive --ignore-init-module-imports --remove-all-unused-imports --remove-unused-variables --in-place {staged_files}
+      run: ruff check --fix bot_microservice
     2_isort:
       glob: "*.py"
       run: isort --color --quiet {staged_files}
     3_black:
       glob: "*.py"
       run: black -S {staged_files}
-    4_black_check:
+    4_autoflake:
+      glob: "*.py"
+      run: autoflake --recursive --ignore-init-module-imports --remove-all-unused-imports --remove-unused-variables --in-place {staged_files}
+    5_black_check:
       glob: "*.py"
       run: black --check -S {staged_files}
-    5_ruff:
-      glob: "*.py"
-      run: ruff bot_microservice
 
 lint:
   parallel: true
   commands:
+    ruff:
+      glob: "*.py"
+      run: ruff bot_microservice
     mypy:
       glob: "*.py"
       run: mypy bot_microservice --namespace-packages --config-file pyproject.toml
     flake8:
       glob: "*.py"
       run: flake8 bot_microservice
-    ruff:
-      glob: "*.py"
-      run: ruff bot_microservice
 
 check-format:
   parallel: true

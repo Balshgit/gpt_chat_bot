@@ -55,6 +55,8 @@ class ChatGptModelsEnum(StrEnum):
     gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
     llama2 = "llama2"
+    gpt_3_5_turbo_stream_chatGptAi = "gpt-3.5-turbo-stream-chatGptAi"
+    gpt_3_5_turbo_stream_FakeGpt = "gpt-3.5-turbo-stream-FakeGpt"
     gpt_3_5_turbo_stream_GeekGpt = "gpt-3.5-turbo-stream-GeekGpt"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
 
@@ -69,9 +71,9 @@ class ChatGptModelsEnum(StrEnum):
             priority = 0
             match model:
                 case "gpt-3.5-turbo-stream-gptalk":
-                    priority = 2
-                case "gpt-3.5-turbo-stream-GeekGpt":
                     priority = 1
+                case "gpt-3.5-turbo-stream-GeekGpt":
+                    priority = 2
                 case "llama2":
                     priority = 1
             fields = {"model": model, "priority": priority}

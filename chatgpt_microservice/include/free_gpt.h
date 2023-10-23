@@ -36,6 +36,8 @@ public:
     boost::asio::awaitable<void> llama2(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> noowai(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> geekGpt(std::shared_ptr<Channel>, nlohmann::json);
+    boost::asio::awaitable<void> chatGptAi(std::shared_ptr<Channel>, nlohmann::json);
+    boost::asio::awaitable<void> fakeGpt(std::shared_ptr<Channel>, nlohmann::json);
 
 private:
     boost::asio::awaitable<std::expected<boost::beast::ssl_stream<boost::beast::tcp_stream>, std::string>>
