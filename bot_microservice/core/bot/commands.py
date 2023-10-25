@@ -79,7 +79,7 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not update.message:
         return
 
-    await update.message.reply_text("Пожалуйста подождите, ответ в среднем занимает 10-15 секунд")
+    await update.message.reply_text("Пожалуйста, подождите, ответ в среднем занимает 10-15 секунд")
 
     chatgpt_service = ChatGptService.build()
     logger.warning("question asked", user=update.message.from_user, question=update.message.text)
