@@ -22,7 +22,7 @@ class ChatGptAdmin(ModelView, model=ChatGpt):
 
 def create_admin(application: "Application") -> Admin:
     admin = Admin(
-        title='Chat GPT admin',
+        title="Chat GPT admin",
         app=application.fastapi_app,
         engine=application.db.async_engine,
         base_url=os.path.join(settings.URL_PREFIX, "admin"),

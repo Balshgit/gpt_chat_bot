@@ -59,6 +59,7 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_FakeGpt = "gpt-3.5-turbo-stream-FakeGpt"
     gpt_3_5_turbo_stream_GeekGpt = "gpt-3.5-turbo-stream-GeekGpt"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
+    gpt_3_5_turbo_stream_Vercel = "gpt-3.5-turbo-stream-Vercel"
 
     @classmethod
     def values(cls) -> set[str]:
