@@ -54,6 +54,7 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_Cromicle = "gpt-3.5-turbo-stream-Cromicle"
     gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
+    gpt_3_5_turbo_stream_ChatgptDemo = "gpt-3.5-turbo-stream-ChatgptDemo"
     llama2 = "llama2"
     gpt_3_5_turbo_stream_chatGptAi = "gpt-3.5-turbo-stream-chatGptAi"
     gpt_3_5_turbo_stream_FakeGpt = "gpt-3.5-turbo-stream-FakeGpt"
@@ -71,10 +72,12 @@ class ChatGptModelsEnum(StrEnum):
         for model in ChatGptModelsEnum.values():
             priority = 0
             match model:
-                case "gpt-3.5-turbo-stream-gptalk":
-                    priority = 1
                 case "gpt-3.5-turbo-stream-GeekGpt":
                     priority = 2
+                case "gpt-3.5-turbo-stream-FakeGpt":
+                    priority = 2
+                case "gpt-3.5-turbo-stream-gptalk":
+                    priority = 1
                 case "llama2":
                     priority = 1
             fields = {"model": model, "priority": priority}
@@ -85,4 +88,5 @@ class ChatGptModelsEnum(StrEnum):
     def _deprecated() -> set[str]:
         return {
             "gpt-3.5-turbo-stream-gptforlove",
+            "gpt-3.5-turbo-stream-Vercel",
         }
