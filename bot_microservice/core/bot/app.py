@@ -88,8 +88,8 @@ class BotQueue:
 
 
 @asynccontextmanager
-async def get_bot(settings: AppSettings) -> AsyncGenerator[Bot, None]:
-    app = Application.builder().token(token=settings.TELEGRAM_API_TOKEN).build()
+async def get_bot(token: str) -> AsyncGenerator[Bot, None]:
+    app = Application.builder().token(token=token).build()
     try:
         yield app.bot
     finally:
