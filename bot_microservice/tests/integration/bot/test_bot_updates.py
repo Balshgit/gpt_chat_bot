@@ -254,7 +254,14 @@ async def test_ask_question_action(
         await main_application.bot_app.application.process_update(
             update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
         )
-        assert_that(mocked_send_message.call_args.kwargs).is_equal_to(
+        assert_that(mocked_send_message.call_args_list[0].kwargs).is_equal_to(
+            {
+                "text": "Пожалуйста, подождите, ответ в среднем занимает 10-15 секунд",
+                "chat_id": bot_update["message"]["chat"]["id"],
+            },
+            include=["text", "chat_id"],
+        )
+        assert_that(mocked_send_message.call_args_list[1].kwargs).is_equal_to(
             {
                 "text": "Привет! Как я могу помочь вам сегодня?",
                 "chat_id": bot_update["message"]["chat"]["id"],

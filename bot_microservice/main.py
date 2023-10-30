@@ -38,7 +38,7 @@ class Application:
         self.app.on_event("shutdown")(shutdown(self.app))
 
         self.app.include_router(api_router)
-        self.configure_hooks()
+        self.configure_bot_hooks()
         configure_logging(
             level=LogLevelEnum.INFO,
             enable_json_logs=settings.ENABLE_JSON_LOGS,
@@ -62,7 +62,7 @@ class Application:
     def bot_queue(self) -> BotQueue:
         return self._bot_queue
 
-    def configure_hooks(self) -> None:
+    def configure_bot_hooks(self) -> None:
         if self.bot_app.start_with_webhook:
             self.app.add_event_handler("startup", self._bot_start_up)
         else:
@@ -76,7 +76,7 @@ class Application:
         loop.create_task(self.app.state.queue.get_updates_from_queue())
 
     async def _bot_shutdown(self) -> None:
-        await asyncio.gather(self.bot_app.delete_webhook(), self.bot_app.shutdown())
+        await self.bot_app.shutdown()
 
 
 def create_app(settings: AppSettings | None = None) -> FastAPI:
