@@ -89,8 +89,8 @@ class BotQueue:
 
 @asynccontextmanager
 async def get_bot(settings: AppSettings) -> AsyncGenerator[Bot, None]:
-    bot_app = BotApplication(settings=settings)
+    app = Application.builder().token(token=settings.TELEGRAM_API_TOKEN).build()
     try:
-        yield bot_app.bot
+        yield app.bot
     finally:
-        await bot_app.application.updater.shutdown()  # type: ignore[union-attr]
+        await app.shutdown()
