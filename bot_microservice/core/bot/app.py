@@ -1,10 +1,11 @@
 import asyncio
 import os
 from asyncio import Queue, sleep
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from functools import cached_property
 from http import HTTPStatus
-from typing import Any
+from typing import Any, AsyncGenerator
 
 from fastapi import Response
 from loguru import logger
@@ -18,12 +19,12 @@ class BotApplication:
     def __init__(
         self,
         settings: AppSettings,
-        handlers: list[Any],
+        handlers: list[Any] | None = None,
     ) -> None:
         self.application: Application = (  # type: ignore[type-arg]
             Application.builder().token(token=settings.TELEGRAM_API_TOKEN).build()
         )
-        self.handlers = handlers
+        self.handlers = handlers or []
         self.settings = settings
         self.start_with_webhook = settings.START_WITH_WEBHOOK
         self._add_handlers()
@@ -52,7 +53,11 @@ class BotApplication:
         logger.info("bot started in polling mode")
 
     async def shutdown(self) -> None:
-        await self.application.updater.shutdown()  # type: ignore
+        await asyncio.gather(
+            self.delete_webhook(),
+            self.application.updater.shutdown(),  # type: ignore[union-attr]
+        )
+        logger.info("the bot is turned off")
 
     @cached_property
     def webhook_url(self) -> str:
@@ -80,3 +85,12 @@ class BotQueue:
             update = await self.queue.get()
             asyncio.create_task(self.bot_app.application.process_update(update))
             await sleep(0)
+
+
+@asynccontextmanager
+async def get_bot(token: str) -> AsyncGenerator[Bot, None]:
+    app = Application.builder().token(token=token).build()
+    try:
+        yield app.bot
+    finally:
+        await app.shutdown()
