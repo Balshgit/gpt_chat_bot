@@ -49,7 +49,6 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_CodeLinkAva = "gpt-3.5-turbo-stream-CodeLinkAva"
     gpt_4_stream_ChatBase = "gpt-4-stream-ChatBase"
     gpt_3_5_turbo_stream_GptGo = "gpt-3.5-turbo-stream-GptGo"
-    gpt_3_5_turbo_stream_Aibn = "gpt-3.5-turbo-stream-Aibn"
     gpt_3_5_turbo_stream_FreeGpt = "gpt-3.5-turbo-stream-FreeGpt"
     gpt_3_5_turbo_stream_Cromicle = "gpt-3.5-turbo-stream-Cromicle"
     gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
@@ -61,6 +60,7 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_GeekGpt = "gpt-3.5-turbo-stream-GeekGpt"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
     gpt_3_5_turbo_stream_Vercel = "gpt-3.5-turbo-stream-Vercel"
+    gpt_3_5_turbo_stream_aivvm = "gpt-3.5-turbo-stream-aivvm"
 
     @classmethod
     def values(cls) -> set[str]:

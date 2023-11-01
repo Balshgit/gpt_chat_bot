@@ -67,6 +67,8 @@ void setEnvironment(auto& cfg) {
     }
     if (auto [zeus] = getEnv("ZEUS"); !zeus.empty())
         cfg.zeus = std::move(zeus);
+    if (auto [flaresolverr] = getEnv("FLARESOLVERR"); !flaresolverr.empty())
+        cfg.flaresolverr = std::move(flaresolverr);
 }
 
 std::string createIndexHtml(const std::string& file, const Config& cfg) {
@@ -341,7 +343,6 @@ int main(int argc, char** argv) {
     ADD_METHOD("gpt-3-stream-binjie", FreeGpt::binjie);
     ADD_METHOD("gpt-4-stream-ChatBase", FreeGpt::chatBase);
     ADD_METHOD("gpt-3.5-turbo-stream-GptGo", FreeGpt::gptGo);
-    ADD_METHOD("gpt-3.5-turbo-stream-Aibn", FreeGpt::aibn);
     ADD_METHOD("gpt-3.5-turbo-stream-FreeGpt", FreeGpt::freeGpt);
     ADD_METHOD("gpt-4-stream-Chatgpt4Online", FreeGpt::chatGpt4Online);
     ADD_METHOD("gpt-3.5-turbo-stream-gptalk", FreeGpt::gptalk);
@@ -354,6 +355,7 @@ int main(int argc, char** argv) {
     ADD_METHOD("gpt-3.5-turbo-stream-chatGptAi", FreeGpt::chatGptAi);
     ADD_METHOD("gpt-3.5-turbo-stream-FakeGpt", FreeGpt::fakeGpt);
     ADD_METHOD("gpt-3.5-turbo-stream-Vercel", FreeGpt::vercel);
+    ADD_METHOD("gpt-3.5-turbo-stream-aivvm", FreeGpt::aivvm);
 
     SPDLOG_INFO("active provider:");
     for (auto& [provider, _] : gpt_function)
