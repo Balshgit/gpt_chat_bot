@@ -26,7 +26,6 @@ public:
     boost::asio::awaitable<void> binjie(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> chatBase(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> gptGo(std::shared_ptr<Channel>, nlohmann::json);
-    boost::asio::awaitable<void> aibn(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> chatForAi(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> freeGpt(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> chatGpt4Online(std::shared_ptr<Channel>, nlohmann::json);
@@ -39,6 +38,7 @@ public:
     boost::asio::awaitable<void> chatGptAi(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> fakeGpt(std::shared_ptr<Channel>, nlohmann::json);
     boost::asio::awaitable<void> vercel(std::shared_ptr<Channel>, nlohmann::json);
+    boost::asio::awaitable<void> aivvm(std::shared_ptr<Channel>, nlohmann::json);
 
 private:
     boost::asio::awaitable<std::expected<boost::beast::ssl_stream<boost::beast::tcp_stream>, std::string>>
