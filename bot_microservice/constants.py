@@ -51,7 +51,6 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_GptGo = "gpt-3.5-turbo-stream-GptGo"
     gpt_3_5_turbo_stream_FreeGpt = "gpt-3.5-turbo-stream-FreeGpt"
     gpt_3_5_turbo_stream_Cromicle = "gpt-3.5-turbo-stream-Cromicle"
-    gpt_4_stream_Chatgpt4Online = "gpt-4-stream-Chatgpt4Online"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
     gpt_3_5_turbo_stream_ChatgptDemo = "gpt-3.5-turbo-stream-ChatgptDemo"
     llama2 = "llama2"
