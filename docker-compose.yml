@@ -48,7 +48,7 @@ services:
       - "8858"
 
   caddy:
-    image: "caddy:2.7.4"
+    image: "caddy:2.7.5"
     container_name: "chatgpt_caddy_service"
     hostname: "caddy_service"
     restart: unless-stopped
@@ -59,4 +59,4 @@ services:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
     networks:
       chatgpt-network:
-        ipv4_address: 200.20.0.12
+        ipv4_address: 200.20.0.42
