@@ -108,7 +108,7 @@ Init alembic
 
 ```bash
 cd bot_microservice
-alembic revision --autogenerate -m 'create_quads_table'
+alembic revision --autogenerate -m 'create_chatgpt_table'
 alembic upgrade head
 ```
 
@@ -124,12 +124,29 @@ alembic --config ./alembic.ini revision --autogenerate -m 'create_quads_table'
 
 Run migrations
 
+***note: all migrations should be executed from ./bot_microservice directory***
+
+**upgrade to head:**
 ```bash
 cd ./bot_microservice # alembic root
 alembic --config ./alembic.ini upgrade head
-alembic --config ./alembic.ini downgrade 389018a3e0f0
 ```
 
+**downgrade to 0001_create_chatgpt_table revision:**
+```bash
+alembic --config ./alembic.ini downgrade alembic downgrade 0001_create_chatgpt_table
+```
+
+**downgrade or upgrade +1 revision:**
+```bash
+alembic upgrade +1
+alembic downgrade -1
+```
+
+**downgrade to base:**
+```bash
+alembic downgrade base
+```
 
 ## Help article
 

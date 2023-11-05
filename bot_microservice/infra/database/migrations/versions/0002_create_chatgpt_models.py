@@ -1,12 +1,12 @@
-"""create chat gpt models
+"""create chatgpt models
 
-Revision ID: c2e443941930
-Revises: eb78565abec7
+Revision ID: 0002_create_chatgpt_models
+Revises: 0001_create_chatgpt_table
 Create Date: 2025-10-05 20:44:05.414977
 
 """
-
-from sqlalchemy import create_engine, select
+from loguru import logger
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
 
 from constants import ChatGptModelsEnum
@@ -14,8 +14,8 @@ from core.bot.models.chat_gpt import ChatGpt
 from settings.config import settings
 
 # revision identifiers, used by Alembic.
-revision = "c2e443941930"
-down_revision = "eb78565abec7"
+revision = "0002_create_chatgpt_models"
+down_revision = "0001_create_chatgpt_table"
 branch_labels: str | None = None
 depends_on: str | None = None
 
@@ -40,8 +40,10 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     with session_factory() as session:
-        session.execute(f"""TRUNCATE TABLE {ChatGpt.__tablename__}""")
+        # Truncate doesn't exists for SQLite
+        session.execute(text(f"""DELETE FROM {ChatGpt.__tablename__}"""))  # noqa: S608
         session.commit()
+        logger.info("chatgpt models table has been truncated", table=ChatGpt.__tablename__)
 
 
 engine.dispose()
