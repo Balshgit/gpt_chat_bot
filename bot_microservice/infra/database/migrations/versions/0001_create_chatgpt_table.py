@@ -1,6 +1,6 @@
-"""initial commit
+"""initial migration
 
-Revision ID: eb78565abec7
+Revision ID: 0001_create_chatgpt_table
 Revises:
 Create Date: 2023-10-05 18:28:30.915361
 
@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "eb78565abec7"
+revision = "0001_create_chatgpt_table"
 down_revision = None
 branch_labels = None
 depends_on = None

@@ -1,4 +1,4 @@
-FROM python:3.11.5 AS compile-image
+FROM python:3.11.6 AS compile-image
 
 ARG USER=web
 ARG STAGE

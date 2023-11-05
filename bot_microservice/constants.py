@@ -60,6 +60,7 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
     gpt_3_5_turbo_stream_Vercel = "gpt-3.5-turbo-stream-Vercel"
     gpt_3_5_turbo_stream_aivvm = "gpt-3.5-turbo-stream-aivvm"
+    gpt_3_5_turbo_stream_ChatForAi = "gpt-3.5-turbo-stream-ChatForAi"
 
     @classmethod
     def values(cls) -> set[str]:
@@ -71,6 +72,10 @@ class ChatGptModelsEnum(StrEnum):
         for model in ChatGptModelsEnum.values():
             priority = 0
             match model:
+                case "gpt-3-stream-binjie":
+                    priority = 3
+                case "gpt-3.5-turbo-stream-yqcloud":
+                    priority = 3
                 case "gpt-3.5-turbo-stream-GeekGpt":
                     priority = 2
                 case "gpt-3.5-turbo-stream-FakeGpt":
