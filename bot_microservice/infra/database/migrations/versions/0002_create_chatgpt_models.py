@@ -39,11 +39,12 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    chatgpt_table_name = ChatGpt.__tablename__
     with session_factory() as session:
         # Truncate doesn't exists for SQLite
-        session.execute(text(f"""DELETE FROM {ChatGpt.__tablename__}"""))  # noqa: S608
+        session.execute(text(f"""DELETE FROM {chatgpt_table_name}"""))  # noqa: S608
         session.commit()
-        logger.info("chatgpt models table has been truncated", table=ChatGpt.__tablename__)
+        logger.info("chatgpt models table has been truncated", table=chatgpt_table_name)
 
 
 engine.dispose()
