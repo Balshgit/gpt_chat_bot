@@ -32,7 +32,7 @@ jobs:
       #----------------------------------------------
       - name: Install poetry
         env:  # Keep in sync with `POETRY_VERSION` in `Dockerfile`
-          POETRY_VERSION: "1.6.1"
+          POETRY_VERSION: "1.7.0"
         run: |
           curl -sSL "https://install.python-poetry.org" | python -
           # Adding `poetry` to `$PATH`:
@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           poetry config virtualenvs.in-project true
-          poetry install
+          poetry install --no-interaction --no-ansi --no-root
           poetry run pip install -U pip
       #----------------------------------------------
       #              run test suite

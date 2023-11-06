@@ -6,7 +6,7 @@ ARG STAGE
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     DOCKER_CONTAINER=1 \
-    POETRY_VERSION=1.6.1
+    POETRY_VERSION=1.7.0
 
 RUN printf "================ Start build base service. with USER: ${USER}, STAGE: ${STAGE} ===============" \
   && apt-get update \
@@ -40,7 +40,7 @@ COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
 RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION
 RUN poetry config virtualenvs.in-project true && \
     poetry config virtualenvs.create true && \
-    poetry install $(if [ "$STAGE" = "production" ]; then echo "--only main"; fi) --no-interaction --no-ansi && \
+    poetry install $(if [ "$STAGE" = "production" ]; then echo "--only main"; fi) --no-interaction --no-ansi --no-root && \
     rm -rf $POETRY_CACHE_DIR
 
 
