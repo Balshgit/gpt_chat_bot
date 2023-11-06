@@ -96,7 +96,7 @@ Docs can be found at
 
 on local start can be found at http://localhost/gpt/api/docs
 
-prod docs https://bot.mywistr.ru/gpt/api/docs/
+prod docs https://{DOMAIN}/{URL_PREFIX}/{API_PREFIX}/docs/
 
 
 ## Create migrations

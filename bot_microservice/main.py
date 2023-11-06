@@ -25,6 +25,7 @@ class Application:
             docs_url="/" + "/".join([settings.api_prefix.strip("/"), "docs"]),
             redoc_url="/" + "/".join([settings.api_prefix.strip("/"), "redocs"]),
             openapi_url="/" + "/".join([settings.api_prefix.strip("/"), "openapi.json"]),
+            debug=settings.DEBUG,
             default_response_class=UJSONResponse,
         )
         self.bot_app = bot_app
