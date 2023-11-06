@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chat_gpt_bot"
-version = "1.2.5"
+version = "1.3.0"
 description = "Bot to integrated with Chat gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
