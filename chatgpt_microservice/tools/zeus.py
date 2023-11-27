@@ -1,14 +1,10 @@
 import base64
 import json
 import os
-import threading
-import time
-import traceback
 
 import execjs
 from flask import Flask, request
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
 from werkzeug.serving import ThreadedWSGIServer
 
 app = Flask(__name__)
@@ -19,20 +15,6 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-extensions")
 options.add_argument("--disable-gpu")
 options.add_argument("--disable-dev-shm-usage")
-
-
-def deepai_refresh():
-    while True:
-        driver = webdriver.Chrome(options=options)
-        try:
-            driver.get("https://deepai.org")
-            WebDriverWait(driver, 15)
-            cookies = driver.get_cookies()
-            print(cookies, flush=True)
-        except Exception:
-            traceback.print_exc()
-        driver.quit()
-        time.sleep(600)
 
 
 # curl -X POST -d '{}' -H "Content-Type: application/json" http://127.0.0.1:8860/gptforlove
@@ -77,8 +59,6 @@ def get_anti_bot_token():
 
 
 if __name__ == "__main__":
-    thread = threading.Thread(target=deepai_refresh)
-    thread.start()
     port = os.getenv("PORT", "8860")
     ip = os.getenv("IP", "0.0.0.0")
     print(f"start zeus at {ip}:{port}", flush=True)

@@ -542,65 +542,6 @@ FreeGpt::createHttpClient(boost::asio::ssl::context& ctx, std::string_view host,
     co_return stream_;
 }
 
-boost::asio::awaitable<void> FreeGpt::deepAi(std::shared_ptr<Channel> ch, nlohmann::json json) {
-    co_await boost::asio::post(boost::asio::bind_executor(*m_thread_pool_ptr, boost::asio::use_awaitable));
-    ScopeExit _exit{[=] { boost::asio::post(ch->get_executor(), [=] { ch->close(); }); }};
-
-    boost::system::error_code err{};
-    auto prompt = json.at("meta").at("content").at("parts").at(0).at("content").get<std::string>();
-
-    std::string user_agent{
-        R"(Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36)"};
-
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_int_distribution<uint64_t> dist(0, 100000000);
-    uint64_t part1{dist(mt)};
-    auto part2 = md5(user_agent + md5(user_agent + md5(std::format("{}{}x", user_agent, part1))));
-    auto api_key = std::format("tryit-{}-{}", part1, part2);
-
-    constexpr char CRLF[] = "\r\n";
-    static std::string MULTI_PART_BOUNDARY = "9bc627aea4f77e150e6057f78036e73f";
-
-    auto content_type_str = std::format("multipart/form-data; boundary={}", MULTI_PART_BOUNDARY);
-    SPDLOG_INFO("content_type_str: {}", content_type_str);
-    auto api_key_str = std::format("api-key: {}", api_key);
-
-    std::unordered_multimap<std::string, std::string> headers{
-        {"Content-Type", content_type_str},
-        {"api-key", api_key},
-    };
-    auto ret = Curl()
-                   .setUrl("https://api.deepai.org/hacking_is_a_crime")
-                   .setProxy(m_cfg.http_proxy)
-                   .setRecvHeadersCallback([&](std::string) {})
-                   .setRecvBodyCallback([&](std::string str) {
-                       boost::asio::post(ch->get_executor(), [=] { ch->try_send(err, str); });
-                       return;
-                   })
-                   .setBody([&] {
-                       nlohmann::json request_json{{{"role", "user"}, {"content", std::move(prompt)}}};
-                       std::ostringstream payload;
-                       payload << "--" << MULTI_PART_BOUNDARY << CRLF
-                               << R"(Content-Disposition: form-data; name="chat_style")" << CRLF << CRLF << "chat"
-                               << CRLF << "--" << MULTI_PART_BOUNDARY << CRLF
-                               << R"(Content-Disposition: form-data; name="chatHistory")" << CRLF << CRLF
-                               << request_json.dump() << CRLF << "--" << MULTI_PART_BOUNDARY << "--" << CRLF;
-                       SPDLOG_INFO("{}", payload.str());
-                       auto str = payload.str();
-                       return str;
-                   }())
-                   .clearHeaders()
-                   .setHttpHeaders(headers)
-                   .perform();
-    if (ret.has_value()) {
-        SPDLOG_ERROR("{}", ret.value());
-        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
-        ch->try_send(err, ret.value());
-    }
-    co_return;
-}
-
 boost::asio::awaitable<void> FreeGpt::openAi(std::shared_ptr<Channel> ch, nlohmann::json json) {
     boost::system::error_code err{};
     ScopeExit auto_exit{[&] { ch->close(); }};
@@ -1834,6 +1775,7 @@ create_client:
     request.set("Cookie", cookie);
     request.set(boost::beast::http::field::user_agent, user_agent);
     request.set("Content-Type", "application/json");
+    request.set("X-Wp-Nonce", j["restNonce"]);
 
     constexpr std::string_view json_str = R"({
         "botId":"chatbot-9vy3t5",
@@ -2267,12 +2209,12 @@ boost::asio::awaitable<void> FreeGpt::aivvm(std::shared_ptr<Channel> ch, nlohman
     boost::system::error_code err{};
     ScopeExit auto_exit{[&] { ch->close(); }};
 
-    using Tuple = std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string>;
+    using Tuple = std::tuple<std::chrono::time_point<std::chrono::system_clock>, std::string, std::string>;
     static moodycamel::ConcurrentQueue<Tuple> cookie_queue;
     Tuple item;
     bool found{false};
     if (cookie_queue.try_dequeue(item)) {
-        auto& [time_point, cookie] = item;
+        auto& [time_point, cookie, _] = item;
         if (std::chrono::system_clock::now() - time_point < std::chrono::minutes(120))
             found = true;
     }
@@ -2290,6 +2232,7 @@ boost::asio::awaitable<void> FreeGpt::aivvm(std::shared_ptr<Channel> ch, nlohman
                                            {"cmd", "request.get"},
                                            {"url", "https://chat.aivvm.com/zh"},
                                            {"maxTimeout", 60000},
+                                           {"session_ttl_minutes", 60},
                                        };
                                        return data.dump();
                                    }())
@@ -2328,25 +2271,23 @@ boost::asio::awaitable<void> FreeGpt::aivvm(std::shared_ptr<Channel> ch, nlohman
             co_await ch->async_send(err, "not found cookie", use_nothrow_awaitable);
             co_return;
         }
+        std::string user_agent = rsp["solution"].at("userAgent");
         auto cookie_str = std::format("cf_clearance={}", (*it)["value"].get<std::string>());
         // std::cout << rsp["solution"]["userAgent"].get<std::string>() << std::endl;
-        item = std::make_tuple(std::chrono::system_clock::now(), std::move(cookie_str));
+        item = std::make_tuple(std::chrono::system_clock::now(), std::move(cookie_str), user_agent);
     }
     SPDLOG_INFO("cookie: {}", std::get<1>(item));
     bool return_flag{true};
     ScopeExit auto_free([&] mutable {
         if (!return_flag)
             return;
-        auto& [time_point, cookie] = item;
+        auto& [time_point, cookie, _] = item;
         if (std::chrono::system_clock::now() - time_point < std::chrono::minutes(120))
             cookie_queue.enqueue(std::move(item));
     });
-
+    auto user_agent = std::get<2>(item);
     constexpr std::string_view host = "chat.aivvm.com";
     constexpr std::string_view port = "443";
-
-    constexpr std::string_view user_agent{
-        R"(Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36)"};
 
     boost::asio::ssl::context ctx1(boost::asio::ssl::context::tls);
     ctx1.set_verify_mode(boost::asio::ssl::verify_none);
@@ -2649,6 +2590,83 @@ boost::asio::awaitable<void> FreeGpt::gptTalkru(std::shared_ptr<Channel> ch, nlo
                         })";
                        nlohmann::json ask_request = nlohmann::json::parse(ask_json_str, nullptr, false);
                        ask_request["prompt"] = getConversationJson(json);
+                       std::string ask_request_str = ask_request.dump();
+                       SPDLOG_INFO("request: [{}]", ask_request_str);
+                       return ask_request_str;
+                   }())
+                   .clearHeaders()
+                   .setHttpHeaders(headers)
+                   .perform();
+    if (ret.has_value()) {
+        SPDLOG_ERROR("{}", ret.value());
+        co_await boost::asio::post(boost::asio::bind_executor(ch->get_executor(), boost::asio::use_awaitable));
+        ch->try_send(err, ret.value());
+    }
+    co_return;
+}
+
+boost::asio::awaitable<void> FreeGpt::deepInfra(std::shared_ptr<Channel> ch, nlohmann::json json) {
+    co_await boost::asio::post(boost::asio::bind_executor(*m_thread_pool_ptr, boost::asio::use_awaitable));
+    ScopeExit _exit{[=] { boost::asio::post(ch->get_executor(), [=] { ch->close(); }); }};
+
+    auto prompt = json.at("meta").at("content").at("parts").at(0).at("content").get<std::string>();
+
+    boost::system::error_code err{};
+    std::unordered_multimap<std::string, std::string> headers{
+        {"Accept", "text/event-stream"},
+        {"content-type", "application/json"},
+        {"Referer", "https://deepinfra.com/"},
+        {"Origin", "https://deepinfra.com"},
+        {"X-Deepinfra-Source", "web-embed"},
+        {"sec-ch-ua", R"("Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24")"},
+        {"sec-ch-ua-platform", R"("macOS")"},
+        {"sec-ch-ua-mobile", "?0"},
+        {"Sec-Fetch-Dest", "empty"},
+        {"Sec-Fetch-Mode", "cors"},
+        {"Sec-Fetch-Site", "same-site"},
+    };
+    std::string recv;
+    auto ret = Curl()
+                   .setUrl("https://api.deepinfra.com/v1/openai/chat/completions")
+                   .setProxy(m_cfg.http_proxy)
+                   .setRecvHeadersCallback([](std::string) { return; })
+                   .setRecvBodyCallback([&](std::string str) mutable {
+                       recv.append(str);
+                       while (true) {
+                           auto position = recv.find("\n");
+                           if (position == std::string::npos)
+                               break;
+                           auto msg = recv.substr(0, position + 1);
+                           recv.erase(0, position + 1);
+                           msg.pop_back();
+                           if (msg.empty() || !msg.contains("content"))
+                               continue;
+                           auto fields = splitString(msg, "data: ");
+                           boost::system::error_code err{};
+                           nlohmann::json line_json = nlohmann::json::parse(fields.back(), nullptr, false);
+                           if (line_json.is_discarded()) {
+                               SPDLOG_ERROR("json parse error: [{}]", fields.back());
+                               ch->try_send(err, std::format("json parse error: [{}]", fields.back()));
+                               continue;
+                           }
+                           auto str = line_json["choices"][0]["delta"]["content"].get<std::string>();
+                           if (!str.empty())
+                               ch->try_send(err, str);
+                       }
+                   })
+                   .setBody([&] {
+                       constexpr std::string_view ask_json_str = R"({
+                            "model":"meta-llama/Llama-2-70b-chat-hf",
+                            "messages":[
+                                {
+                                    "role":"user",
+                                    "content":"hello"
+                                }
+                            ],
+                            "stream":true
+                        })";
+                       nlohmann::json ask_request = nlohmann::json::parse(ask_json_str, nullptr, false);
+                       ask_request["messages"] = getConversationJson(json);
                        std::string ask_request_str = ask_request.dump();
                        SPDLOG_INFO("request: [{}]", ask_request_str);
                        return ask_request_str;
