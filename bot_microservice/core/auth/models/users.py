@@ -15,6 +15,8 @@ class User(SQLAlchemyBaseUserTable[Mapped[int]], Base):
 
 
 class AccessToken(SQLAlchemyBaseAccessTokenTable[Mapped[int]], Base):
+    __tablename__ = "access_token"  # type: ignore[assignment]
+
     @declared_attr
     def user_id(cls) -> Mapped[int]:
         return mapped_column(INTEGER, ForeignKey("users.id", ondelete="cascade"), nullable=False)

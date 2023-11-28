@@ -1,28 +1,11 @@
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Session, sessionmaker
-from starlette.requests import Request
 
 from settings.config import settings
-
-
-async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
-    """
-    Create and get database session.
-
-    :param request: current request.
-    :yield: database session.
-    """
-    session: AsyncSession = request.app.state.db_session_factory()
-
-    try:
-        yield session
-    finally:
-        await session.commit()
-        await session.close()
 
 
 @contextmanager
@@ -35,6 +18,7 @@ def get_sync_session() -> Generator[Session, None, None]:
         engine.dispose()
 
 
+@asynccontextmanager
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async_engine = create_async_engine(
         str(settings.async_db_url),
@@ -42,5 +26,8 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
         execution_options={"isolation_level": "AUTOCOMMIT"},
     )
     async_session_maker = async_sessionmaker(bind=async_engine, expire_on_commit=False)
-    async with async_session_maker() as session:
-        yield session
+    try:
+        async with async_session_maker() as session:
+            yield session
+    finally:
+        await async_engine.dispose()

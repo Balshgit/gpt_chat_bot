@@ -71,9 +71,9 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     # Enable uvicorn reloading
     RELOAD: bool = False
 
-    SUPERUSER: str = "user"
-    SUPERUSER_PASSWORD: SecretStr = SecretStr("hackme")
-    SALT: SecretStr = SecretStr("change me")
+    SUPERUSER: str | None = None
+    SUPERUSER_PASSWORD: SecretStr | None = None
+    SALT: SecretStr | None = None
 
     # telegram settings
     TELEGRAM_API_TOKEN: str = "123456789:AABBCCDDEEFFaabbccddeeff-1234567890"
