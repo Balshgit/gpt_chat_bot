@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings
 from yarl import URL
 
@@ -70,6 +70,10 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     WORKERS_COUNT: int = 1
     # Enable uvicorn reloading
     RELOAD: bool = False
+
+    SUPERUSER: str = "user"
+    SUPERUSER_PASSWORD: SecretStr = SecretStr("hackme")
+    SALT: SecretStr = SecretStr("change me")
 
     # telegram settings
     TELEGRAM_API_TOKEN: str = "123456789:AABBCCDDEEFFaabbccddeeff-1234567890"

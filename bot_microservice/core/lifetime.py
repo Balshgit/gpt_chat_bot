@@ -1,18 +1,11 @@
-from asyncio import current_task
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_scoped_session,
-    async_sessionmaker,
-    create_async_engine,
-)
 
-from settings.config import AppSettings
+from infra.database.db_adapter import Database
 
 
-def startup(app: FastAPI, settings: AppSettings) -> Callable[[], Awaitable[None]]:
+def startup(app: FastAPI, database: Database) -> Callable[[], Awaitable[None]]:
     """
     Actions to run on application startup.
 
@@ -20,13 +13,13 @@ def startup(app: FastAPI, settings: AppSettings) -> Callable[[], Awaitable[None]
     such as db_engine.
 
     :param app: the fastAPI application.
-    :param settings: app settings
+    :param database: app settings
     :return: function that actually performs actions.
 
     """
 
     async def _startup() -> None:
-        _setup_db(app, settings)
+        _setup_db(app, database)
 
     return _startup
 
@@ -46,7 +39,7 @@ def shutdown(app: FastAPI) -> Callable[[], Awaitable[None]]:
     return _shutdown
 
 
-def _setup_db(app: FastAPI, settings: AppSettings) -> None:
+def _setup_db(app: FastAPI, database: Database) -> None:
     """
     Create connection to the database.
 
@@ -56,18 +49,5 @@ def _setup_db(app: FastAPI, settings: AppSettings) -> None:
 
     :param app: fastAPI application.
     """
-    engine = create_async_engine(
-        str(settings.async_db_url),
-        echo=settings.DB_ECHO,
-        execution_options={"isolation_level": "AUTOCOMMIT"},
-    )
-    session_factory = async_scoped_session(
-        async_sessionmaker(
-            engine,
-            expire_on_commit=False,
-            class_=AsyncSession,
-        ),
-        scopefunc=current_task,
-    )
-    app.state.db_engine = engine
-    app.state.db_session_factory = session_factory
+    app.state.db_engine = database.async_engine
+    app.state.db_session_factory = database._async_session_factory
