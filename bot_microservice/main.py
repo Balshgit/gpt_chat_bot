@@ -35,7 +35,7 @@ class Application:
         self.app.state.queue = self._bot_queue
         self.app.state.bot_app = self.bot_app
 
-        self.app.on_event("startup")(startup(self.app, settings))
+        self.app.on_event("startup")(startup(self.app, self.db))
         self.app.on_event("shutdown")(shutdown(self.app))
 
         self.app.include_router(api_router)

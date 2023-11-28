@@ -108,7 +108,7 @@ class Database:
 
 def load_all_models() -> None:
     """Load all models from this folder."""
-    package_dir = Path(__file__).resolve().parent.parent
+    package_dir = Path(__file__).resolve().parent.parent.parent
     package_dir = package_dir.joinpath("core")
     modules = pkgutil.walk_packages(path=[str(package_dir)], prefix="core.")
     models_packages = [module for module in modules if module.ispkg and "models" in module.name]
