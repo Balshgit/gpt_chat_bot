@@ -42,7 +42,6 @@ class ChatGptModelsEnum(StrEnum):
     gpt_4_ChatgptAi = "gpt-4-ChatgptAi"
     gpt_3_5_turbo_weWordle = "gpt-3.5-turbo-weWordle"
     gpt_3_5_turbo_stream_yqcloud = "gpt-3.5-turbo-stream-yqcloud"
-    gpt_OpenAssistant_stream_HuggingChat = "gpt-OpenAssistant-stream-HuggingChat"
     gpt_4_turbo_stream_you = "gpt-4-turbo-stream-you"
     gpt_3_stream_binjie = "gpt-3-stream-binjie"
     gpt_3_5_turbo_stream_CodeLinkAva = "gpt-3.5-turbo-stream-CodeLinkAva"
@@ -52,19 +51,16 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_Cromicle = "gpt-3.5-turbo-stream-Cromicle"
     gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
     gpt_3_5_turbo_stream_ChatgptDemo = "gpt-3.5-turbo-stream-ChatgptDemo"
-    gpt_3_5_turbo_stream_ChatAnywhere = "gpt-3.5-turbo-stream-ChatAnywhere"
-    gpt_3_5_turbo_ChatgptNext = "gpt-3.5-turbo-ChatgptNext"
     gpt_3_5_turbo_stream_gptTalkRu = "gpt-3.5-turbo--stream-gptTalkRu"
     Llama_2_70b_chat_hf_stream_DeepInfra = "Llama-2-70b-chat-hf-stream-DeepInfra"
     gpt_4_stream_aivvm = "gpt-4-stream-aivvm"
-    llama2 = "llama2"
+    llama2_70B = "llama2-70B"
+    gpt_3_5_turbo_gptChatly = "gpt-3.5-turbo-gptChatly"
     gpt_3_5_turbo_stream_Berlin = "gpt-3.5-turbo-stream-Berlin"
     gpt_4_ChatGpt4Online = "gpt-4-ChatGpt4Online"
     gpt_3_5_turbo_stream_chatGptAi = "gpt-3.5-turbo-stream-chatGptAi"
-    gpt_3_5_turbo_stream_FakeGpt = "gpt-3.5-turbo-stream-FakeGpt"
     gpt_3_5_turbo_stream_GeekGpt = "gpt-3.5-turbo-stream-GeekGpt"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
-    gpt_3_5_turbo_stream_Vercel = "gpt-3.5-turbo-stream-Vercel"
     gpt_3_5_turbo_stream_aivvm = "gpt-3.5-turbo-stream-aivvm"
     gpt_3_5_turbo_stream_ChatForAi = "gpt-3.5-turbo-stream-ChatForAi"
 
@@ -84,8 +80,6 @@ class ChatGptModelsEnum(StrEnum):
                     priority = 3
                 case "gpt-3.5-turbo-stream-GeekGpt":
                     priority = 2
-                case "gpt-3.5-turbo-stream-FakeGpt":
-                    priority = 2
                 case "gpt-3.5-turbo-stream-gptalk":
                     priority = 1
                 case "llama2":
@@ -98,5 +92,4 @@ class ChatGptModelsEnum(StrEnum):
     def _deprecated() -> set[str]:
         return {
             "gpt-3.5-turbo-stream-gptforlove",
-            "gpt-3.5-turbo-stream-Vercel",
         }
