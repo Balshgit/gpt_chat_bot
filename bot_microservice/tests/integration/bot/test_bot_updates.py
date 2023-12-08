@@ -54,7 +54,7 @@ async def test_bot_queue(
     event_loop: AbstractEventLoop,
 ) -> None:
     bot_queue = BotQueue(bot_app=bot)
-    event_loop.create_task(bot_queue.get_updates_from_queue())
+    asyncio.create_task(bot_queue.get_updates_from_queue())
 
     bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/help"))
 
