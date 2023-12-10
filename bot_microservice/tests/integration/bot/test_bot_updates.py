@@ -1,5 +1,4 @@
 import asyncio
-from asyncio import AbstractEventLoop
 from unittest import mock
 
 import httpx
