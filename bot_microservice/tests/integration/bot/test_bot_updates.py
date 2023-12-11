@@ -1,5 +1,4 @@
 import asyncio
-from asyncio import AbstractEventLoop
 from unittest import mock
 
 import httpx
@@ -51,10 +50,9 @@ async def test_bot_webhook_endpoint(
 
 async def test_bot_queue(
     bot: BotApplication,
-    event_loop: AbstractEventLoop,
 ) -> None:
     bot_queue = BotQueue(bot_app=bot)
-    event_loop.create_task(bot_queue.get_updates_from_queue())
+    asyncio.create_task(bot_queue.get_updates_from_queue())
 
     bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/help"))
 
