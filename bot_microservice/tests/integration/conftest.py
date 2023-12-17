@@ -3,9 +3,7 @@ from asyncio import AbstractEventLoop
 from typing import Any, AsyncGenerator, Generator
 
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
-from pytest_asyncio.plugin import SubRequest
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from telegram import Bot, User
@@ -45,7 +43,7 @@ def engine(test_settings: AppSettings) -> Generator[Engine, None, None]:
         engine.dispose()
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest.fixture()
 def dbsession(engine: Engine) -> Generator[Session, None, None]:
     """
     Get session to database.
@@ -150,7 +148,7 @@ def _get_bot_user(token: str) -> User:
 # Redefine the event_loop fixture to have a session scope. Otherwise `bot` fixture can't be
 # session. See https://github.com/pytest-dev/pytest-asyncio/issues/68 for more details.
 @pytest.fixture(scope="session", autouse=True)
-def event_loop(request: SubRequest) -> AbstractEventLoop:
+def event_loop() -> AbstractEventLoop:
     """
     Пересоздаем луп для изоляции тестов. В основном нужно для запуска юнит тестов
     в связке с интеграционными, т.к. без этого pytest зависает.
@@ -166,7 +164,7 @@ def bot_info() -> dict[str, Any]:
     return BotInfoFactory()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest.fixture(scope="session")
 async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]:
     # We build a new bot each time so that we use `app` in a context manager without problems
     application = ApplicationBuilder().bot(make_bot(bot_info)).application_class(PytestApplication).build()
@@ -177,7 +175,7 @@ async def bot_application(bot_info: dict[str, Any]) -> AsyncGenerator[Any, None]
         await application.shutdown()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest.fixture(scope="session")
 async def bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[PytestExtBot, None]:
     """Makes an ExtBot instance with the given bot_info"""
     async with make_bot(bot_info) as _bot:
@@ -185,7 +183,7 @@ async def bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[
         yield _bot
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest.fixture(scope="session")
 async def main_application(
     bot_application: PytestApplication, test_settings: AppSettings
 ) -> AsyncGenerator[AppApplication, None]:
@@ -203,7 +201,7 @@ async def main_application(
     await database.drop_database()
 
 
-@pytest_asyncio.fixture()
+@pytest.fixture()
 async def rest_client(main_application: AppApplication) -> AsyncGenerator[AsyncClient, None]:
     """
     Default http client. Use to test unauthorized requests, public endpoints

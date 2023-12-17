@@ -20,10 +20,7 @@ DIR_LOGS.mkdir(exist_ok=True)
 env_path = f"{BASE_DIR}/settings/.env"
 
 if environ.get("STAGE") == "runtests":
-    if "LOCALTEST" in environ:
-        env_path = f"{BASE_DIR}/settings/.env.local.runtests"
-    else:
-        env_path = f"{BASE_DIR}/settings/.env.ci.runtests"
+    env_path = f"{BASE_DIR}/settings/.env.runtests"
 
 load_dotenv(env_path, override=True)
 
