@@ -62,6 +62,6 @@ COPY --from=compile-image /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 # workarroud fo python3.12 and setuptools not found for fastapi users
-RUN pip3 uninstall setuptools && pip3 install --upgrade setuptools wheel
+RUN pip3 uninstall -y setuptools && pip3 install --upgrade setuptools wheel
 
 USER ${USER}
