@@ -80,7 +80,7 @@ class SpeechToTextService:
             with AudioFile(tmpfile) as source:
                 audio_text = self.recognizer.listen(source)
                 try:
-                    return self.recognizer.recognize_google(audio_text, language="ru-RU")
+                    return self.recognizer.recognize_sphinx(audio_text, language="ru-RU")
                 except SpeechRecognizerError as error:
                     logger.error("error recognizing text with google", error=error)
                     raise
