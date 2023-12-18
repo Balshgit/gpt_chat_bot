@@ -49,20 +49,16 @@ class ChatGptModelsEnum(StrEnum):
     gpt_3_5_turbo_stream_GptGo = "gpt-3.5-turbo-stream-GptGo"
     gpt_3_5_turbo_stream_FreeGpt = "gpt-3.5-turbo-stream-FreeGpt"
     gpt_3_5_turbo_stream_Cromicle = "gpt-3.5-turbo-stream-Cromicle"
-    gpt_3_5_turbo_stream_gptalk = "gpt-3.5-turbo-stream-gptalk"
     gpt_3_5_turbo_stream_ChatgptDemo = "gpt-3.5-turbo-stream-ChatgptDemo"
-    gpt_3_5_turbo_stream_gptTalkRu = "gpt-3.5-turbo--stream-gptTalkRu"
     Llama_2_70b_chat_hf_stream_DeepInfra = "Llama-2-70b-chat-hf-stream-DeepInfra"
     gpt_4_stream_aivvm = "gpt-4-stream-aivvm"
     gpt_3_5_turbo_stream_AiChatOnline = "gpt-3.5-turbo-stream-AiChatOnline"
     llama2_70B = "llama2-70B"
     gpt_3_5_turbo_gptChatly = "gpt-3.5-turbo-gptChatly"
     gpt_3_5_turbo_stream_Berlin = "gpt-3.5-turbo-stream-Berlin"
-    gpt_4_ChatGpt4Online = "gpt-4-ChatGpt4Online"
     gpt_3_5_turbo_stream_chatGptAi = "gpt-3.5-turbo-stream-chatGptAi"
     gpt_3_5_turbo_stream_GeekGpt = "gpt-3.5-turbo-stream-GeekGpt"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
-    gpt_3_5_turbo_stream_ChatForAi = "gpt-3.5-turbo-stream-ChatForAi"
 
     @classmethod
     def values(cls) -> set[str]:
@@ -80,10 +76,8 @@ class ChatGptModelsEnum(StrEnum):
                     priority = 3
                 case "gpt-3.5-turbo-stream-GeekGpt":
                     priority = 2
-                case "gpt-3.5-turbo-stream-gptalk":
-                    priority = 1
                 case "llama2":
-                    priority = 1
+                    priority = 2
             fields = {"model": model, "priority": priority}
             models.append(fields)
         return models
@@ -92,4 +86,8 @@ class ChatGptModelsEnum(StrEnum):
     def _deprecated() -> set[str]:
         return {
             "gpt-3.5-turbo-stream-gptforlove",
+            "gpt-3.5-turbo-stream-gptalk",
+            "gpt-3.5-turbo-stream-ChatForAi",
+            "gpt-4-ChatGpt4Online",
+            "gpt-3.5-turbo--stream-gptTalkRu",
         }
