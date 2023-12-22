@@ -22,6 +22,12 @@ class BotStagesEnum(StrEnum):
     help = "help"
 
 
+class BotCommands(StrEnum):
+    help = "help"
+    bug_report = "bug_report"
+    website = "website"
+
+
 class BotEntryPoints(StrEnum):
     start_routes = "start_routes"
     end = "end"

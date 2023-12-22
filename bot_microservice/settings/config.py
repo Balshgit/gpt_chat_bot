@@ -71,6 +71,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     SUPERUSER: str | None = None
     SUPERUSER_PASSWORD: SecretStr | None = None
     SALT: SecretStr | None = None
+    ADMIN_CHAT_ID: int | None = None
 
     # telegram settings
     TELEGRAM_API_TOKEN: str = "123456789:AABBCCDDEEFFaabbccddeeff-1234567890"

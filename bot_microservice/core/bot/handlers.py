@@ -9,11 +9,12 @@ from telegram.ext import (
     filters,
 )
 
-from constants import BotEntryPoints, BotStagesEnum
+from constants import BotCommands, BotEntryPoints, BotStagesEnum
 from core.bot.commands import (
     about_bot,
     about_me,
     ask_question,
+    bug_report,
     github,
     help_command,
     start_command,
@@ -32,7 +33,10 @@ class BotEventHandlers:
 
 bot_event_handlers = BotEventHandlers()
 
-bot_event_handlers.add_handler(CommandHandler("help", help_command))
+bot_event_handlers.add_handler(CommandHandler(BotCommands.help, help_command))
+bot_event_handlers.add_handler(CommandHandler(BotCommands.website, website))
+bot_event_handlers.add_handler(CommandHandler(BotCommands.bug_report, bug_report))
+
 bot_event_handlers.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ask_question))
 bot_event_handlers.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_recognize))
 bot_event_handlers.add_handler(
