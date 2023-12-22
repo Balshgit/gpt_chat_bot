@@ -84,7 +84,7 @@ class BotInfoFactory(factory.DictFactory):
 class BotEntitleFactory(factory.DictFactory):
     type = "bot_command"
     offset = 0
-    length = 7
+    length = 42
 
 
 class BotMessageFactory(factory.DictFactory):

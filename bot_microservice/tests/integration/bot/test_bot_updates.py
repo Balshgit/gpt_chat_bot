@@ -210,9 +210,7 @@ async def test_about_bot_callback_action(
 
         assert mocked_reply_text.call_args.args == (
             f"Бот использует бесплатную модель *{model_with_highest_priority.model}* для ответов на вопросы.\n"
-            f"Принимает запросы на разных языках.\n\nБот так же умеет переводить русские голосовые сообщения в текст. "
-            f"Просто пришлите или перешлите голосовуху боту и получите поток сознания в виде текста, "
-            f"но без знаков препинания.",
+            f"Принимает запросы на разных языках.",
         )
         assert mocked_reply_text.call_args.kwargs == {"parse_mode": "Markdown"}
 
@@ -232,6 +230,35 @@ async def test_website_callback_action(
         )
 
         assert mocked_reply_text.call_args.args == ("Веб версия: http://localhost/chat/",)
+
+
+async def test_bug_report_action(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    with (
+        mock.patch.object(telegram._message.Message, "reply_text") as mocked_reply_text,
+        mock.patch.object(
+            telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+        ) as mocked_send_message,
+    ):
+        bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/bug_report"))
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+
+        assert mocked_reply_text.call_args.args == (
+            "Спасибо за баг репорт.\n"
+            "Можете попробовать воспользоваться веб версией /website, выбрав различные GPT модели",
+        )
+        from_user = bot_update["message"]["from"]
+        assert mocked_send_message.call_args.kwargs["text"] == (
+            f"Bug report from user: "
+            f"User(first_name='{from_user['first_name']}', id={from_user['id']}, is_bot={from_user['is_bot']}, "
+            f"language_code='{from_user['language_code']}', last_name='{from_user['last_name']}', "
+            f"username='{from_user['username']}')"
+        )
 
 
 async def test_ask_question_action(
@@ -254,7 +281,9 @@ async def test_ask_question_action(
         )
         assert_that(mocked_send_message.call_args_list[0].kwargs).is_equal_to(
             {
-                "text": "Пожалуйста, подождите, ответ в среднем занимает 10-15 секунд",
+                "text": (
+                    "Ответ в среднем занимает 10-15 секунд.\n- Список команд: /help\n- Сообщить об ошибке: /bug_report"
+                ),
                 "chat_id": bot_update["message"]["chat"]["id"],
             },
             include=["text", "chat_id"],

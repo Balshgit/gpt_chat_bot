@@ -6,7 +6,8 @@ from loguru import logger
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from constants import BotEntryPoints
+from constants import BotCommands, BotEntryPoints
+from core.bot.app import get_bot
 from core.bot.keyboards import main_keyboard
 from core.bot.services import ChatGptService, SpeechToTextService
 from settings.config import settings
@@ -36,9 +37,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chatgpt_service = ChatGptService.build()
     model = await chatgpt_service.get_current_chatgpt_model()
     await update.effective_message.reply_text(
-        f"Бот использует бесплатную модель *{model}* для ответов на вопросы.\nПринимает запросы на разных языках."
-        f"\n\nБот так же умеет переводить русские голосовые сообщения в текст. Просто пришлите или перешлите "
-        f"голосовуху боту и получите поток сознания в виде текста, но без знаков препинания.",
+        f"Бот использует бесплатную модель *{model}* для ответов на вопросы.\nПринимает запросы на разных языках.",
         parse_mode="Markdown",
     )
 
@@ -64,6 +63,20 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
 
+async def bug_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a message when the command /bug-report is issued."""
+
+    if not update.effective_message:
+        return
+    async with get_bot(settings.TELEGRAM_API_TOKEN) as bot:
+        await bot.send_message(chat_id=settings.ADMIN_CHAT_ID, text=f"Bug report from user: {update.effective_user}")
+    await update.effective_message.reply_text(
+        f"Спасибо за баг репорт.\n"
+        f"Можете попробовать воспользоваться веб версией /{BotCommands.website}, выбрав различные GPT модели",
+        parse_mode="Markdown",
+    )
+
+
 async def github(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
 
@@ -79,7 +92,11 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not update.message:
         return
 
-    await update.message.reply_text("Пожалуйста, подождите, ответ в среднем занимает 10-15 секунд")
+    await update.message.reply_text(
+        f"Ответ в среднем занимает 10-15 секунд.\n"
+        f"- Список команд: /{BotCommands.help}\n"
+        f"- Сообщить об ошибке: /{BotCommands.bug_report}",
+    )
 
     chatgpt_service = ChatGptService.build()
     logger.warning("question asked", user=update.message.from_user, question=update.message.text)
