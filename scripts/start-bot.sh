@@ -2,7 +2,12 @@
 
 set -e
 
-alembic downgrade -1 && alembic upgrade "head"
+if [ -f shared/${DB_NAME:-chatgpt.db} ]
+then
+  alembic downgrade -1 && alembic upgrade "head"
+else
+  alembic upgrade "head"
+fi
 
 echo "starting the bot"
 

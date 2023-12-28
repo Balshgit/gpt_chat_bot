@@ -1,5 +1,9 @@
 version: '3.9'
 
+volumes:
+  chatgpt_shared:
+    name: chatgpt_shared
+
 networks:
   chatgpt-network:
     name:
@@ -25,7 +29,7 @@ services:
       - bot_microservice/settings/.env
     volumes:
       - ./bot_microservice/settings:/app/settings:ro
-      - ./bot_microservice/shared:/app/shared
+      - chatgpt_shared:/app/shared
       - /etc/localtime:/etc/localtime:ro
     networks:
       chatgpt-network:
