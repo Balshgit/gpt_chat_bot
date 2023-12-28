@@ -5,6 +5,7 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
+from api.exceptions import internal_server_error_handler
 from core.bot.app import BotApplication, BotQueue
 from core.bot.handlers import bot_event_handlers
 from core.lifetime import shutdown, startup
@@ -26,6 +27,9 @@ class Application:
             openapi_url="/" + "/".join([settings.api_prefix.strip("/"), "openapi.json"]),
             debug=settings.DEBUG,
             default_response_class=UJSONResponse,
+            exception_handlers={
+                Exception: internal_server_error_handler,
+            },
         )
         self.bot_app = bot_app
         self.db = Database(settings)

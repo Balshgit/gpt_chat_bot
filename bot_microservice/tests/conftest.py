@@ -24,6 +24,20 @@ def test_settings() -> AppSettings:
     return get_settings()
 
 
+# Redefine the event_loop fixture to have a session scope. Otherwise `bot` fixture can't be
+# session. See https://github.com/pytest-dev/pytest-asyncio/issues/68 for more details.
+@pytest.fixture(scope="session", autouse=True)
+def event_loop() -> AbstractEventLoop:
+    """
+    Пересоздаем луп для изоляции тестов. В основном нужно для запуска юнит тестов
+    в связке с интеграционными, т.к. без этого pytest зависает.
+    Для интеграционных тестов фикстура определяется дополнительная фикстура на всю сессию.
+    """
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    asyncio.set_event_loop(loop)
+    return loop
+
+
 @pytest.fixture(scope="session")
 def engine(test_settings: AppSettings) -> Generator[Engine, None, None]:
     """
@@ -99,21 +113,6 @@ class PytestApplication(Application):  # type: ignore
     pass
 
 
-def make_bot(bot_info: dict[str, Any] | None = None, **kwargs: Any) -> PytestExtBot:
-    """
-    Tests are executed on tg.ext.ExtBot, as that class only extends the functionality of tg.bot
-    """
-    token = kwargs.pop("token", (bot_info or {}).get("token"))
-    kwargs.pop("token", None)
-    return PytestExtBot(
-        token=token,
-        private_key=None,
-        request=NonchalantHttpxRequest(connection_pool_size=8),
-        get_updates_request=NonchalantHttpxRequest(connection_pool_size=1),
-        **kwargs,
-    )
-
-
 async def _mocked_get_me(bot: Bot) -> User:
     if bot._bot_user is None:
         bot._bot_user = _get_bot_user(bot.token)
@@ -143,20 +142,6 @@ def _get_bot_user(token: str) -> User:
         can_read_all_group_messages=False,
         supports_inline_queries=True,
     )
-
-
-# Redefine the event_loop fixture to have a session scope. Otherwise `bot` fixture can't be
-# session. See https://github.com/pytest-dev/pytest-asyncio/issues/68 for more details.
-@pytest.fixture(scope="session", autouse=True)
-def event_loop() -> AbstractEventLoop:
-    """
-    Пересоздаем луп для изоляции тестов. В основном нужно для запуска юнит тестов
-    в связке с интеграционными, т.к. без этого pytest зависает.
-    Для интеграционных тестов фикстура определяется дополнительная фикстура на всю сессию.
-    """
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    asyncio.set_event_loop(loop)
-    return loop
 
 
 @pytest.fixture(scope="session")
@@ -213,3 +198,18 @@ async def rest_client(main_application: AppApplication) -> AsyncGenerator[AsyncC
         headers={"Content-Type": "application/json"},
     ) as client:
         yield client
+
+
+def make_bot(bot_info: dict[str, Any] | None = None, **kwargs: Any) -> PytestExtBot:
+    """
+    Tests are executed on tg.ext.ExtBot, as that class only extends the functionality of tg.bot
+    """
+    token = kwargs.pop("token", (bot_info or {}).get("token"))
+    kwargs.pop("token", None)
+    return PytestExtBot(
+        token=token,
+        private_key=None,
+        request=NonchalantHttpxRequest(connection_pool_size=8),
+        get_updates_request=NonchalantHttpxRequest(connection_pool_size=1),
+        **kwargs,
+    )

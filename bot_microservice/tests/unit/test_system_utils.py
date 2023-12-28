@@ -1,7 +1,21 @@
 import time
 from typing import Callable
 
+import pytest
+from fastapi.responses import ORJSONResponse
+from httpx import ASGITransport, AsyncClient
+from starlette import status
+
+from core.bot.app import BotApplication
+from core.bot.handlers import bot_event_handlers
 from core.utils import timed_lru_cache
+from main import Application as AppApplication
+from settings.config import AppSettings
+
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.enable_socket,
+]
 
 
 class TestTimedLruCache:
@@ -58,3 +72,27 @@ class TestTimedLruCache:
     ) -> None:
         for _ in range(call_times):
             assert func(first, second) == result
+
+
+async def test_server_error_handler_returns_500_without_traceback_when_debug_disabled(
+    test_settings: AppSettings,
+) -> None:
+    bot_app = BotApplication(
+        settings=test_settings,
+        handlers=bot_event_handlers.handlers,
+    )
+    settings = test_settings.model_copy(update={"DEBUG": False})
+    fastapi_app = AppApplication(settings=settings, bot_app=bot_app).fastapi_app
+
+    @fastapi_app.get("/server-error", response_model=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    async def controller() -> ORJSONResponse:
+        result = 1 / 0
+        return ORJSONResponse(content=result, status_code=status.HTTP_200_OK)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=fastapi_app, raise_app_exceptions=False),  # type: ignore[arg-type]
+        base_url="http://test",
+        headers={"Content-Type": "application/json"},
+    ) as client:
+        response = await client.get("/server-error")
+    assert response.status_code == 500
