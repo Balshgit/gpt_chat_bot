@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from core.bot.models.chat_gpt import ChatGpt
+from core.bot.models.chatgpt import ChatGptModels
 from tests.integration.factories.bot import ChatGptModelFactory
 
 pytestmark = [
@@ -58,7 +58,7 @@ async def test_change_chatgpt_model_priority(
     response = await rest_client.put(url=f"/api/chatgpt/models/{model2.id}/priority", json={"priority": priority})
     assert response.status_code == 202
 
-    upd_model1, upd_model2 = dbsession.query(ChatGpt).order_by(ChatGpt.priority).all()
+    upd_model1, upd_model2 = dbsession.query(ChatGptModels).order_by(ChatGptModels.priority).all()
 
     assert model1.model == upd_model1.model
     assert model1.priority == upd_model1.priority
@@ -76,10 +76,10 @@ async def test_reset_chatgpt_models_priority(
     response = await rest_client.put(url="/api/chatgpt/models/priority/reset")
     assert response.status_code == 202
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 5
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
 
     for model in models:
         assert model.priority == 0
@@ -96,7 +96,7 @@ async def test_create_new_chatgpt_model(
     model_name = "new-gpt-model"
     model_priority = faker.random_int(min=1, max=5)
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 3
 
     response = await rest_client.post(
@@ -108,10 +108,10 @@ async def test_create_new_chatgpt_model(
     )
     assert response.status_code == 201
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 4
 
-    latest_model = dbsession.query(ChatGpt).order_by(desc(ChatGpt.id)).limit(1).one()
+    latest_model = dbsession.query(ChatGptModels).order_by(desc(ChatGptModels.id)).limit(1).one()
     assert latest_model.model == model_name
     assert latest_model.priority == model_priority
 
@@ -132,7 +132,7 @@ async def test_add_existing_chatgpt_model(
     model_name = model.model
     model_priority = faker.random_int(min=1, max=5)
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 3
 
     response = await rest_client.post(
@@ -144,7 +144,7 @@ async def test_add_existing_chatgpt_model(
     )
     assert response.status_code == 201
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 3
 
 
@@ -155,13 +155,13 @@ async def test_delete_chatgpt_model(
     ChatGptModelFactory.create_batch(size=2)
     model = ChatGptModelFactory(priority=42)
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 3
 
     response = await rest_client.delete(url=f"/api/chatgpt/models/{model.id}")
     assert response.status_code == 204
 
-    models = dbsession.query(ChatGpt).all()
+    models = dbsession.query(ChatGptModels).all()
     assert len(models) == 2
 
     assert model not in models

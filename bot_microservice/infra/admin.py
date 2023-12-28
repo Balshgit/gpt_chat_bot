@@ -3,16 +3,16 @@ from typing import TYPE_CHECKING
 
 from sqladmin import Admin, ModelView
 
-from core.bot.models.chat_gpt import ChatGpt
+from core.bot.models.chatgpt import ChatGptModels
 from settings.config import settings
 
 if TYPE_CHECKING:
     from main import Application
 
 
-class ChatGptAdmin(ModelView, model=ChatGpt):
-    column_list = [ChatGpt.id, ChatGpt.model, ChatGpt.priority]
-    column_sortable_list = [ChatGpt.priority]
+class ChatGptAdmin(ModelView, model=ChatGptModels):
+    column_list = [ChatGptModels.id, ChatGptModels.model, ChatGptModels.priority]
+    column_sortable_list = [ChatGptModels.priority]
     column_default_sort = ("priority", True)
     form_widget_args = {"model": {"readonly": True}}
 

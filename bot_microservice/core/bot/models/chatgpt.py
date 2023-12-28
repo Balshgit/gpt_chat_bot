@@ -3,10 +3,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from infra.database.base import Base
 
-__slots__ = ("ChatGpt",)
+__slots__ = ("ChatGptModels",)
 
 
-class ChatGpt(Base):
+class ChatGptModels(Base):
     __tablename__ = "chatgpt_models"  # type: ignore[assignment]
 
     id: Mapped[int] = mapped_column("id", INTEGER(), primary_key=True, autoincrement=True)
