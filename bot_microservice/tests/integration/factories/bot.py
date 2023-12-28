@@ -6,7 +6,7 @@ import factory.fuzzy
 from faker import Faker
 
 from constants import BotStagesEnum
-from core.bot.models.chat_gpt import ChatGpt
+from core.bot.models.chatgpt import ChatGptModels
 from tests.integration.factories.utils import BaseModelFactory
 
 faker = Faker("ru_RU")
@@ -58,7 +58,7 @@ class ChatGptModelFactory(BaseModelFactory):
     priority = factory.Faker("random_int", min=0, max=42)
 
     class Meta:
-        model = ChatGpt
+        model = ChatGptModels
 
 
 class BotInfoFactory(factory.DictFactory):

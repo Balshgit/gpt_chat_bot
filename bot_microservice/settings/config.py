@@ -8,7 +8,7 @@ from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings
 from yarl import URL
 
-from constants import API_PREFIX, CHATGPT_BASE_URI
+from constants import API_PREFIX, CHATGPT_BASE_URI, LogLevelEnum
 
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
@@ -39,6 +39,7 @@ class SentrySettings(BaseSettings):
 
 
 class LoggingSettings(BaseSettings):
+    LOG_LEVEL: LogLevelEnum = LogLevelEnum.INFO
     ENABLE_JSON_LOGS: bool = True
     ENABLE_SENTRY_LOGS: bool = False
 

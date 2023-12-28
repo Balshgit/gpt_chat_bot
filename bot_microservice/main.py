@@ -5,7 +5,6 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
-from constants import LogLevelEnum
 from core.bot.app import BotApplication, BotQueue
 from core.bot.handlers import bot_event_handlers
 from core.lifetime import shutdown, startup
@@ -41,7 +40,7 @@ class Application:
         self.app.include_router(api_router)
         self.configure_bot_hooks()
         configure_logging(
-            level=LogLevelEnum.INFO,
+            level=settings.LOG_LEVEL,
             enable_json_logs=settings.ENABLE_JSON_LOGS,
             enable_sentry_logs=settings.ENABLE_SENTRY_LOGS,
             log_to_file=settings.LOG_TO_FILE,
