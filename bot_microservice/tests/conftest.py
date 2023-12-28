@@ -175,7 +175,8 @@ async def bot_app(test_settings: AppSettings) -> BotApplication:
 
 @pytest.fixture(scope="session")
 async def main_application(
-    test_settings: AppSettings, bot_app: BotApplication,
+    test_settings: AppSettings,
+    bot_app: BotApplication,
 ) -> AsyncGenerator[AppApplication, None]:
     bot_app.application._initialized = True
     bot_app.application.bot = make_bot(BotInfoFactory())

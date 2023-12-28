@@ -23,5 +23,5 @@ class BaseError(BaseModel):
 
 class BaseResponse(BaseModel):
     status: int = Field(..., title="Status code of request.", example=status_code.HTTP_200_OK)  # type: ignore[call-arg]
-    error: dict[Any, Any] | BaseError | None = Field(None, title="Errors")
-    payload: Any | None = Field({}, title="Payload data.")
+    error: dict[Any, Any] | BaseError | None = Field(default=None, title="Errors")
+    payload: Any | None = Field(default_factory=dict, title="Payload data.")

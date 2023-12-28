@@ -2,15 +2,13 @@ import httpx
 import pytest
 from faker import Faker
 from fastapi.responses import ORJSONResponse
-from httpx import ASGITransport, AsyncClient
-from httpx import Response
+from httpx import ASGITransport, AsyncClient, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette import status
 
 from api.exceptions import BaseAPIException
 from core.bot.app import BotApplication
-from core.bot.handlers import bot_event_handlers
 from main import Application as AppApplication
 from settings.config import AppSettings
 from tests.integration.factories.bot import ChatGptModelFactory
@@ -72,7 +70,8 @@ async def test_bot_healthcheck_not_ok(
 
 
 async def test_server_error_handler_returns_500_without_traceback_when_debug_disabled(
-    test_settings: AppSettings, bot_app: BotApplication,
+    test_settings: AppSettings,
+    bot_app: BotApplication,
 ) -> None:
     settings = test_settings.model_copy(update={"DEBUG": False})
     fastapi_app = AppApplication(settings=settings, bot_app=bot_app).fastapi_app
