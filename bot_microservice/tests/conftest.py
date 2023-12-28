@@ -169,13 +169,14 @@ async def bot(bot_info: dict[str, Any], bot_application: Any) -> AsyncGenerator[
 
 
 @pytest.fixture(scope="session")
+async def bot_app(test_settings: AppSettings) -> BotApplication:
+    return BotApplication(settings=test_settings, handlers=bot_event_handlers.handlers)
+
+
+@pytest.fixture(scope="session")
 async def main_application(
-    bot_application: PytestApplication, test_settings: AppSettings
+    test_settings: AppSettings, bot_app: BotApplication,
 ) -> AsyncGenerator[AppApplication, None]:
-    bot_app = BotApplication(
-        settings=test_settings,
-        handlers=bot_event_handlers.handlers,
-    )
     bot_app.application._initialized = True
     bot_app.application.bot = make_bot(BotInfoFactory())
     bot_app.application.bot._bot_user = BotUserFactory()

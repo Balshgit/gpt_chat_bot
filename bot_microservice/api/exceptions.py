@@ -29,8 +29,6 @@ class InternalServerErrorResponse(BaseResponse):
 
 
 async def internal_server_error_handler(_request: Request, _exception: Exception) -> ORJSONResponse:
-    error = InternalServerError(title="Something went wrong!", type="InternalServerError")  # type: ignore[call-arg]
-    response = InternalServerErrorResponse(status=500, error=error).model_dump(  # type: ignore[call-arg]
-        exclude_unset=True
-    )
+    error = InternalServerError(title="Something went wrong!", type="InternalServerError")
+    response = InternalServerErrorResponse(status=500, error=error).model_dump(exclude_unset=True)
     return ORJSONResponse(status_code=500, content=response)

@@ -1,11 +1,17 @@
 import httpx
 import pytest
 from faker import Faker
-from httpx import AsyncClient, Response
+from fastapi.responses import ORJSONResponse
+from httpx import ASGITransport, AsyncClient
+from httpx import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
+from starlette import status
 
 from api.exceptions import BaseAPIException
+from core.bot.app import BotApplication
+from core.bot.handlers import bot_event_handlers
+from main import Application as AppApplication
 from settings.config import AppSettings
 from tests.integration.factories.bot import ChatGptModelFactory
 from tests.integration.utils import mocked_ask_question_api
@@ -63,3 +69,31 @@ async def test_bot_healthcheck_not_ok(
     ):
         response = await rest_client.get("/api/bot-healthcheck")
         assert response.status_code == httpx.codes.INTERNAL_SERVER_ERROR
+
+
+async def test_server_error_handler_returns_500_without_traceback_when_debug_disabled(
+    test_settings: AppSettings, bot_app: BotApplication,
+) -> None:
+    settings = test_settings.model_copy(update={"DEBUG": False})
+    fastapi_app = AppApplication(settings=settings, bot_app=bot_app).fastapi_app
+
+    route = "/server-error"
+
+    @fastapi_app.get(route, response_model=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    async def controller() -> ORJSONResponse:
+        result = 1 / 0
+        return ORJSONResponse(content=result, status_code=status.HTTP_200_OK)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=fastapi_app, raise_app_exceptions=False),  # type: ignore[arg-type]
+        base_url="http://test",
+        headers={"Content-Type": "application/json"},
+    ) as client:
+        response = await client.get(route)
+    assert response.status_code == 500
+    data = response.json()
+    assert data == {"error": {"title": "Something went wrong!", "type": "InternalServerError"}, "status": 500}
+    replaced_oauth_route = next(
+        filter(lambda r: r.path == route, fastapi_app.routes)  # type: ignore[arg-type, attr-defined]
+    )
+    fastapi_app.routes.remove(replaced_oauth_route)
