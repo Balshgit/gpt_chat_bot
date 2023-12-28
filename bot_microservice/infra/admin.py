@@ -21,11 +21,12 @@ class ChatGptAdmin(ModelView, model=ChatGpt):
 
 
 def create_admin(application: "Application") -> Admin:
+    base_url = os.path.join(settings.URL_PREFIX, "admin")
     admin = Admin(
         title="Chat GPT admin",
         app=application.fastapi_app,
         engine=application.db.async_engine,
-        base_url=os.path.join(settings.URL_PREFIX, "admin"),
+        base_url=base_url if base_url.startswith("/") else "/" + base_url,
         authentication_backend=None,
     )
     admin.add_view(ChatGptAdmin)
