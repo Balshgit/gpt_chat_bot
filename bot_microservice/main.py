@@ -5,7 +5,6 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
-from constants import LogLevelEnum
 from core.bot.app import BotApplication, BotQueue
 from core.bot.handlers import bot_event_handlers
 from core.lifetime import shutdown, startup

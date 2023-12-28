@@ -1,7 +1,7 @@
 """create_auth_tables
 
-Revision ID: 0003_create_users_table
-Revises: 0002_create_chatgpt_models
+Revision ID: 0002_create_users_table
+Revises: 0001_create_chatgpt_table
 Create Date: 2023-11-28 00:58:01.984654
 
 """
@@ -17,8 +17,8 @@ from infra.database.deps import get_sync_session
 from settings.config import settings
 
 # revision identifiers, used by Alembic.
-revision = "0003_create_auth_tables"
-down_revision = "0002_create_chatgpt_models"
+revision = "0002_create_auth_tables"
+down_revision = "0001_create_chatgpt_table"
 branch_labels = None
 depends_on = None
 

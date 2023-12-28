@@ -1,7 +1,7 @@
 """create chatgpt models
 
-Revision ID: 0002_create_chatgpt_models
-Revises: 0001_create_chatgpt_table
+Revision ID: 0004_add_chatgpt_models
+Revises: 0003_create_user_question_count_table
 Create Date: 2025-10-05 20:44:05.414977
 
 """
@@ -13,8 +13,8 @@ from core.bot.models.chat_gpt import ChatGpt
 from infra.database.deps import get_sync_session
 
 # revision identifiers, used by Alembic.
-revision = "0002_create_chatgpt_models"
-down_revision = "0001_create_chatgpt_table"
+revision = "0004_add_chatgpt_models"
+down_revision = "0003_create_user_question_count_table"
 branch_labels: str | None = None
 depends_on: str | None = None
 

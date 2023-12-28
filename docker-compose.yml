@@ -25,6 +25,7 @@ services:
       - bot_microservice/settings/.env
     volumes:
       - ./bot_microservice/settings:/app/settings:ro
+      - ./bot_microservice/shared:/app/shared
       - /etc/localtime:/etc/localtime:ro
     networks:
       chatgpt-network:

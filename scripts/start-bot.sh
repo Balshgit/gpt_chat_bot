@@ -2,7 +2,7 @@
 
 set -e
 
-alembic upgrade "head"
+alembic downgrade -1 && alembic upgrade "head"
 
 echo "starting the bot"
 

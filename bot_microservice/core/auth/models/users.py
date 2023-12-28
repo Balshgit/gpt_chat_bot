@@ -20,3 +20,10 @@ class AccessToken(SQLAlchemyBaseAccessTokenTable[Mapped[int]], Base):
     @declared_attr
     def user_id(cls) -> Mapped[int]:
         return mapped_column(INTEGER, ForeignKey("users.id", ondelete="cascade"), nullable=False)
+
+
+class UserQuestionCount(Base):
+    __tablename__ = "user_question_count"  # type: ignore[assignment]
+
+    user_id: Mapped[int] = mapped_column(INTEGER, ForeignKey("users.id", ondelete="cascade"), primary_key=True)
+    question_count: Mapped[int] = mapped_column(INTEGER, default=0, nullable=False)
