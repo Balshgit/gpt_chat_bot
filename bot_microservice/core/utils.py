@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from functools import cache, wraps
 from inspect import cleandoc
@@ -39,3 +40,9 @@ def clean_doc(cls: Any) -> str | None:
     if cls.__doc__ is None:
         return None
     return cleandoc(cls.__doc__)
+
+
+def build_uri(uri_parts: list[str]) -> str:
+    parts = [part.strip("/") for part in uri_parts]
+    uri = str(os.path.join(*parts)).strip("/")
+    return f"/{uri}"

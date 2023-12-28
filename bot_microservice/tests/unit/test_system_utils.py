@@ -1,7 +1,9 @@
 import time
 from typing import Callable
 
-from core.utils import timed_lru_cache
+import pytest
+
+from core.utils import build_uri, timed_lru_cache
 
 
 class TestTimedLruCache:
@@ -58,3 +60,21 @@ class TestTimedLruCache:
     ) -> None:
         for _ in range(call_times):
             assert func(first, second) == result
+
+
+@pytest.mark.parametrize(
+    "uri_parts, expected_result",
+    [
+        (["", "admin"], "/admin"),
+        (["/gpt", "admin"], "/gpt/admin"),
+        (["/gpt", "/chat"], "/gpt/chat"),
+        (["gpt", ""], "/gpt"),
+        (["gpt"], "/gpt"),
+        (["gpt", "chat"], "/gpt/chat"),
+        (["", ""], "/"),
+        (["gpt", "/chat", "/admin"], "/gpt/chat/admin"),
+        (["gpt/", "/chat/", "/admin"], "/gpt/chat/admin"),
+    ],
+)
+def test_build_uri_with_slash_prefix(uri_parts: list[str], expected_result: str) -> None:
+    assert build_uri(uri_parts) == expected_result
