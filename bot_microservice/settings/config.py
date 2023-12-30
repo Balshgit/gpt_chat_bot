@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings
 from yarl import URL
 
 from constants import API_PREFIX, CHATGPT_BASE_URI, LogLevelEnum
+from core.utils import build_uri
 
 BASE_DIR = Path(__file__).parent.parent
 SHARED_DIR = BASE_DIR.resolve().joinpath("shared")
@@ -109,7 +110,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     @cached_property
     def api_prefix(self) -> str:
         if self.URL_PREFIX:
-            return "/" + "/".join([self.URL_PREFIX.strip("/"), API_PREFIX.strip("/")])
+            return build_uri([self.URL_PREFIX, API_PREFIX])
         return API_PREFIX
 
     @cached_property
@@ -126,7 +127,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
 
     @cached_property
     def bot_webhook_url(self) -> str:
-        return "/".join([self.api_prefix, self.token_part])
+        return build_uri([self.api_prefix, self.token_part])
 
     @cached_property
     def db_file(self) -> Path:

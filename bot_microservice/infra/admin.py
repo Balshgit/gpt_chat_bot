@@ -1,9 +1,9 @@
-import os
 from typing import TYPE_CHECKING
 
 from sqladmin import Admin, ModelView
 
 from core.bot.models.chatgpt import ChatGptModels
+from core.utils import build_uri
 from settings.config import settings
 
 if TYPE_CHECKING:
@@ -21,12 +21,11 @@ class ChatGptAdmin(ModelView, model=ChatGptModels):
 
 
 def create_admin(application: "Application") -> Admin:
-    base_url = os.path.join(settings.URL_PREFIX, "admin")
     admin = Admin(
         title="Chat GPT admin",
         app=application.fastapi_app,
         engine=application.db.async_engine,
-        base_url=base_url if base_url.startswith("/") else "/" + base_url,
+        base_url=build_uri([settings.URL_PREFIX, "admin"]),
         authentication_backend=None,
     )
     admin.add_view(ChatGptAdmin)

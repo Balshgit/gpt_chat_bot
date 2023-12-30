@@ -5,9 +5,11 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
+from api.exceptions import internal_server_error_handler
 from core.bot.app import BotApplication, BotQueue
 from core.bot.handlers import bot_event_handlers
 from core.lifetime import shutdown, startup
+from core.utils import build_uri
 from infra.admin import create_admin
 from infra.database.db_adapter import Database
 from infra.logging_conf import configure_logging
@@ -21,11 +23,14 @@ class Application:
             title="Chat gpt bot",
             description="Bot for proxy to chat gpt in telegram",
             version="0.0.3",
-            docs_url="/" + "/".join([settings.api_prefix.strip("/"), "docs"]),
-            redoc_url="/" + "/".join([settings.api_prefix.strip("/"), "redocs"]),
-            openapi_url="/" + "/".join([settings.api_prefix.strip("/"), "openapi.json"]),
+            docs_url=build_uri([settings.api_prefix, "docs"]),
+            redoc_url=build_uri([settings.api_prefix, "redocs"]),
+            openapi_url=build_uri([settings.api_prefix, "openapi.json"]),
             debug=settings.DEBUG,
             default_response_class=UJSONResponse,
+            exception_handlers={
+                Exception: internal_server_error_handler,
+            },
         )
         self.bot_app = bot_app
         self.db = Database(settings)
