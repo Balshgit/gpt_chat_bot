@@ -92,6 +92,11 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not update.message:
         return
 
+    if not update.effective_user:
+        logger.error('no effective user', update=update, context=context)
+        await update.message.reply_text("Бот не смог определить пользователя. :(\nОб ошибке уже сообщено.")
+        return
+
     await update.message.reply_text(
         f"Ответ в среднем занимает 10-15 секунд.\n"
         f"- Список команд: /{BotCommands.help}\n"
@@ -100,8 +105,16 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     chatgpt_service = ChatGptService.build()
     logger.warning("question asked", user=update.message.from_user, question=update.message.text)
-    answer = await chatgpt_service.request_to_chatgpt(question=update.message.text)
-    await update.message.reply_text(answer)
+    answer, user = await asyncio.gather(
+        chatgpt_service.request_to_chatgpt(question=update.message.text),
+        chatgpt_service.get_or_create_bot_user(
+            user_id=update.effective_user.id,
+            username=update.effective_user.username,
+            first_name=update.effective_user.first_name,
+            last_name=update.effective_user.last_name,
+        ),
+    )
+    await asyncio.gather(update.message.reply_text(answer), chatgpt_service.update_bot_user_message_count(user.id))
 
 
 async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

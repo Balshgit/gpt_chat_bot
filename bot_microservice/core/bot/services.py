@@ -15,6 +15,9 @@ from speech_recognition import (
 )
 
 from constants import AUDIO_SEGMENT_DURATION
+from core.auth.models.users import User
+from core.auth.repository import UserRepository
+from core.auth.services import UserService
 from core.bot.models.chatgpt import ChatGptModels
 from core.bot.repository import ChatGPTRepository
 from infra.database.db_adapter import Database
@@ -89,6 +92,15 @@ class SpeechToTextService:
 @dataclass
 class ChatGptService:
     repository: ChatGPTRepository
+    user_service: UserService
+
+    @classmethod
+    def build(cls) -> "ChatGptService":
+        db = Database(settings=settings)
+        repository = ChatGPTRepository(settings=settings, db=db)
+        user_repository = UserRepository(db=db)
+        user_service = UserService(repository=user_repository)
+        return ChatGptService(repository=repository, user_service=user_service)
 
     async def get_chatgpt_models(self) -> Sequence[ChatGptModels]:
         return await self.repository.get_chatgpt_models()
@@ -117,8 +129,27 @@ class ChatGptService:
     async def delete_chatgpt_model(self, model_id: int) -> None:
         return await self.repository.delete_chatgpt_model(model_id=model_id)
 
-    @classmethod
-    def build(cls) -> "ChatGptService":
-        db = Database(settings=settings)
-        repository = ChatGPTRepository(settings=settings, db=db)
-        return ChatGptService(repository=repository)
+    async def get_or_create_bot_user(
+        self,
+        user_id: int,
+        email: str | None = None,
+        username: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        ban_reason: str | None = None,
+        is_active: bool = True,
+        is_superuser: bool = False,
+    ) -> User:
+        return await self.user_service.get_or_create_user_by_id(
+            user_id=user_id,
+            email=email,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            ban_reason=ban_reason,
+            is_active=is_active,
+            is_superuser=is_superuser,
+        )
+
+    async def update_bot_user_message_count(self, user_id: int) -> None:
+        await self.user_service.update_user_message_count(user_id)

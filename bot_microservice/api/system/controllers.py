@@ -3,7 +3,7 @@ from fastapi.responses import ORJSONResponse
 from starlette import status
 from starlette.responses import Response
 
-from api.deps import get_chatgpt_service
+from api.bot.deps import get_chatgpt_service
 from api.exceptions import BaseAPIException
 from constants import INVALID_GPT_REQUEST_MESSAGES
 from core.bot.services import ChatGptService
