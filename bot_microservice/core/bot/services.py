@@ -93,6 +93,14 @@ class ChatGptService:
     repository: ChatGPTRepository
     user_service: UserService
 
+    @classmethod
+    def build(cls) -> "ChatGptService":
+        db = Database(settings=settings)
+        repository = ChatGPTRepository(settings=settings, db=db)
+        user_repository = UserRepository(db=db)
+        user_service = UserService(repository=user_repository)
+        return ChatGptService(repository=repository, user_service=user_service)
+
     async def get_chatgpt_models(self) -> Sequence[ChatGptModels]:
         return await self.repository.get_chatgpt_models()
 
@@ -119,11 +127,3 @@ class ChatGptService:
 
     async def delete_chatgpt_model(self, model_id: int) -> None:
         return await self.repository.delete_chatgpt_model(model_id=model_id)
-
-    @classmethod
-    def build(cls) -> "ChatGptService":
-        db = Database(settings=settings)
-        repository = ChatGPTRepository(settings=settings, db=db)
-        user_repository = UserRepository(db=db)
-        user_service = UserService(repository=user_repository)
-        return ChatGptService(repository=repository, user_service=user_service)

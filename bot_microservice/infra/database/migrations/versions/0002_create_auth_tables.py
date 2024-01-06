@@ -5,7 +5,6 @@ Revises: 0001_create_chatgpt_table
 Create Date: 2023-11-28 00:58:01.984654
 
 """
-import hashlib
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -14,6 +13,7 @@ from sqlalchemy import TIMESTAMP
 from sqlalchemy.dialects.sqlite import insert
 
 from core.auth.models.users import User
+from core.auth.utils import create_password_hash
 from infra.database.deps import get_sync_session
 from settings.config import settings
 
@@ -57,7 +57,7 @@ def upgrade() -> None:
     if not all([username, password, salt]):
         return
     with get_sync_session() as session:
-        hashed_password = hashlib.sha256((password.get_secret_value() + salt.get_secret_value()).encode()).hexdigest()
+        hashed_password = create_password_hash(password.get_secret_value())
         query = insert(User).values({"username": username, "hashed_password": hashed_password})
         session.execute(query)
         session.commit()

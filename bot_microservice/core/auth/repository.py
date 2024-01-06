@@ -13,14 +13,14 @@ class UserRepository:
     async def create_user(
         self,
         id: int,
-        email: str | None = None,
-        username: str | None = None,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        ban_reason: str | None = None,
-        hashed_password: str | None = None,
-        is_active: bool = True,
-        is_superuser: bool = False,
+        email: str | None,
+        username: str | None,
+        first_name: str | None,
+        last_name: str | None,
+        ban_reason: str | None,
+        hashed_password: str | None,
+        is_active: bool,
+        is_superuser: bool,
     ) -> User:
         user = User.build(
             id=id,
