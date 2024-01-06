@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 
 from sqlalchemy import INTEGER, TIMESTAMP, VARCHAR, Boolean, ForeignKey, String
@@ -24,7 +22,7 @@ class User(Base):
         TIMESTAMP(timezone=True), index=True, nullable=False, default=datetime.now
     )
 
-    user_question_count: UserQuestionCount = relationship(
+    user_question_count: Mapped["UserQuestionCount"] = relationship(
         "UserQuestionCount",
         primaryjoin="UserQuestionCount.user_id == User.id",
         backref="user",
@@ -50,7 +48,7 @@ class User(Base):
         hashed_password: str | None = None,
         is_active: bool = True,
         is_superuser: bool = False,
-    ) -> User:
+    ) -> "User":
         username = username or str(id)
         return User(  # type: ignore[call-arg]
             id=id,
