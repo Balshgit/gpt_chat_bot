@@ -15,6 +15,8 @@ from speech_recognition import (
 )
 
 from constants import AUDIO_SEGMENT_DURATION
+from core.auth.repository import UserRepository
+from core.auth.services import UserService
 from core.bot.models.chatgpt import ChatGptModels
 from core.bot.repository import ChatGPTRepository
 from infra.database.db_adapter import Database
@@ -89,6 +91,7 @@ class SpeechToTextService:
 @dataclass
 class ChatGptService:
     repository: ChatGPTRepository
+    user_service: UserService
 
     async def get_chatgpt_models(self) -> Sequence[ChatGptModels]:
         return await self.repository.get_chatgpt_models()
@@ -121,4 +124,6 @@ class ChatGptService:
     def build(cls) -> "ChatGptService":
         db = Database(settings=settings)
         repository = ChatGPTRepository(settings=settings, db=db)
-        return ChatGptService(repository=repository)
+        user_repository = UserRepository(db=db)
+        user_service = UserService(repository=user_repository)
+        return ChatGptService(repository=repository, user_service=user_service)

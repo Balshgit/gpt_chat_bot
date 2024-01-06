@@ -3,13 +3,13 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from telegram import Update
 
+from api.bot.deps import get_bot_queue, get_chatgpt_service, get_update_from_request
 from api.bot.serializers import (
     ChatGptModelSerializer,
     ChatGptModelsPrioritySerializer,
     GETChatGptModelsSerializer,
     LightChatGptModel,
 )
-from api.deps import get_bot_queue, get_chatgpt_service, get_update_from_request
 from core.bot.app import BotQueue
 from core.bot.services import ChatGptService
 from settings.config import settings

@@ -34,6 +34,7 @@ sqlalchemy = {version = "^2.0", extras=["mypy"]}
 alembic = "^1.13"
 sqladmin = {version = "^0.16", extras=["full"]}
 pydub = {git = "https://github.com/jiaaro/pydub.git"}
+types-pytz = "^2023.3.1.1"
 
 
 [tool.poetry.dev-dependencies]
