@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 
 from sqlalchemy import select
+from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.orm import load_only
 
-from core.auth.models.users import User
+from core.auth.dto import UserIsBannedDTO
+from core.auth.models.users import User, UserQuestionCount
 from infra.database.db_adapter import Database
 
 
@@ -46,3 +49,30 @@ class UserRepository:
         async with self.db.session() as session:
             result = await session.execute(query)
             return result.scalar()
+
+    async def check_user_is_banned(self, user_id: int) -> UserIsBannedDTO:
+        query = select(User).options(load_only(User.is_active, User.ban_reason)).filter_by(id=user_id)
+
+        async with self.db.session() as session:
+            result = await session.execute(query)
+            if user := result.scalar():
+                return UserIsBannedDTO(is_banned=not bool(user.is_active), ban_reason=user.ban_reason)
+            return UserIsBannedDTO()
+
+    async def update_user_message_count(self, user_id: int) -> None:
+        query = (
+            insert(UserQuestionCount)
+            .values({UserQuestionCount.user_id: user_id, UserQuestionCount.question_count: 1})
+            .on_conflict_do_update(
+                index_elements=[UserQuestionCount.user_id],
+                set_={
+                    UserQuestionCount.get_real_column_name(
+                        UserQuestionCount.question_count.key
+                    ): UserQuestionCount.question_count
+                    + 1
+                },
+            )
+        )
+
+        async with self.db.session() as session:
+            await session.execute(query)

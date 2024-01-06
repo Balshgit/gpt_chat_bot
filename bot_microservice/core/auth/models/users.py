@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import INTEGER, TIMESTAMP, VARCHAR, Boolean, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from infra.database.base import Base
 
@@ -12,15 +14,29 @@ class User(Base):
     id: Mapped[int] = mapped_column(INTEGER, primary_key=True)
     email: Mapped[str] = mapped_column(VARCHAR(length=255), unique=True, nullable=True)
     username: Mapped[str] = mapped_column(VARCHAR(length=32), unique=True, index=True, nullable=False)
-    first_name: Mapped[str] = mapped_column(VARCHAR(length=32), nullable=True)
-    last_name: Mapped[str] = mapped_column(VARCHAR(length=32), nullable=True)
-    ban_reason: Mapped[str] = mapped_column(String(length=1024), nullable=True)
+    first_name: Mapped[str | None] = mapped_column(VARCHAR(length=32), nullable=True)
+    last_name: Mapped[str | None] = mapped_column(VARCHAR(length=32), nullable=True)
+    ban_reason: Mapped[str | None] = mapped_column(String(length=1024), nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), index=True, nullable=False, default=datetime.now
     )
+
+    user_question_count: UserQuestionCount = relationship(
+        "UserQuestionCount",
+        primaryjoin="UserQuestionCount.user_id == User.id",
+        backref="user",
+        lazy="selectin",
+        uselist=False,
+    )
+
+    @property
+    def question_count(self) -> int:
+        if self.user_question_count:
+            return self.user_question_count.question_count
+        return 0
 
     @classmethod
     def build(
@@ -34,7 +50,7 @@ class User(Base):
         hashed_password: str | None = None,
         is_active: bool = True,
         is_superuser: bool = False,
-    ) -> "User":
+    ) -> User:
         username = username or str(id)
         return User(  # type: ignore[call-arg]
             id=id,

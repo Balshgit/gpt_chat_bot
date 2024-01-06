@@ -1,6 +1,5 @@
 import asyncio
 import tempfile
-import uuid
 from urllib.parse import urljoin
 
 from loguru import logger
@@ -8,7 +7,6 @@ from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from constants import BotCommands, BotEntryPoints
-from core.auth.utils import create_password_hash
 from core.bot.app import get_bot
 from core.bot.keyboards import main_keyboard
 from core.bot.services import ChatGptService, SpeechToTextService
@@ -37,14 +35,6 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
         return
     chatgpt_service = ChatGptService.build()
-    if update.effective_user:
-        await chatgpt_service.user_service.get_or_create_user_by_id(
-            user_id=update.effective_user.id,
-            username=update.effective_user.username,
-            first_name=update.effective_user.first_name,
-            last_name=update.effective_user.last_name,
-            hashed_password=create_password_hash(uuid.uuid4().hex),
-        )
     model = await chatgpt_service.get_current_chatgpt_model()
     await update.effective_message.reply_text(
         f"Бот использует бесплатную модель *{model}* для ответов на вопросы.\nПринимает запросы на разных языках.",
@@ -102,6 +92,11 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not update.message:
         return
 
+    if not update.effective_user:
+        logger.error('no effective user', update=update, context=context)
+        await update.message.reply_text("Бот не смог определить пользователя. :(\nОб ошибке уже сообщено.")
+        return
+
     await update.message.reply_text(
         f"Ответ в среднем занимает 10-15 секунд.\n"
         f"- Список команд: /{BotCommands.help}\n"
@@ -110,8 +105,16 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     chatgpt_service = ChatGptService.build()
     logger.warning("question asked", user=update.message.from_user, question=update.message.text)
-    answer = await chatgpt_service.request_to_chatgpt(question=update.message.text)
-    await update.message.reply_text(answer)
+    answer, user = await asyncio.gather(
+        chatgpt_service.request_to_chatgpt(question=update.message.text),
+        chatgpt_service.get_or_create_bot_user(
+            user_id=update.effective_user.id,
+            username=update.effective_user.username,
+            first_name=update.effective_user.first_name,
+            last_name=update.effective_user.last_name,
+        ),
+    )
+    await asyncio.gather(update.message.reply_text(answer), chatgpt_service.update_bot_user_message_count(user.id))
 
 
 async def voice_recognize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
