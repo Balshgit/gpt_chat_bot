@@ -54,7 +54,7 @@ services:
       - "8858"
 
   caddy:
-    image: "caddy:2.7.5"
+    image: "caddy:2.7.6"
     container_name: "chatgpt_caddy_service"
     hostname: "caddy_service"
     restart: unless-stopped

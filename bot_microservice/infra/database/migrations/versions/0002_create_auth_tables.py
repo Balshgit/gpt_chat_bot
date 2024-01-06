@@ -6,10 +6,11 @@ Create Date: 2023-11-28 00:58:01.984654
 
 """
 import hashlib
+from datetime import datetime
 
-import fastapi_users_db_sqlalchemy
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy import TIMESTAMP
 from sqlalchemy.dialects.sqlite import insert
 
 from core.auth.models.users import User
@@ -28,12 +29,15 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.INTEGER(), nullable=False),
-        sa.Column("email", sa.VARCHAR(length=320), nullable=True),
+        sa.Column("email", sa.VARCHAR(length=255), nullable=True),
         sa.Column("username", sa.VARCHAR(length=32), nullable=False),
+        sa.Column("first_name", sa.VARCHAR(length=32), nullable=True),
+        sa.Column("last_name", sa.VARCHAR(length=32), nullable=True),
         sa.Column("hashed_password", sa.String(length=1024), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
-        sa.Column("is_superuser", sa.Boolean(), nullable=False),
-        sa.Column("is_verified", sa.Boolean(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False, default=True),
+        sa.Column("is_superuser", sa.Boolean(), nullable=False, default=False),
+        sa.Column("ban_reason", sa.String(length=1024), nullable=True),
+        sa.Column("created_at", TIMESTAMP(timezone=True), nullable=False, default=datetime.now),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
     )
@@ -41,8 +45,8 @@ def upgrade() -> None:
     op.create_table(
         "access_token",
         sa.Column("user_id", sa.INTEGER(), nullable=False),
-        sa.Column("token", sa.String(length=43), nullable=False),
-        sa.Column("created_at", fastapi_users_db_sqlalchemy.generics.TIMESTAMPAware(timezone=True), nullable=False),
+        sa.Column("token", sa.String(length=42), nullable=False),
+        sa.Column("created_at", TIMESTAMP(timezone=True), nullable=False, default=datetime.now),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="cascade"),
         sa.PrimaryKeyConstraint("token"),
     )

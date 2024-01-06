@@ -150,7 +150,7 @@ alembic downgrade base
 
 ## Help article
 
-[Следить за обновлениями этого репозитория](https://github.com/fantasy-peak/cpp-freegpt-webui)
+[Следить за обновлениями этого репозитория](https://github.com/fantasy-peak/cpp-freegpt-webui/commits/main/)
 
 
 ## TODO
@@ -161,7 +161,9 @@ alembic downgrade base
 - [ ] and models rotation
 - [x] add update model priority endpoint
 - [x] add more tests for gpt model selection
-- [ ] add authorisation for api
+- [ ] add authorization for api
 - [x] reformat conftest.py file
-- [x] Add sentry
-- [x] Add graylog integration and availability to log to file
+- [x] add sentry
+- [x] add graylog integration and availability to log to file
+- [x] add user model
+- [ ] add messages statistic

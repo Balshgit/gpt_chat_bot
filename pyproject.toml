@@ -11,7 +11,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = "^3.12"
 
-fastapi = "^0.105"
+fastapi = "^0.108"
 python-telegram-bot = {version = "^20.6", extras=["ext"]}
 python-dotenv = "^1.0"
 python-dateutil = "*"
@@ -21,7 +21,7 @@ loguru = "^0.7"
 pydantic = "^2.5"
 pydantic-settings = "^2.1"
 gunicorn = "^21.2"
-uvicorn = "^0.24"
+uvicorn = "^0.25"
 wheel = "^0.42"
 orjson = "^3.9"
 sentry-sdk = "^1.39"
@@ -33,12 +33,11 @@ yarl = "^1.9"
 sqlalchemy = {version = "^2.0", extras=["mypy"]}
 alembic = "^1.13"
 sqladmin = {version = "^0.16", extras=["full"]}
-fastapi-users = {version = "^12.1.2", extras=["sqlalchemy"]}
 pydub = {git = "https://github.com/jiaaro/pydub.git"}
 
 
 [tool.poetry.dev-dependencies]
-ipython = "^8.18"
+ipython = "^8.19"
 
 factory-boy = "^3.3"
 Faker = "^20"
@@ -53,7 +52,7 @@ pyupgrade = "^3.10"
 isort = "^5.12"
 black = "^23.12"
 
-mypy = "^1.7"
+mypy = "^1.8"
 types-PyMySQL = "^1.0"
 types-python-dateutil = "^2.8"
 
@@ -78,7 +77,7 @@ pytest-socket = "^0.6"
 assertpy = "^1.1"
 respx = "^0.20"
 
-coverage = "^7.3"
+coverage = "^7.4"
 
 autoflake = "^2.2"
 flake8-aaa = "^0.17.0"

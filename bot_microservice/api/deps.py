@@ -1,10 +1,8 @@
 from fastapi import Depends
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from telegram import Update
 
-from core.auth.models.users import User
 from core.bot.app import BotApplication, BotQueue
 from core.bot.repository import ChatGPTRepository
 from core.bot.services import ChatGptService
@@ -51,9 +49,3 @@ def get_chatgpt_service(
     chatgpt_repository: ChatGPTRepository = Depends(get_chatgpt_repository),
 ) -> ChatGptService:
     return ChatGptService(repository=chatgpt_repository)
-
-
-async def get_user_db(  # type: ignore[misc]
-    session: AsyncSession = Depends(get_db_session),
-) -> SQLAlchemyUserDatabase:  # type: ignore[type-arg]
-    yield SQLAlchemyUserDatabase(session, User)
