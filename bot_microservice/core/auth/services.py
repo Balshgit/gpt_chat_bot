@@ -66,18 +66,21 @@ class UserService:
 def check_user_is_banned(func: Any) -> Any:
     @wraps(func)
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        if not update.message:
+        if not update.effective_message:
+            logger.error('no effective message', update=update, context=context)
             return
 
         if not update.effective_user:
             logger.error('no effective user', update=update, context=context)
-            await update.message.reply_text("Бот не смог определить пользователя. :(\nОб ошибке уже сообщено.")
+            await update.effective_message.reply_text(
+                "Бот не смог определить пользователя. :(\nОб ошибке уже сообщено."
+            )
             return
 
         user_service = UserService.build()  # noqa: NEW100
         user_status = await user_service.check_user_is_banned(update.effective_user.id)
         if user_status.is_banned:
-            await update.message.reply_text(
+            await update.effective_message.reply_text(
                 text=f"You have banned for reason: *{user_status.ban_reason}*."
                 f"\nPlease contact the /{BotCommands.developer}",
                 parse_mode="Markdown",

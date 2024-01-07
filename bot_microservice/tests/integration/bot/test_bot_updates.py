@@ -261,6 +261,23 @@ async def test_bug_report_action(
         )
 
 
+async def test_get_developer_action(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    with (
+        mock.patch.object(telegram._message.Message, "reply_text") as mocked_reply_text,
+        mock.patch.object(telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)),
+    ):
+        bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/developer"))
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+
+        assert mocked_reply_text.call_args.args == ("Автор бота: *Дмитрий Афанасьев*\n\nTg nickname: *Balshtg*",)
+
+
 async def test_ask_question_action(
     dbsession: Session,
     main_application: Application,
