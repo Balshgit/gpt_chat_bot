@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from sqlalchemy import INTEGER, TIMESTAMP, VARCHAR, Boolean, ForeignKey, String
@@ -26,7 +27,7 @@ class User(Base):
         "UserQuestionCount",
         primaryjoin="UserQuestionCount.user_id == User.id",
         backref="user",
-        lazy="selectin",
+        lazy="noload",
         uselist=False,
         cascade="delete",
     )
@@ -68,10 +69,24 @@ class AccessToken(Base):
     __tablename__ = "access_token"  # type: ignore[assignment]
 
     user_id = mapped_column(INTEGER, ForeignKey("users.id", ondelete="cascade"), nullable=False)
-    token: Mapped[str] = mapped_column(String(length=42), primary_key=True)
+    token: Mapped[str] = mapped_column(String(length=42), primary_key=True, default=lambda: str(uuid.uuid4()))
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), index=True, nullable=False, default=datetime.now
     )
+
+    user: Mapped["User"] = relationship(
+        "User",
+        backref="access_token",
+        lazy="selectin",
+        uselist=False,
+        cascade="expunge",
+    )
+
+    @property
+    def username(self) -> str:
+        if self.user:
+            return self.user.username
+        return ""
 
 
 class UserQuestionCount(Base):

@@ -62,6 +62,9 @@ class UserService:
     async def check_user_is_banned(self, user_id: int) -> UserIsBannedDTO:
         return await self.repository.check_user_is_banned(user_id)
 
+    async def get_user_access_token_by_username(self, username: str | None) -> str | None:
+        return await self.repository.get_user_access_token(username)
+
 
 def check_user_is_banned(func: Any) -> Any:
     @wraps(func)

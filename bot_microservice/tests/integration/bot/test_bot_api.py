@@ -6,7 +6,9 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from core.bot.models.chatgpt import ChatGptModels
+from settings.config import AppSettings
 from tests.integration.factories.bot import ChatGptModelFactory
+from tests.integration.factories.user import AccessTokenFactory, UserFactory
 
 pytestmark = [
     pytest.mark.asyncio,
@@ -51,11 +53,18 @@ async def test_change_chatgpt_model_priority(
     dbsession: Session,
     rest_client: AsyncClient,
     faker: Faker,
+    test_settings: AppSettings,
 ) -> None:
     model1 = ChatGptModelFactory(priority=0)
     model2 = ChatGptModelFactory(priority=1)
     priority = faker.random_int(min=2, max=7)
-    response = await rest_client.put(url=f"/api/chatgpt/models/{model2.id}/priority", json={"priority": priority})
+    user = UserFactory(username=test_settings.SUPERUSER)
+    access_token = AccessTokenFactory(user_id=user.id)
+    response = await rest_client.put(
+        url=f"/api/chatgpt/models/{model2.id}/priority",
+        json={"priority": priority},
+        headers={"BOT-API-KEY": access_token.token},
+    )
     assert response.status_code == 202
 
     upd_model1, upd_model2 = dbsession.query(ChatGptModels).order_by(ChatGptModels.priority).all()
@@ -69,11 +78,18 @@ async def test_change_chatgpt_model_priority(
 async def test_reset_chatgpt_models_priority(
     dbsession: Session,
     rest_client: AsyncClient,
+    test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=4)
     ChatGptModelFactory(priority=42)
 
-    response = await rest_client.put(url="/api/chatgpt/models/priority/reset")
+    user = UserFactory(username=test_settings.SUPERUSER)
+    access_token = AccessTokenFactory(user_id=user.id)
+
+    response = await rest_client.put(
+        url="/api/chatgpt/models/priority/reset",
+        headers={"BOT-API-KEY": access_token.token},
+    )
     assert response.status_code == 202
 
     models = dbsession.query(ChatGptModels).all()
@@ -89,9 +105,13 @@ async def test_create_new_chatgpt_model(
     dbsession: Session,
     rest_client: AsyncClient,
     faker: Faker,
+    test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=2)
     ChatGptModelFactory(priority=42)
+
+    user = UserFactory(username=test_settings.SUPERUSER)
+    access_token = AccessTokenFactory(user_id=user.id)
 
     model_name = "new-gpt-model"
     model_priority = faker.random_int(min=1, max=5)
@@ -105,6 +125,7 @@ async def test_create_new_chatgpt_model(
             "model": model_name,
             "priority": model_priority,
         },
+        headers={"BOT-API-KEY": access_token.token},
     )
     assert response.status_code == 201
 
@@ -125,9 +146,12 @@ async def test_add_existing_chatgpt_model(
     dbsession: Session,
     rest_client: AsyncClient,
     faker: Faker,
+    test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=2)
     model = ChatGptModelFactory(priority=42)
+    user = UserFactory(username=test_settings.SUPERUSER)
+    access_token = AccessTokenFactory(user_id=user.id)
 
     model_name = model.model
     model_priority = faker.random_int(min=1, max=5)
@@ -141,6 +165,7 @@ async def test_add_existing_chatgpt_model(
             "model": model_name,
             "priority": model_priority,
         },
+        headers={"BOT-API-KEY": access_token.token},
     )
     assert response.status_code == 201
 
@@ -151,14 +176,21 @@ async def test_add_existing_chatgpt_model(
 async def test_delete_chatgpt_model(
     dbsession: Session,
     rest_client: AsyncClient,
+    test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=2)
     model = ChatGptModelFactory(priority=42)
 
+    user = UserFactory(username=test_settings.SUPERUSER)
+    access_token = AccessTokenFactory(user_id=user.id)
+
     models = dbsession.query(ChatGptModels).all()
     assert len(models) == 3
 
-    response = await rest_client.delete(url=f"/api/chatgpt/models/{model.id}")
+    response = await rest_client.delete(
+        url=f"/api/chatgpt/models/{model.id}",
+        headers={"BOT-API-KEY": access_token.token},
+    )
     assert response.status_code == 204
 
     models = dbsession.query(ChatGptModels).all()
