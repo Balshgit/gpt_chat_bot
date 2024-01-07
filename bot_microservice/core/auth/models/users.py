@@ -28,6 +28,7 @@ class User(Base):
         backref="user",
         lazy="selectin",
         uselist=False,
+        cascade="delete",
     )
 
     @property
