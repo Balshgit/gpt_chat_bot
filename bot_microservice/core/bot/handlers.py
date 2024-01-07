@@ -36,6 +36,7 @@ bot_event_handlers = BotEventHandlers()
 bot_event_handlers.add_handler(CommandHandler(BotCommands.help, help_command))
 bot_event_handlers.add_handler(CommandHandler(BotCommands.website, website))
 bot_event_handlers.add_handler(CommandHandler(BotCommands.bug_report, bug_report))
+bot_event_handlers.add_handler(CommandHandler(BotCommands.developer, about_me))
 
 bot_event_handlers.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ask_question))
 bot_event_handlers.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_recognize))

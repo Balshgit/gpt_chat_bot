@@ -26,6 +26,7 @@ class BotCommands(StrEnum):
     help = "help"
     bug_report = "bug_report"
     website = "website"
+    developer = "developer"
 
 
 class BotEntryPoints(StrEnum):
