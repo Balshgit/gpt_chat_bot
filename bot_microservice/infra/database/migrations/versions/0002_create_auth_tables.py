@@ -10,9 +10,8 @@ from datetime import datetime
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import TIMESTAMP
-from sqlalchemy.dialects.sqlite import insert
 
-from core.auth.models.users import User
+from core.auth.models.users import AccessToken, User
 from core.auth.utils import create_password_hash
 from infra.database.deps import get_sync_session
 from settings.config import settings
@@ -58,8 +57,14 @@ def upgrade() -> None:
         return
     with get_sync_session() as session:
         hashed_password = create_password_hash(password.get_secret_value())
-        query = insert(User).values({"username": username, "hashed_password": hashed_password})
-        session.execute(query)
+        user = User(username=username, hashed_password=hashed_password)
+        session.add(user)
+        session.flush()
+        session.refresh(user)
+
+        access_token = AccessToken(user_id=user.id)
+        session.add(access_token)
+
         session.commit()
 
 

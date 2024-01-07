@@ -3,13 +3,19 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from telegram import Update
 
-from api.bot.deps import get_bot_queue, get_chatgpt_service, get_update_from_request
+from api.bot.deps import (
+    get_access_to_bot_api_or_403,
+    get_bot_queue,
+    get_chatgpt_service,
+    get_update_from_request,
+)
 from api.bot.serializers import (
     ChatGptModelSerializer,
     ChatGptModelsPrioritySerializer,
     GETChatGptModelsSerializer,
     LightChatGptModel,
 )
+from api.exceptions import PermissionMissingResponse
 from core.bot.app import BotQueue
 from core.bot.services import ChatGptService
 from settings.config import settings
@@ -53,6 +59,10 @@ async def models_list(
 @router.put(
     "/chatgpt/models/{model_id}/priority",
     name="bot:change_model_priority",
+    dependencies=[Depends(get_access_to_bot_api_or_403)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": PermissionMissingResponse},
+    },
     response_class=Response,
     status_code=status.HTTP_202_ACCEPTED,
     summary="change gpt model priority",
@@ -69,6 +79,10 @@ async def change_model_priority(
 @router.put(
     "/chatgpt/models/priority/reset",
     name="bot:reset_models_priority",
+    dependencies=[Depends(get_access_to_bot_api_or_403)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": PermissionMissingResponse},
+    },
     response_class=Response,
     status_code=status.HTTP_202_ACCEPTED,
     summary="reset all model priority to default",
@@ -83,6 +97,11 @@ async def reset_models_priority(
 @router.post(
     "/chatgpt/models",
     name="bot:add_new_model",
+    dependencies=[Depends(get_access_to_bot_api_or_403)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": PermissionMissingResponse},
+        status.HTTP_201_CREATED: {"model": ChatGptModelSerializer},
+    },
     response_model=ChatGptModelSerializer,
     status_code=status.HTTP_201_CREATED,
     summary="add new model",
@@ -100,6 +119,10 @@ async def add_new_model(
 @router.delete(
     "/chatgpt/models/{model_id}",
     name="bot:delete_gpt_model",
+    dependencies=[Depends(get_access_to_bot_api_or_403)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": PermissionMissingResponse},
+    },
     response_class=Response,
     status_code=status.HTTP_204_NO_CONTENT,
     summary="delete gpt model",

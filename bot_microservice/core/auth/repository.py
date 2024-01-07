@@ -5,7 +5,7 @@ from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import load_only
 
 from core.auth.dto import UserIsBannedDTO
-from core.auth.models.users import User, UserQuestionCount
+from core.auth.models.users import AccessToken, User, UserQuestionCount
 from infra.database.db_adapter import Database
 
 
@@ -76,3 +76,10 @@ class UserRepository:
 
         async with self.db.session() as session:
             await session.execute(query)
+
+    async def get_user_access_token(self, username: str | None) -> str | None:
+        query = select(AccessToken.token).join(AccessToken.user).where(User.username == username)
+
+        async with self.db.session() as session:
+            result = await session.execute(query)
+            return result.scalar()
