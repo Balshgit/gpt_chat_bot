@@ -48,7 +48,7 @@ async def get_access_to_bot_api_or_403(
     bot_api_key: str | None = Header(None, alias=BOT_ACCESS_API_HEADER, description="Ключ доступа до API бота"),
     user_service: UserService = Depends(get_user_service),
 ) -> None:
-    access_token = await user_service.get_user_access_token(settings.SUPERUSER)
+    access_token = await user_service.get_user_access_token_by_username(settings.SUPERUSER)
 
     if not access_token or access_token != bot_api_key:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate api header")
