@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class ChatGptAdmin(ModelView, model=ChatGptModels):
+    name = "ChatGPT model"
+    name_plural = "ChatGPT models"
     column_list = [ChatGptModels.id, ChatGptModels.model, ChatGptModels.priority]
     column_sortable_list = [ChatGptModels.priority]
     column_default_sort = ("priority", True)
@@ -22,6 +24,8 @@ class ChatGptAdmin(ModelView, model=ChatGptModels):
 
 
 class UserAdmin(ModelView, model=User):
+    name = "User"
+    name_plural = "Users"
     column_list = [
         User.id,
         User.username,

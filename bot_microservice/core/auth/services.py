@@ -1,6 +1,13 @@
 import uuid
 from dataclasses import dataclass
+from functools import wraps
+from typing import Any
 
+from loguru import logger
+from telegram import Update
+from telegram.ext import ContextTypes
+
+from constants import BotCommands
 from core.auth.dto import UserIsBannedDTO
 from core.auth.models.users import User
 from core.auth.repository import UserRepository
@@ -54,3 +61,31 @@ class UserService:
 
     async def check_user_is_banned(self, user_id: int) -> UserIsBannedDTO:
         return await self.repository.check_user_is_banned(user_id)
+
+
+def check_user_is_banned(func: Any) -> Any:
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if not update.effective_message:
+            logger.error('no effective message', update=update, context=context)
+            return
+
+        if not update.effective_user:
+            logger.error('no effective user', update=update, context=context)
+            await update.effective_message.reply_text(
+                "Бот не смог определить пользователя. :(\nОб ошибке уже сообщено."
+            )
+            return
+
+        user_service = UserService.build()  # noqa: NEW100
+        user_status = await user_service.check_user_is_banned(update.effective_user.id)
+        if user_status.is_banned:
+            await update.effective_message.reply_text(
+                text=f"You have banned for reason: *{user_status.ban_reason}*."
+                f"\nPlease contact the /{BotCommands.developer}",
+                parse_mode="Markdown",
+            )
+        else:
+            await func(update, context)
+
+    return wrapper

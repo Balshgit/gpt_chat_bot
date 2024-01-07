@@ -57,7 +57,7 @@ def engine(test_settings: AppSettings) -> Generator[Engine, None, None]:
         engine.dispose()
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def dbsession(engine: Engine) -> Generator[Session, None, None]:
     """
     Get session to database.
@@ -69,7 +69,6 @@ def dbsession(engine: Engine) -> Generator[Session, None, None]:
     :yields: async session.
     """
     connection = engine.connect()
-    trans = connection.begin()
 
     session_maker = sessionmaker(
         connection,
@@ -83,7 +82,6 @@ def dbsession(engine: Engine) -> Generator[Session, None, None]:
     finally:
         meta.drop_all(engine)
         session.close()
-        trans.rollback()
         connection.close()
 
 

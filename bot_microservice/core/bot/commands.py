@@ -7,6 +7,7 @@ from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from constants import BotCommands, BotEntryPoints
+from core.auth.services import check_user_is_banned
 from core.bot.app import get_bot
 from core.bot.keyboards import main_keyboard
 from core.bot.services import ChatGptService, SpeechToTextService
@@ -42,6 +43,7 @@ async def about_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+@check_user_is_banned
 async def website(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.effective_message:
         return
@@ -49,6 +51,7 @@ async def website(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.effective_message.reply_text(f"Веб версия: {website}")
 
 
+@check_user_is_banned
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
 
@@ -63,6 +66,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
 
+@check_user_is_banned
 async def bug_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /bug-report is issued."""
 
@@ -88,13 +92,9 @@ async def github(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+@check_user_is_banned
 async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
-        return
-
-    if not update.effective_user:
-        logger.error('no effective user', update=update, context=context)
-        await update.message.reply_text("Бот не смог определить пользователя. :(\nОб ошибке уже сообщено.")
         return
 
     await update.message.reply_text(
@@ -108,10 +108,10 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     answer, user = await asyncio.gather(
         chatgpt_service.request_to_chatgpt(question=update.message.text),
         chatgpt_service.get_or_create_bot_user(
-            user_id=update.effective_user.id,
-            username=update.effective_user.username,
-            first_name=update.effective_user.first_name,
-            last_name=update.effective_user.last_name,
+            user_id=update.effective_user.id,  # type: ignore[union-attr]
+            username=update.effective_user.username,  # type: ignore[union-attr]
+            first_name=update.effective_user.first_name,  # type: ignore[union-attr]
+            last_name=update.effective_user.last_name,  # type: ignore[union-attr]
         ),
     )
     await asyncio.gather(update.message.reply_text(answer), chatgpt_service.update_bot_user_message_count(user.id))
