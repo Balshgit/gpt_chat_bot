@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import load_only
 
@@ -69,7 +69,8 @@ class UserRepository:
                     UserQuestionCount.get_real_column_name(
                         UserQuestionCount.question_count.key
                     ): UserQuestionCount.question_count
-                    + 1
+                    + 1,
+                    UserQuestionCount.get_real_column_name(UserQuestionCount.last_question_at.key): func.now(),
                 },
             )
         )
