@@ -19,9 +19,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), index=True, nullable=False, default=datetime.now
-    )
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now)
 
     user_question_count: Mapped["UserQuestionCount"] = relationship(
         "UserQuestionCount",
@@ -37,6 +35,12 @@ class User(Base):
         if self.user_question_count:
             return self.user_question_count.question_count
         return 0
+
+    @property
+    def last_question_at(self) -> str | None:
+        if self.user_question_count:
+            return self.user_question_count.last_question_at.strftime("%Y-%m-%d %H:%M:%S")
+        return None
 
     @classmethod
     def build(
@@ -70,9 +74,7 @@ class AccessToken(Base):
 
     user_id = mapped_column(INTEGER, ForeignKey("users.id", ondelete="cascade"), nullable=False)
     token: Mapped[str] = mapped_column(String(length=42), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), index=True, nullable=False, default=datetime.now
-    )
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now)
 
     user: Mapped["User"] = relationship(
         "User",
@@ -94,3 +96,4 @@ class UserQuestionCount(Base):
 
     user_id: Mapped[int] = mapped_column(INTEGER, ForeignKey("users.id", ondelete="cascade"), primary_key=True)
     question_count: Mapped[int] = mapped_column(INTEGER, default=0, nullable=False)
+    last_question_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now)

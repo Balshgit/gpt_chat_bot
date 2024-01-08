@@ -37,6 +37,7 @@ class UserAdmin(ModelView, model=User):
         User.is_active,
         User.ban_reason,
         "question_count",
+        "last_question_at",
         User.created_at,
     ]
 
@@ -57,7 +58,14 @@ class UserAdmin(ModelView, model=User):
                 )
             )
             .outerjoin(User.user_question_count)
-            .options(contains_eager(User.user_question_count).options(load_only(UserQuestionCount.question_count)))
+            .options(
+                contains_eager(User.user_question_count).options(
+                    load_only(
+                        UserQuestionCount.question_count,
+                        UserQuestionCount.last_question_at,
+                    )
+                )
+            )
         ).order_by(desc(UserQuestionCount.question_count))
 
 

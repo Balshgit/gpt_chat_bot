@@ -34,6 +34,7 @@ class AccessTokenFactory(BaseModelFactory):
 class UserQuestionCountFactory(BaseModelFactory):
     user_id = factory.Sequence(lambda n: n + 1)
     question_count = factory.Faker("random_int")
+    last_question_at = factory.Faker("past_datetime")
 
     class Meta:
         model = UserQuestionCount

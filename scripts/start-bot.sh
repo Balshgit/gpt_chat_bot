@@ -4,9 +4,7 @@ set -e
 
 if [ -f shared/${DB_NAME:-chatgpt.db} ]
 then
-  alembic downgrade -1 && alembic upgrade "head"
-else
-  alembic upgrade "head"
+  python3 core/bot/managment/update_gpt_models.py
 fi
 
 echo "starting the bot"

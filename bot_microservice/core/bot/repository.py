@@ -38,6 +38,18 @@ class ChatGPTRepository:
         async with self.db.session() as session:
             await session.execute(query)
 
+    async def delete_all_chatgpt_models(self) -> None:
+        query = delete(ChatGptModels)
+        async with self.db.session() as session:
+            await session.execute(query)
+
+    async def bulk_insert_chatgpt_models(self, models_priority: list[dict[str, Any]]) -> None:
+        models = [ChatGptModels(**model_priority) for model_priority in models_priority]
+
+        async with self.db.session() as session:
+            session.add_all(models)
+            await session.commit()
+
     async def add_chatgpt_model(self, model: str, priority: int) -> dict[str, str | int]:
         query = (
             insert(ChatGptModels)
