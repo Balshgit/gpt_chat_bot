@@ -2,7 +2,7 @@ import uuid
 
 import factory
 
-from core.auth.models.users import AccessToken, User
+from core.auth.models.users import AccessToken, User, UserQuestionCount
 from tests.integration.factories.utils import BaseModelFactory
 
 
@@ -29,3 +29,11 @@ class AccessTokenFactory(BaseModelFactory):
 
     class Meta:
         model = AccessToken
+
+
+class UserQuestionCountFactory(BaseModelFactory):
+    user_id = factory.Sequence(lambda n: n + 1)
+    question_count = factory.Faker("random_int")
+
+    class Meta:
+        model = UserQuestionCount
