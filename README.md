@@ -168,4 +168,4 @@ alembic downgrade base
 - [x] add sentry
 - [x] add graylog integration and availability to log to file
 - [x] add user model
-- [ ] add messages statistic
+- [x] add messages statistic
