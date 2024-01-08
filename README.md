@@ -110,6 +110,7 @@ Init alembic
 cd bot_microservice
 alembic revision --autogenerate -m 'create_chatgpt_table'
 alembic upgrade head
+python3 core/bot/managment/update_gpt_models.py
 ```
 
 
@@ -130,6 +131,7 @@ Run migrations
 ```bash
 cd ./bot_microservice # alembic root
 alembic --config ./alembic.ini upgrade head
+python3 core/bot/managment/update_gpt_models.py
 ```
 
 **downgrade to 0001_create_chatgpt_table revision:**
