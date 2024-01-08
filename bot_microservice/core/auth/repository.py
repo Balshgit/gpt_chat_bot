@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from datetime import datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import load_only
 
+from constants import MOSCOW_TZ
 from core.auth.dto import UserIsBannedDTO
 from core.auth.models.users import AccessToken, User, UserQuestionCount
 from infra.database.db_adapter import Database
@@ -70,7 +72,9 @@ class UserRepository:
                         UserQuestionCount.question_count.key
                     ): UserQuestionCount.question_count
                     + 1,
-                    UserQuestionCount.get_real_column_name(UserQuestionCount.last_question_at.key): func.now(),
+                    UserQuestionCount.get_real_column_name(UserQuestionCount.last_question_at.key): datetime.now(
+                        tz=MOSCOW_TZ
+                    ),
                 },
             )
         )
