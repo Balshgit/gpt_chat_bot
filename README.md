@@ -38,8 +38,8 @@ python main.py
 ```
 
 ```shell
-cd bot_microservice
-	poetry run uvicorn main:create_app --factory --host 0.0.0.0 --port 8080 --forwarded-allow-ips='*' --proxy-headers --reload --workers 2 --log-level warning
+cd bot_microservice &&
+poetry run uvicorn main:create_app --factory --host 0.0.0.0 --port 8080 --forwarded-allow-ips='*' --proxy-headers --reload --workers 2 --log-level warning
 ```
 
 To start on polling mode set `START_WITH_WEBHOOK` to blank

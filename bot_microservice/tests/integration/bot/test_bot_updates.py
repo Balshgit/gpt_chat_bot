@@ -11,7 +11,7 @@ from httpx import AsyncClient, Response
 from sqlalchemy.orm import Session
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 
-from constants import BotStagesEnum
+from constants import MOSCOW_TZ, BotStagesEnum
 from core.auth.models.users import User, UserQuestionCount
 from core.bot.app import BotApplication, BotQueue
 from main import Application
@@ -415,9 +415,9 @@ async def test_ask_question_action_bot_user_not_exists(
 
     created_user_question_count = dbsession.query(UserQuestionCount).filter_by(user_id=user["id"]).one()
     assert created_user_question_count.question_count == 1
-    assert created_user_question_count.last_question_at - datetime.datetime.now() < datetime.timedelta(  # noqa: DTZ005
-        seconds=2
-    )
+    assert created_user_question_count.last_question_at.replace(tzinfo=None) - datetime.datetime.now(
+        tz=MOSCOW_TZ
+    ).replace(tzinfo=None) < datetime.timedelta(seconds=2)
 
 
 async def test_ask_question_action_bot_user_already_exists(
@@ -470,9 +470,9 @@ async def test_ask_question_action_bot_user_already_exists(
 
     updated_user_question_count = dbsession.query(UserQuestionCount).filter_by(user_id=user["id"]).one()
     assert updated_user_question_count.question_count == existing_user_question_count + 1
-    assert updated_user_question_count.last_question_at - datetime.datetime.now() < datetime.timedelta(  # noqa: DTZ005
-        seconds=2
-    )
+    assert updated_user_question_count.last_question_at.replace(tzinfo=None) - datetime.datetime.now(
+        tz=MOSCOW_TZ
+    ).replace(tzinfo=None) < datetime.timedelta(seconds=2)
 
 
 async def test_ask_question_action_user_is_banned(
