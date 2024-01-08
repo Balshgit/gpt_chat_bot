@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 
 from constants import BotStagesEnum
+from core.auth.models.users import User, UserQuestionCount
 from core.bot.app import BotApplication, BotQueue
 from main import Application
 from settings.config import AppSettings
@@ -22,6 +23,7 @@ from tests.integration.factories.bot import (
     CallBackFactory,
     ChatGptModelFactory,
 )
+from tests.integration.factories.user import UserFactory, UserQuestionCountFactory
 from tests.integration.utils import mocked_ask_question_api
 
 pytestmark = [
@@ -111,6 +113,33 @@ async def test_help_command(
             },
             include=["text", "api_kwargs", "chat_id", "reply_markup"],
         )
+
+
+async def test_help_command_user_is_banned(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    message = BotMessageFactory.create_instance(text="/help")
+    user = message["from"]
+    UserFactory(
+        id=user["id"],
+        first_name=user["first_name"],
+        last_name=user["last_name"],
+        username=user["username"],
+        is_active=False,
+        ban_reason="test reason",
+    )
+    with mock.patch.object(
+        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+    ) as mocked_send_message:
+        bot_update = BotUpdateFactory(message=message)
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+    assert mocked_send_message.call_args.kwargs["text"] == (
+        "You have banned for reason: *test reason*.\nPlease contact the /developer"
+    )
 
 
 async def test_start_entry(
@@ -232,6 +261,35 @@ async def test_website_callback_action(
         assert mocked_reply_text.call_args.args == ("Веб версия: http://localhost/chat/",)
 
 
+async def test_website_callback_action_user_is_banned(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    message = BotMessageFactory.create_instance(text="Список основных команд:")
+    user = message["from"]
+    UserFactory(
+        id=user["id"],
+        first_name=user["first_name"],
+        last_name=user["last_name"],
+        username=user["username"],
+        is_active=False,
+        ban_reason="test reason",
+    )
+    with mock.patch.object(telegram._message.Message, "reply_text") as mocked_reply_text:
+        bot_update = BotCallBackQueryFactory(
+            message=message,
+            callback_query=CallBackFactory(data=BotStagesEnum.website),
+        )
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+
+        assert mocked_reply_text.call_args.kwargs["text"] == (
+            "You have banned for reason: *test reason*.\nPlease contact the /developer"
+        )
+
+
 async def test_bug_report_action(
     main_application: Application,
     test_settings: AppSettings,
@@ -261,6 +319,35 @@ async def test_bug_report_action(
         )
 
 
+async def test_bug_report_action_user_is_banned(
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    message = BotMessageFactory.create_instance(text="/bug_report")
+    user = message["from"]
+    UserFactory(
+        id=user["id"],
+        first_name=user["first_name"],
+        last_name=user["last_name"],
+        username=user["username"],
+        is_active=False,
+        ban_reason="test reason",
+    )
+    with (
+        mock.patch.object(telegram._message.Message, "reply_text") as mocked_reply_text,
+        mock.patch.object(telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)),
+    ):
+        bot_update = BotUpdateFactory(message=message)
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+
+        assert mocked_reply_text.call_args.kwargs["text"] == (
+            "You have banned for reason: *test reason*.\nPlease contact the /developer"
+        )
+
+
 async def test_get_developer_action(
     main_application: Application,
     test_settings: AppSettings,
@@ -278,19 +365,28 @@ async def test_get_developer_action(
         assert mocked_reply_text.call_args.args == ("Автор бота: *Дмитрий Афанасьев*\n\nTg nickname: *Balshtg*",)
 
 
-async def test_ask_question_action(
+async def test_ask_question_action_bot_user_not_exists(
     dbsession: Session,
     main_application: Application,
     test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=3)
+    users = dbsession.query(User).all()
+    users_question_count = dbsession.query(UserQuestionCount).all()
+
+    assert len(users) == 0
+    assert len(users_question_count) == 0
+
+    message = BotMessageFactory.create_instance(text="Привет!")
+    user = message["from"]
+
     with mock.patch.object(
         telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
     ) as mocked_send_message, mocked_ask_question_api(
         host=test_settings.GPT_BASE_HOST,
         return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
     ):
-        bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="Привет!"))
+        bot_update = BotUpdateFactory(message=message)
         bot_update["message"].pop("entities")
 
         await main_application.bot_app.application.process_update(
@@ -312,6 +408,114 @@ async def test_ask_question_action(
             },
             include=["text", "chat_id"],
         )
+
+    created_user = dbsession.query(User).filter_by(id=user["id"]).one()
+    assert created_user.username == user["username"]
+
+    created_user_question_count = dbsession.query(UserQuestionCount).filter_by(user_id=user["id"]).one()
+    assert created_user_question_count.question_count == 1
+
+
+async def test_ask_question_action_bot_user_already_exists(
+    dbsession: Session,
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    ChatGptModelFactory.create_batch(size=3)
+    message = BotMessageFactory.create_instance(text="Привет!")
+    user = message["from"]
+    existing_user = UserFactory(
+        id=user["id"], first_name=user["first_name"], last_name=user["last_name"], username=user["username"]
+    )
+    existing_user_question_count = UserQuestionCountFactory(user_id=existing_user.id).question_count
+
+    users = dbsession.query(User).all()
+    assert len(users) == 1
+
+    with mock.patch.object(
+        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+    ) as mocked_send_message, mocked_ask_question_api(
+        host=test_settings.GPT_BASE_HOST,
+        return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+    ):
+        bot_update = BotUpdateFactory(message=message)
+        bot_update["message"].pop("entities")
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+        assert_that(mocked_send_message.call_args_list[0].kwargs).is_equal_to(
+            {
+                "text": (
+                    "Ответ в среднем занимает 10-15 секунд.\n- Список команд: /help\n- Сообщить об ошибке: /bug_report"
+                ),
+                "chat_id": bot_update["message"]["chat"]["id"],
+            },
+            include=["text", "chat_id"],
+        )
+        assert_that(mocked_send_message.call_args_list[1].kwargs).is_equal_to(
+            {
+                "text": "Привет! Как я могу помочь вам сегодня?",
+                "chat_id": bot_update["message"]["chat"]["id"],
+            },
+            include=["text", "chat_id"],
+        )
+
+    users = dbsession.query(User).all()
+    assert len(users) == 1
+
+    updated_user_question_count = dbsession.query(UserQuestionCount).filter_by(user_id=user["id"]).one()
+    assert updated_user_question_count.question_count == existing_user_question_count + 1
+
+
+async def test_ask_question_action_user_is_banned(
+    dbsession: Session,
+    main_application: Application,
+    test_settings: AppSettings,
+) -> None:
+    ChatGptModelFactory.create_batch(size=3)
+
+    users_question_count = dbsession.query(UserQuestionCount).all()
+    assert len(users_question_count) == 0
+
+    message = BotMessageFactory.create_instance(text="Привет!")
+    user = message["from"]
+    UserFactory(
+        id=user["id"],
+        first_name=user["first_name"],
+        last_name=user["last_name"],
+        username=user["username"],
+        is_active=False,
+        ban_reason="test reason",
+    )
+
+    with mock.patch.object(
+        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+    ) as mocked_send_message, mocked_ask_question_api(
+        host=test_settings.GPT_BASE_HOST,
+        return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+        assert_all_called=False,
+    ):
+        bot_update = BotUpdateFactory(message=message)
+        bot_update["message"].pop("entities")
+
+        await main_application.bot_app.application.process_update(
+            update=Update.de_json(data=bot_update, bot=main_application.bot_app.bot)
+        )
+        assert_that(mocked_send_message.call_args_list[0].kwargs).is_equal_to(
+            {
+                "text": ("You have banned for reason: *test reason*.\nPlease contact the /developer"),
+                "chat_id": bot_update["message"]["chat"]["id"],
+            },
+            include=["text", "chat_id"],
+        )
+
+    created_user = dbsession.query(User).filter_by(id=user["id"]).one()
+    assert created_user.username == user["username"]
+    assert created_user.is_active is False
+
+    created_user_question_count = dbsession.query(UserQuestionCount).filter_by(user_id=user["id"]).scalar()
+    assert created_user_question_count is None
 
 
 async def test_ask_question_action_not_success(

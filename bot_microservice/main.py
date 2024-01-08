@@ -22,7 +22,7 @@ class Application:
         self.app = FastAPI(
             title="Chat gpt bot",
             description="Bot for proxy to chat gpt in telegram",
-            version="0.0.3",
+            version="1.1.12",
             docs_url=build_uri([settings.api_prefix, "docs"]),
             redoc_url=build_uri([settings.api_prefix, "redocs"]),
             openapi_url=build_uri([settings.api_prefix, "openapi.json"]),

@@ -9,11 +9,11 @@ from settings.config import settings
 
 @contextmanager
 def mocked_ask_question_api(
-    host: str, return_value: Response | None = None, side_effect: Any | None = None
+    host: str, return_value: Response | None = None, side_effect: Any | None = None, assert_all_called: bool = True
 ) -> Iterator[respx.MockRouter]:
     with respx.mock(
         assert_all_mocked=True,
-        assert_all_called=True,
+        assert_all_called=assert_all_called,
         base_url=host,
     ) as respx_mock:
         ask_question_route = respx_mock.post(url=settings.chatgpt_backend_url, name="ask_question")
