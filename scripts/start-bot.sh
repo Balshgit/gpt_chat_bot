@@ -2,10 +2,8 @@
 
 set -e
 
-if [ -f shared/${DB_NAME:-chatgpt.db} ]
-then
-  python3 core/bot/managment/update_gpt_models.py
-fi
+alembic upgrade "head" && \
+python3 core/bot/managment/update_gpt_models.py
 
 echo "starting the bot"
 
