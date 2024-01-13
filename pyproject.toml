@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chat_gpt_bot"
-version = "1.5.1"
+version = "1.5.2"
 description = "Bot to integrated with Chat gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
@@ -11,7 +11,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = "^3.12"
 
-fastapi = "^0.108"
+fastapi = "^0.109"
 python-telegram-bot = {version = "^20.6", extras=["ext"]}
 python-dotenv = "^1.0"
 python-dateutil = "*"
@@ -44,7 +44,7 @@ factory-boy = "^3.3"
 Faker = "^20"
 
 safety = "^2.4.0b2"
-pip-audit = "^2.6"
+pip-audit = "^2.7"
 yamllint = "^1.33"
 tomlkit = "^0.12"
 bandit = "^1.7"
