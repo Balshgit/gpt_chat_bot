@@ -60,6 +60,7 @@ class ChatGptModelsEnum(StrEnum):
     Llama_2_70b_chat_hf_stream_DeepInfra = "Llama-2-70b-chat-hf-stream-DeepInfra"
     gpt_4_stream_aivvm = "gpt-4-stream-aivvm"
     gpt_3_5_turbo_stream_AiChatOnline = "gpt-3.5-turbo-stream-AiChatOnline"
+    gpt_3_5_turbo_stream_FreeChatgpt = "gpt-3.5-turbo-stream-FreeChatgpt"
     llama2_70B = "llama2-70B"
     gpt6 = "gpt6"
     gpt_3_5_turbo_streamc_hatxyz = "gpt-3.5-turbo-stream-chatxyz"
