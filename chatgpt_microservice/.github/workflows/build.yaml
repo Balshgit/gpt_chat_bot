@@ -19,19 +19,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev p7zip gobjc g++-13 wget sudo libcurl4-openssl-dev libnss3 nss-plugin-pem ca-certificates
-          wget https://github.com/lwthiker/curl-impersonate/releases/download/v0.5.4/libcurl-impersonate-v0.5.4.x86_64-linux-gnu.tar.gz
-          sudo mv libcurl-impersonate-v0.5.4.x86_64-linux-gnu.tar.gz /usr/lib64
+          wget https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.0-alpha.1/libcurl-impersonate-v0.6.0-alpha.1.x86_64-linux-gnu.tar.gz
+          sudo mv libcurl-impersonate-v0.6.0-alpha.1.x86_64-linux-gnu.tar.gz /usr/lib64
           cd /usr/lib64
           sudo tar -xvf libcurl-impersonate-v0.6.0-alpha.1.x86_64-linux-gnu.tar.gz
           cd -
-          curl -kfsSL https://xmake.io/shget.text | bash -s v2.8.6
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: v2.8.6
 
       - name: checkout
         uses: actions/checkout@v3
       - name: build
         run: |
           export XMAKE_ROOT="y"
-          source ~/.xmake/profile
           g++-13 -v
           export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
           export LIBRARY_PATH=/usr/lib64:$LIBRARY_PATH
