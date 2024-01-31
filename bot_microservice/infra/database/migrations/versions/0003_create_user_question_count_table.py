@@ -5,6 +5,7 @@ Revises: 0002_create_auth_tables
 Create Date: 2023-12-28 13:24:42.667724
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 
