@@ -5,6 +5,7 @@ Revises: 0003_create_user_question_count_table
 Create Date: 2024-01-08 20:56:34.815976
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 

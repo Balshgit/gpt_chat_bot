@@ -70,11 +70,11 @@ def check_user_is_banned(func: Any) -> Any:
     @wraps(func)
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not update.effective_message:
-            logger.error('no effective message', update=update, context=context)
+            logger.error("no effective message", update=update, context=context)
             return
 
         if not update.effective_user:
-            logger.error('no effective user', update=update, context=context)
+            logger.error("no effective user", update=update, context=context)
             await update.effective_message.reply_text(
                 "Бот не смог определить пользователя. :(\nОб ошибке уже сообщено."
             )

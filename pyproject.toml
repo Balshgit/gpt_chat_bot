@@ -5,7 +5,7 @@ description = "Bot to integrated with Chat gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
 [build-system]
-requires = ["poetry-core>=1.7.1"]
+requires = ["poetry-core>=1.7.2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
@@ -18,13 +18,13 @@ python-dateutil = "*"
 httpx = "^0.25"
 aiohttp = "^3.9"
 loguru = "^0.7"
-pydantic = "^2.5"
+pydantic = "^2.6"
 pydantic-settings = "^2.1"
 gunicorn = "^21.2"
-uvicorn = "^0.25"
+uvicorn = "^0.27.0.post1"
 wheel = "^0.42"
 orjson = "^3.9"
-sentry-sdk = "^1.39"
+sentry-sdk = "^1.40"
 SpeechRecognition = "^3.8"
 greenlet = "^3.0"
 graypy = "^2.1.0"
@@ -34,7 +34,7 @@ sqlalchemy = {version = "^2.0", extras=["mypy"]}
 alembic = "^1.13"
 sqladmin = {version = "^0.16", extras=["full"]}
 pydub = {git = "https://github.com/jiaaro/pydub.git"}
-types-pytz = "^2023.3.1.1"
+types-pytz = "^2023.4.0.20240130"
 
 
 [tool.poetry.dev-dependencies]
@@ -51,7 +51,7 @@ bandit = "^1.7"
 
 pyupgrade = "^3.10"
 isort = "^5.12"
-black = "^23.12"
+black = "^24.1"
 
 mypy = "^1.8"
 types-PyMySQL = "^1.0"
@@ -69,12 +69,12 @@ pytest-timeouts = "^1.2"
 pytest-sugar = "^0.9"
 pytest-clarity = "^1.0"
 pytest-env = "^1.1"
-nest-asyncio = "^1.5"
+nest-asyncio = "^1.6"
 pytest-html = "^4.1"
 pytest-randomly = "^3.15"
 pytest-split = "^0.8"
 pytest-freezegun = "^0.4"
-pytest-socket = "^0.6"
+pytest-socket = "^0.7"
 assertpy = "^1.1"
 respx = "^0.20"
 
@@ -92,7 +92,7 @@ flake8-logging-format = "^0.9"
 flake8-comprehensions = "^3.14"
 flake8-eradicate = "^1.5"
 flake8-pytest-style = "^1.7"
-flake8-bugbear = "^23.12"
+flake8-bugbear = "^24.1"
 flake8-warnings = "^0.4"
 flake8-debugger = "^4.1"
 flake8-fixme = "^1.1"

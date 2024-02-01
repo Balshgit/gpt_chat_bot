@@ -381,11 +381,14 @@ async def test_ask_question_action_bot_user_not_exists(
     message = BotMessageFactory.create_instance(text="Привет!")
     user = message["from"]
 
-    with mock.patch.object(
-        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message, mocked_ask_question_api(
-        host=test_settings.GPT_BASE_HOST,
-        return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+    with (
+        mock.patch.object(
+            telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+        ) as mocked_send_message,
+        mocked_ask_question_api(
+            host=test_settings.GPT_BASE_HOST,
+            return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+        ),
     ):
         bot_update = BotUpdateFactory(message=message)
         bot_update["message"].pop("entities")
@@ -436,11 +439,14 @@ async def test_ask_question_action_bot_user_already_exists(
     users = dbsession.query(User).all()
     assert len(users) == 1
 
-    with mock.patch.object(
-        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message, mocked_ask_question_api(
-        host=test_settings.GPT_BASE_HOST,
-        return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+    with (
+        mock.patch.object(
+            telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+        ) as mocked_send_message,
+        mocked_ask_question_api(
+            host=test_settings.GPT_BASE_HOST,
+            return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+        ),
     ):
         bot_update = BotUpdateFactory(message=message)
         bot_update["message"].pop("entities")
@@ -496,12 +502,15 @@ async def test_ask_question_action_user_is_banned(
         ban_reason="test reason",
     )
 
-    with mock.patch.object(
-        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message, mocked_ask_question_api(
-        host=test_settings.GPT_BASE_HOST,
-        return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
-        assert_all_called=False,
+    with (
+        mock.patch.object(
+            telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+        ) as mocked_send_message,
+        mocked_ask_question_api(
+            host=test_settings.GPT_BASE_HOST,
+            return_value=Response(status_code=httpx.codes.OK, text="Привет! Как я могу помочь вам сегодня?"),
+            assert_all_called=False,
+        ),
     ):
         bot_update = BotUpdateFactory(message=message)
         bot_update["message"].pop("entities")
@@ -531,10 +540,13 @@ async def test_ask_question_action_not_success(
     test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=3)
-    with mock.patch.object(
-        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message, mocked_ask_question_api(
-        host=test_settings.GPT_BASE_HOST, return_value=Response(status_code=httpx.codes.INTERNAL_SERVER_ERROR)
+    with (
+        mock.patch.object(
+            telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+        ) as mocked_send_message,
+        mocked_ask_question_api(
+            host=test_settings.GPT_BASE_HOST, return_value=Response(status_code=httpx.codes.INTERNAL_SERVER_ERROR)
+        ),
     ):
         bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="Привет!"))
         bot_update["message"].pop("entities")
@@ -557,11 +569,14 @@ async def test_ask_question_action_critical_error(
     test_settings: AppSettings,
 ) -> None:
     ChatGptModelFactory.create_batch(size=3)
-    with mock.patch.object(
-        telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
-    ) as mocked_send_message, mocked_ask_question_api(
-        host=test_settings.GPT_BASE_HOST,
-        side_effect=Exception(),
+    with (
+        mock.patch.object(
+            telegram._bot.Bot, "send_message", return_value=lambda *args, **kwargs: (args, kwargs)
+        ) as mocked_send_message,
+        mocked_ask_question_api(
+            host=test_settings.GPT_BASE_HOST,
+            side_effect=Exception(),
+        ),
     ):
         bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="Привет!"))
         bot_update["message"].pop("entities")

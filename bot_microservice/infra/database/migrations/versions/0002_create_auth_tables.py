@@ -5,6 +5,7 @@ Revises: 0001_create_chatgpt_table
 Create Date: 2023-11-28 00:58:01.984654
 
 """
+
 from datetime import datetime
 
 import sqlalchemy as sa

@@ -90,7 +90,7 @@ class AppSettings(SentrySettings, LoggingSettings, BaseSettings):
     # ==== gpt settings ====
     GPT_BASE_HOST: str = "http://chathpt_chat_service:8858"
 
-    @model_validator(mode="before")  # type: ignore[arg-type]
+    @model_validator(mode="before")
     def validate_boolean_fields(self) -> Any:
         values_dict: dict[str, Any] = self  # type: ignore[assignment]
         for value in (
