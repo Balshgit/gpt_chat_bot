@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chat_gpt_bot"
-version = "1.5.2"
+version = "1.6.0"
 description = "Bot to integrated with Chat gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
@@ -12,10 +12,10 @@ build-backend = "poetry.core.masonry.api"
 python = "^3.12"
 
 fastapi = "^0.109"
-python-telegram-bot = {version = "^20.6", extras=["ext"]}
+python-telegram-bot = {version = "^20.8", extras=["ext"]}
 python-dotenv = "^1.0"
 python-dateutil = "*"
-httpx = "^0.25"
+httpx = "^0.26"
 aiohttp = "^3.9"
 loguru = "^0.7"
 pydantic = "^2.6"
@@ -34,7 +34,7 @@ sqlalchemy = {version = "^2.0", extras=["mypy"]}
 alembic = "^1.13"
 sqladmin = {version = "^0.16", extras=["full"]}
 pydub = {git = "https://github.com/jiaaro/pydub.git"}
-types-pytz = "^2023.4.0.20240130"
+types-pytz = "^2024.1.0.20240203"
 
 
 [tool.poetry.dev-dependencies]
@@ -57,16 +57,15 @@ mypy = "^1.8"
 types-PyMySQL = "^1.0"
 types-python-dateutil = "^2.8"
 
-pytest = "^7.4"
+pytest = "^8.0"
 pytest-asyncio = "^0.15.1"
 pytest-deadfixtures = "^2.2"
 pytest-repeat = "^0.9"
-pytest-testmon = "^2.1"
 pytest-mock = "^3.12"
 pytest-cov = "^4.1"
 pytest-timeout = "^2.1"
 pytest-timeouts = "^1.2"
-pytest-sugar = "^0.9"
+pytest-sugar = "^1.0"
 pytest-clarity = "^1.0"
 pytest-env = "^1.1"
 nest-asyncio = "^1.6"
@@ -100,7 +99,7 @@ flake8-simplify = "^0.21"
 flake8-bandit = "^4.1"
 Flake8-pyproject = "^1.2.3"
 
-ruff = "^0.1"
+ruff = "^0.2"
 
 [tool.flake8]
 inline-quotes = "double"
