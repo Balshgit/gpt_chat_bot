@@ -6,7 +6,7 @@ ARG STAGE
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     DOCKER_CONTAINER=1 \
-    POETRY_VERSION=1.7.1
+    POETRY_VERSION=1.8.1
 
 RUN printf "================ Start build base service. with USER: ${USER}, STAGE: ${STAGE} ===============" \
   && apt-get update \
