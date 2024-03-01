@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "chat_gpt_bot"
-version = "1.6.1"
+version = "1.7.0"
 description = "Bot to integrated with Chat gpt"
 authors = ["Dmitry Afanasyev <Balshbox@gmail.com>"]
 
 [build-system]
-requires = ["poetry-core>=1.7.3"]
+requires = ["poetry-core>=1.8.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
