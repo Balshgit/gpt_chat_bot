@@ -6,7 +6,7 @@ ARG STAGE
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     DOCKER_CONTAINER=1 \
-    POETRY_VERSION=1.8.1
+    POETRY_VERSION=1.8.2
 
 RUN printf "================ Start build base service. with USER: ${USER}, STAGE: ${STAGE} ===============" \
   && apt-get update \
@@ -37,15 +37,15 @@ RUN if [ "$USER" != "root" ]; then \
 
 COPY --chown=${USER}:${USER} ../poetry.lock ../pyproject.toml /app/
 
-RUN pip install --upgrade pip && pip install poetry==$POETRY_VERSION
+RUN pip install --upgrade pip && pip install poetry=="$POETRY_VERSION"
 RUN poetry config virtualenvs.in-project true && \
     poetry config virtualenvs.create true && \
     poetry install $(if [ "$STAGE" = "production" ]; then echo "--only main"; fi) --no-interaction --no-ansi --no-root && \
-    rm -rf $POETRY_CACHE_DIR
+    rm -rf "$POETRY_CACHE_DIR"
 
 
 #==================== bot-service =================================
-FROM compile-image as bot-service
+FROM compile-image AS bot-service
 
 RUN printf "================ Start build bot-service. with USER: ${USER} ==============="
 
