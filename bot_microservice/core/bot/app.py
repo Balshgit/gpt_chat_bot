@@ -83,7 +83,7 @@ class BotQueue:
     async def get_updates_from_queue(self) -> None:
         while True:
             update = await self.queue.get()
-            asyncio.create_task(self.bot_app.application.process_update(update))
+            await asyncio.create_task(self.bot_app.application.process_update(update))
             await sleep(0)
 
 
