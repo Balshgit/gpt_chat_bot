@@ -65,6 +65,19 @@ async def test_bot_queue(
     assert bot_queue.queue.empty()
 
 
+async def test_get_update_from_bot_queue(
+    bot: BotApplication,
+) -> None:
+    bot_queue = BotQueue(bot_app=bot)
+    asyncio.create_task(bot_queue.get_updates_from_queue())
+
+    bot_update = BotUpdateFactory(message=BotMessageFactory.create_instance(text="/help"))
+    mocked_request = MockedRequest(bot_update)
+    await bot_queue.put_updates_on_queue(mocked_request)  # type: ignore
+    update = await bot_queue.queue.get()
+    assert update.json() == mocked_request.json()
+
+
 async def test_no_update_message(
     main_application: Application,
     test_settings: AppSettings,

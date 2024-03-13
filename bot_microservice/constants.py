@@ -58,13 +58,9 @@ class ChatGptModelsEnum(StrEnum):
     Llama_2_70b_chat_hf_stream_DeepInfra = "Llama-2-70b-chat-hf-stream-DeepInfra"
     gpt_4_stream_aivvm = "gpt-4-stream-aivvm"
     llama2_70B = "llama2-70B"
-    gpt_3_5_turbo_gptChatly = "gpt-3.5-turbo-gptChatly"
     gpt_3_5_turbo_stream_Berlin = "gpt-3.5-turbo-stream-Berlin"
     gpt_3_5_turbo_stream_GeekGpt = "gpt-3.5-turbo-stream-GeekGpt"
     gpt_3_5_turbo_stream_gptforlove = "gpt-3.5-turbo-stream-gptforlove"
-    gpt_3_5_turbo_stream_fakeGpt = "gpt-3.5-turbo-stream-fakeGpt"
-    gpt_3_5_turbo_stream_aura = "gpt-3.5-turbo-stream-aura"
-    gpt_3_5_turbo_stream_geminiProChat = "gpt-3.5-turbo-stream-geminiProChat"
     gpt_3_5_turbo_stream_flowgpt = "gpt-3.5-turbo-stream-flowgpt"
 
     @classmethod
@@ -83,8 +79,6 @@ class ChatGptModelsEnum(StrEnum):
                     priority = 3
                 case "gpt-3.5-turbo-stream-GeekGpt":
                     priority = 2
-                case "gpt-3.5-turbo-stream-fakeGpt":
-                    priority = 2
             fields = {"model": model, "priority": priority}
             models.append(fields)
         return models
@@ -92,9 +86,9 @@ class ChatGptModelsEnum(StrEnum):
     @staticmethod
     def _deprecated() -> set[str]:
         return {
-            "gpt-3.5-turbo-stream-gptforlove",
-            "gpt-3.5-turbo-stream-gptalk",
-            "gpt-3.5-turbo-stream-ChatForAi",
-            "gpt-4-ChatGpt4Online",
-            "gpt-3.5-turbo--stream-gptTalkRu",
+            "gpt-3.5-turbo-stream-GeekGpt",
+            "gpt-3.5-turbo-gptChatly",
+            "gpt-3.5-turbo-stream-fakeGpt",
+            "gpt-3.5-turbo-stream-aura",
+            "gpt-3.5-turbo-stream-geminiProChat",
         }
