@@ -80,11 +80,11 @@ class BotQueue:
         self.queue.put_nowait(tg_update)
         return Response(status_code=HTTPStatus.ACCEPTED)
 
-    async def get_updates_from_queue(self) -> None:
+    async def get_updates_from_queue(self, wait_on_each_update: int = 0) -> None:
         while True:
             update = await self.queue.get()
-            await asyncio.create_task(self.bot_app.application.process_update(update))
-            await sleep(0)
+            asyncio.create_task(self.bot_app.application.process_update(update))
+            await sleep(wait_on_each_update)
 
 
 @asynccontextmanager
