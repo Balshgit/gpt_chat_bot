@@ -77,8 +77,6 @@ class ChatGptModelsEnum(StrEnum):
                     priority = 3
                 case "gpt-3.5-turbo-stream-yqcloud":
                     priority = 3
-                case "gpt-3.5-turbo-stream-GeekGpt":
-                    priority = 2
             fields = {"model": model, "priority": priority}
             models.append(fields)
         return models
