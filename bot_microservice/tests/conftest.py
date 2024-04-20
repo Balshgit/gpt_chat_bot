@@ -27,7 +27,7 @@ def test_settings() -> AppSettings:
 # Redefine the event_loop fixture to have a session scope. Otherwise `bot` fixture can't be
 # session. See https://github.com/pytest-dev/pytest-asyncio/issues/68 for more details.
 @pytest.fixture(scope="session", autouse=True)
-def event_loop() -> AbstractEventLoop:
+async def event_loop() -> AsyncGenerator[AbstractEventLoop, None]:
     """
     Пересоздаем луп для изоляции тестов. В основном нужно для запуска юнит тестов
     в связке с интеграционными, т.к. без этого pytest зависает.
@@ -35,7 +35,10 @@ def event_loop() -> AbstractEventLoop:
     """
     loop = asyncio.get_event_loop_policy().new_event_loop()
     asyncio.set_event_loop(loop)
-    return loop
+    try:
+        yield loop
+    finally:
+        loop.close()
 
 
 @pytest.fixture(scope="session")
