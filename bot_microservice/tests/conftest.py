@@ -186,7 +186,7 @@ async def main_application(
     await database.drop_database()
 
 
-@pytest.fixture()
+@pytest.fixture
 async def rest_client(main_application: AppApplication) -> AsyncGenerator[AsyncClient, None]:
     """
     Default http client. Use to test unauthorized requests, public endpoints

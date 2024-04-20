@@ -70,7 +70,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def bug_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /bug-report is issued."""
 
-    if not update.effective_message:
+    if not update.effective_message or not settings.ADMIN_CHAT_ID:
         return
     async with get_bot(settings.TELEGRAM_API_TOKEN) as bot:
         await bot.send_message(chat_id=settings.ADMIN_CHAT_ID, text=f"Bug report from user: {update.effective_user}")
