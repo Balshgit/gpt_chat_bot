@@ -6,6 +6,7 @@ from httpx import ASGITransport, AsyncClient, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette import status
+from starlette.routing import BaseRoute
 
 from api.exceptions import BaseAPIException
 from core.bot.app import BotApplication
@@ -92,7 +93,7 @@ async def test_server_error_handler_returns_500_without_traceback_when_debug_dis
     assert response.status_code == 500
     data = response.json()
     assert data == {"error": {"title": "Something went wrong!", "type": "InternalServerError"}, "status": 500}
-    replaced_oauth_route = next(
+    replaced_oauth_route: BaseRoute = next(
         filter(lambda r: r.path == route, fastapi_app.routes)  # type: ignore[arg-type, attr-defined]
     )
     fastapi_app.routes.remove(replaced_oauth_route)
